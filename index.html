@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- Version 2: BoB Home Loan Calculator (Finalized Logic) -->
+<!-- Version 2.1: Fixed CIBIL Input (-1) & Schedule Format -->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BoB Home Loan Eligibility & ROI (v2)</title>
+    <title>BoB Home Loan Calculator</title>
     <style>
         :root {
             --bob-orange: #f58220;
@@ -86,7 +86,7 @@
             color: #444;
         }
 
-        input[type="number"], input[type="date"], select {
+        input[type="number"], input[type="date"], input[type="text"], select {
             width: 100%;
             padding: 12px;
             border: 1px solid #ccc;
@@ -427,9 +427,10 @@
         <div id="roiStatusMsg" class="status-banner"></div>
 
         <!-- CIBIL Input -->
+        <!-- Fixed: type="text" allows "-" to remain while typing -->
         <div class="form-group">
             <label for="cibilScore">Applicant CIBIL Score</label>
-            <input type="number" id="cibilScore" placeholder="Enter Score (-1 or 300-900)" min="-1" max="900" 
+            <input type="text" inputmode="numeric" id="cibilScore" placeholder="Enter Score (-1 or 300-900)" maxlength="4"
                    oninput="this.value=this.value.replace(/[^0-9-]/g,''); checkRoiEligibility()">
             <div class="input-hint" id="cibilHint">Scores 0-700 are NOT eligible. -1 (NTC) is eligible.</div>
         </div>
@@ -717,12 +718,10 @@
     const BRLLR = 7.90;
     
     // --- ROI DATA MATRIX ---
-    // Spread values relative to BRLLR (7.90)
-    // Structure: promo (all), std_sal (salaried), std_nonsal (non-salaried)
     const ROI_MATRIX = [
-        { min: 825, max: 900, promo: -0.70, std_sal: 0.10, std_nonsal: 0.10 },
-        { min: 800, max: 824, promo: -0.60, std_sal: 0.10, std_nonsal: 0.10 },
-        { min: 771, max: 799, promo: -0.50, std_sal: 0.10, std_nonsal: 0.10 },
+        { min: 825, max: 900, promo: -0.70, std_sal: 0.00, std_nonsal: 0.10 },
+        { min: 800, max: 824, promo: -0.60, std_sal: 0.00, std_nonsal: 0.10 },
+        { min: 771, max: 799, promo: -0.50, std_sal: 0.00, std_nonsal: 0.10 },
         { min: 751, max: 770, promo: -0.50, std_sal: 0.10, std_nonsal: 0.20 },
         { min: 726, max: 750, promo: -0.25, std_sal: 0.25, std_nonsal: 0.35 },
         { min: 701, max: 725, promo: -0.20, std_sal: 0.35, std_nonsal: 0.45 },
@@ -1076,8 +1075,8 @@
         const dob = new Date(dobVal);
         const now = new Date();
         const empType = document.getElementById('empType').value;
-        const extend = document.getElementById('extRetirement').checked;
-        let retireAge = extend ? 70 : ((empType === 'Salaried') ? 60 : 65);
+        const extendEl = document.getElementById('extRetirement');
+        let retireAge = (extendEl && extendEl.checked) ? 70 : ((empType === 'Salaried') ? 60 : 65);
         
         const targetDate = new Date(dob);
         targetDate.setFullYear(dob.getFullYear() + retireAge);
@@ -1245,7 +1244,7 @@
         let currentDate = nextRepayDate; // First payment date
         let prevDate = disbDate; // For interest calc
         
-        // Initial Row
+        // Initial Row - Just Date and Balance
         const fmt = new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 });
         let html = `<tr>
             <td>-</td>
