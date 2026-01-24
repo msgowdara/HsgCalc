@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<!-- Version 2: BoB Home Loan Calculator (Finalized Logic) -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BoB Home Loan Eligibility & ROI (v2)</title>
+    <style>
+        :root {
+            --bob-orange: #f58220;
+            --bob-dark: #b84e00;
+            --light-bg: #fff5eb;
+            --text-color: #333;
+            --border-color: #e0e0e0;
+            --success-green: #28a745;
+            --disabled-gray: #e9ecef;
+            --warning-red: #d32f2f;
+            --info-blue: #0277bd;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 15px;
+            color: var(--text-color);
+            padding-bottom: 100px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border-top: 6px solid var(--bob-orange);
+        }
+
+        h2 {
+            text-align: center;
+            color: var(--bob-orange);
+            margin: 0 0 5px 0;
+            font-size: 24px;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+            margin-bottom: 25px;
+            font-style: italic;
+        }
+
+        .section-card {
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .section-title {
+            position: absolute;
+            top: -12px;
+            left: 15px;
+            background: white;
+            padding: 0 8px;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--bob-dark);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            font-size: 13px;
+            color: #444;
+        }
+
+        input[type="number"], input[type="date"], select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 15px;
+            box-sizing: border-box;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--bob-orange);
+            box-shadow: 0 0 0 3px rgba(245, 130, 32, 0.1);
+            outline: none;
+        }
+
+        input[readonly] {
+            background-color: #f4f7fa;
+            color: #555;
+            border-color: #dceefc;
+            font-weight: bold;
+        }
+        
+        input.manual-override {
+            background-color: #fff !important;
+            border-color: var(--bob-orange);
+            color: #333;
+        }
+
+        .input-hint {
+            font-size: 11px;
+            color: #888;
+            margin-top: 3px;
+        }
+
+        /* Checkbox Styling */
+        .checkbox-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 10px;
+            background: #fafafa;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #eee;
+        }
+        
+        .checkbox-container.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+            background: var(--disabled-gray);
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            padding: 5px 0;
+            cursor: pointer;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-right: 12px;
+            accent-color: var(--bob-orange);
+            cursor: pointer;
+        }
+
+        .checkbox-item label {
+            margin: 0;
+            font-size: 13px;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .discount-badge {
+            background: #e6f4ea;
+            color: #1e7e34;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-left: auto;
+        }
+
+        /* Income Grid */
+        .income-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        
+        .grid-col-header {
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #888;
+            text-align: center;
+        }
+
+        /* Age Info Box */
+        .age-info {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            padding: 8px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            font-size: 12px;
+            color: #0d47a1;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Buttons */
+        .action-btn {
+            width: 100%;
+            background-color: var(--bob-orange);
+            color: white;
+            padding: 16px;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(245, 130, 32, 0.3);
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        .action-btn:active {
+            transform: scale(0.98);
+            background-color: var(--bob-dark);
+        }
+        
+        .action-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* Result Section */
+        .result-card {
+            display: none;
+            background: linear-gradient(135deg, #fff5eb 0%, #ffffff 100%);
+            border: 2px solid var(--bob-orange);
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 25px;
+            text-align: center;
+            animation: slideUp 0.4s ease-out;
+        }
+
+        .result-title { font-size: 14px; color: #666; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom:5px; }
+        .result-value { font-size: 32px; color: var(--bob-dark); font-weight: 800; margin: 5px 0; font-family: 'Roboto', sans-serif; }
+        
+        .result-sub-info {
+            font-size: 14px;
+            color: #444;
+            margin: 3px 0;
+            font-weight: 600;
+        }
+        
+        .result-emi {
+            font-size: 18px;
+            color: var(--bob-orange);
+            font-weight: bold;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            border-top: 1px dashed #ddd;
+            padding-top: 10px;
+        }
+
+        .breakdown-table {
+            width: 100%;
+            margin-top: 15px;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+            text-align: left;
+        }
+        .breakdown-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 13px;
+            color: #555;
+            border-bottom: 1px dashed #eee;
+        }
+        .breakdown-row:last-child { border-bottom: none; }
+        .val-bold { font-weight: bold; color: #333; }
+
+        .status-banner {
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            text-align: center;
+            margin-top: 10px;
+            font-weight: bold;
+            display: none;
+        }
+        
+        .status-promo { background-color: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+        .status-standard { background-color: #e3f2fd; color: #1565c0; border: 1px solid #bbdefb; }
+        .status-reject { background-color: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+        
+        .roi-display {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #eef6ff;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #d0e4ff;
+        }
+        .roi-display div {
+            text-align: center;
+        }
+        .roi-label { font-size:11px; color:#555; text-transform:uppercase; }
+        .roi-val { font-size:16px; font-weight:bold; color:#0056b3; }
+
+        /* Schedule Table */
+        .schedule-table-container {
+            margin-top: 20px;
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid #eee;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+        th {
+            background-color: var(--bob-orange);
+            color: white;
+            padding: 10px 5px;
+            text-align: center;
+            font-weight: bold;
+        }
+        td {
+            padding: 8px 5px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+            color: #333;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .row-moratorium {
+            background-color: #e3f2fd !important;
+            color: #0d47a1;
+        }
+
+        .hidden { display: none !important; }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>BoB Home Loan Calculator</h2>
+    <div class="subtitle">Eligibility & ROI (Version 2)</div>
+
+    <!-- 1. LOAN AMOUNT -->
+    <div class="section-card">
+        <div class="section-title">Step 1: Loan Requirement</div>
+        <div class="form-group">
+            <label for="reqLoanAmt">Required Loan Amount (₹)</label>
+            <input type="number" id="reqLoanAmt" placeholder="Enter amount (e.g. 2500000)" 
+                   oninput="this.value=this.value.replace(/[^0-9.]/g,''); checkRoiEligibility()">
+            <div class="input-hint" style="color:var(--bob-dark);">* Loans > ₹15 Lakhs eligible for Promo Rates.</div>
+        </div>
+    </div>
+
+    <!-- 2. APPLICANT DETAILS (DOB & Tenure Logic) -->
+    <div class="section-card">
+        <div class="section-title">Step 2: Applicant Profile & Tenure</div>
+        
+        <div class="form-group">
+            <label for="location">Property Location</label>
+            <select id="location">
+                <option value="Mumbai">Mumbai (Limit: ₹20 Cr)</option>
+                <option value="Metro">Hyd/Del/Blr/Metros (Limit: ₹7.5 Cr)</option>
+                <option value="OtherMetro">Other Metros (Limit: ₹5 Cr)</option>
+                <option value="Urban">Urban Areas (Limit: ₹3 Cr)</option>
+                <option value="SemiUrban">Semi-Urban/Rural (Limit: ₹1 Cr)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="empType">Employment Type</label>
+            <select id="empType" onchange="toggleIncomeSection()">
+                <option value="Salaried">Salaried (Max 60 Years)</option>
+                <option value="NonSalaried">Business / Self-Employed (Max 65 Years)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="dob">Date of Birth</label>
+            <input type="date" id="dob" onchange="handleProfileChange()">
+        </div>
+
+        <div id="ageInfoSection" class="age-info hidden">
+            <span id="currentAgeDisp">Current Age: --</span>
+            <span id="remainingTenureDisp">Max Tenure: --</span>
+        </div>
+
+        <div class="checkbox-container" style="margin-bottom: 15px;">
+            <div class="checkbox-item">
+                <input type="checkbox" id="extRetirement" onchange="handleProfileChange()">
+                <label for="extRetirement">Request Extension beyond Retirement? (Max Age 70)</label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="tenure">Requested Repayment Period (Total Years)</label>
+            <input type="number" id="tenure" value="30" max="30" 
+                   oninput="this.value=this.value.replace(/[^0-9]/g,''); handleProfileChange()">
+            <div class="input-hint" id="tenureHint">Max 30 years allowed (subject to age)</div>
+        </div>
+
+        <div class="form-group" style="background:#f0f8ff; padding:10px; border-radius:8px; border:1px dashed #bcd;">
+            <label for="moratorium">Moratorium / Holiday Period (Months)</label>
+            <input type="number" id="moratorium" value="0" min="0" max="18" 
+                   oninput="this.value=this.value.replace(/[^0-9]/g,''); handleProfileChange()">
+            <div class="input-hint" style="color:var(--info-blue);">Max 18 Months. (Interest only payment). Repayment period reduces accordingly.</div>
+        </div>
+        
+        <input type="hidden" id="calculatedAge" value="0">
+    </div>
+
+    <!-- 3. INTEREST RATE SECTION -->
+    <div class="section-card">
+        <div class="section-title">Step 3: Interest Rate (ROI)</div>
+        
+        <div id="roiStatusMsg" class="status-banner"></div>
+
+        <!-- CIBIL Input -->
+        <div class="form-group">
+            <label for="cibilScore">Applicant CIBIL Score</label>
+            <input type="number" id="cibilScore" placeholder="Enter Score (-1 or 300-900)" min="-1" max="900" 
+                   oninput="this.value=this.value.replace(/[^0-9-]/g,''); checkRoiEligibility()">
+            <div class="input-hint" id="cibilHint">Scores 0-700 are NOT eligible. -1 (NTC) is eligible.</div>
+        </div>
+
+        <div id="roi-auto-section">
+            <!-- ROI Visualizer -->
+            <div class="roi-display">
+                <div>
+                    <div class="roi-label">BRLLR</div>
+                    <div class="roi-val">7.90%</div>
+                </div>
+                <div style="font-size:14px; color:#aaa;">+</div>
+                <div>
+                    <div class="roi-label">Spread</div>
+                    <div class="roi-val" id="dispSpread">--</div>
+                </div>
+                <div style="font-size:14px; color:#aaa;">=</div>
+                <div>
+                    <div class="roi-label">Table Rate</div>
+                    <div class="roi-val" id="dispBaseRate">--</div>
+                </div>
+            </div>
+            
+            <div class="roi-display" style="background:#fff9f5; border-color:#ffe0cc;">
+                <div>
+                    <div class="roi-label">Table Rate</div>
+                    <div class="roi-val" id="dispCardRate2">--</div>
+                </div>
+                <div style="font-size:14px; color:#aaa;">-</div>
+                <div>
+                    <div class="roi-label">Concessions</div>
+                    <div class="roi-val" id="dispConcessions">0.00%</div>
+                </div>
+                <div style="font-size:14px; color:#aaa;">=</div>
+                <div>
+                    <div class="roi-label">Final Rate</div>
+                    <div class="roi-val" id="dispFinalRate" style="color:var(--bob-orange);">--</div>
+                </div>
+                <div style="font-size:10px; color:#888; text-align:center; width:100%; grid-column:span 5;">Min Floor: 7.20%</div>
+            </div>
+
+            <div class="form-group">
+                <label>Additional Concessions (Highest single concession applies)</label>
+                <div class="checkbox-container" id="concessionList">
+                    
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="concParam1" value="0.10" onchange="calculateROI()">
+                        <label for="concParam1">I. Takeover / Fully Completed / Govt Projects</label>
+                        <span class="discount-badge">0.10%</span>
+                    </div>
+
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="concParam2" value="0.05" onchange="calculateROI()">
+                        <label for="concParam2">II. Women Borrower (Owner/Co-Owner)</label>
+                        <span class="discount-badge">0.05%</span>
+                    </div>
+
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="concParam3" value="0.10" onchange="calculateROI()">
+                        <label for="concParam3">III. BoB Salary / Business Account</label>
+                        <span class="discount-badge">0.10%</span>
+                    </div>
+                    
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="concParam4" value="0.10" onchange="calculateROI()">
+                        <label for="concParam4">IV. Baroda Family / Radiance Customer</label>
+                        <span class="discount-badge">0.10%</span>
+                    </div>
+
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="concParam5" value="0.10" disabled onchange="calculateROI()">
+                        <label for="concParam5">V. Youth (Age &le; 40 Years) [Auto-Applied]</label>
+                        <span class="discount-badge">0.10%</span>
+                    </div>
+
+                </div>
+                <div class="input-hint" id="concHint" style="color:#d32f2f;">* Clubbing of additional concessions is NOT permissible.</div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="finalRate">Final Applicable Interest Rate (% p.a.)</label>
+            <input type="number" id="finalRate" value="0" readonly>
+            <div class="input-hint" id="rateInputHint">Auto-calculated</div>
+        </div>
+    </div>
+
+    <!-- 4. INCOME DETAILS -->
+    <div class="section-card">
+        <div class="section-title">Step 4: Income Calculation</div>
+
+        <!-- SALARIED INPUTS -->
+        <div id="salariedSection">
+            <div class="income-grid">
+                <div class="grid-col-header">Gross Salary</div>
+                <div class="grid-col-header">Deductions (PT/PF/Tax)</div>
+
+                <!-- Row 1 -->
+                <div style="grid-column: span 2; font-size:12px; font-weight:600; color:var(--bob-orange); margin-top:5px;">Month 1 (Latest)</div>
+                <input type="number" class="sal-gross" placeholder="Latest Gross" 
+                       oninput="this.value=this.value.replace(/[^0-9.]/g,''); calculateAverage()">
+                <input type="number" id="sal-deduct-latest" placeholder="Latest Deduction" 
+                       oninput="this.value=this.value.replace(/[^0-9.]/g,''); calculateAverage()">
+
+                <!-- Row 2 -->
+                <div style="grid-column: span 2; font-size:12px; font-weight:600; color:#666; margin-top:5px;">Month 2</div>
+                <input type="number" class="sal-gross" placeholder="Gross" 
+                       oninput="this.value=this.value.replace(/[^0-9.]/g,''); calculateAverage()">
+                <input type="number" disabled placeholder="Not Req" style="background:#eee;">
+
+                <!-- Row 3 -->
+                <div style="grid-column: span 2; font-size:12px; font-weight:600; color:#666; margin-top:5px;">Month 3</div>
+                <input type="number" class="sal-gross" placeholder="Gross" 
+                       oninput="this.value=this.value.replace(/[^0-9.]/g,''); calculateAverage()">
+                <input type="number" disabled placeholder="Not Req" style="background:#eee;">
+            </div>
+            <div class="input-hint" style="margin-top:8px;">
+                <strong>Logic:</strong> (Avg of 3 Months Gross) minus (Latest Month Deduction)
+            </div>
+        </div>
+
+        <!-- NON-SALARIED INPUTS -->
+        <div id="nonSalariedSection" class="hidden">
+            <div class="income-grid">
+                <div class="grid-col-header">Gross Annual Income</div>
+                <div class="grid-col-header">Tax Paid</div>
+
+                <div style="grid-column: span 2; font-size:12px; font-weight:600; color:var(--bob-orange); margin-top:5px;">Last Financial Year (Latest)</div>
+                <input type="number" class="it-gross" placeholder="Total Income" 
+                       oninput="this.value=this.value.replace(/[^0-9.]/g,''); calculateAverage()">
+                <input type="number" class="it-tax" placeholder="Latest Tax Paid" 
+                       oninput="this.value=this.value.replace(/[^0-9.]/g,''); calculateAverage()">
+
+                <div style="grid-column: span 2; font-size:12px; font-weight:600; color:#666; margin-top:5px;">Previous Financial Year</div>
+                <input type="number" class="it-gross" placeholder="Total Income" 
+                       oninput="this.value=this.value.replace(/[^0-9.]/g,''); calculateAverage()">
+                <input type="number" class="it-tax" placeholder="Not Req" disabled style="background:#eee;">
+            </div>
+            <div class="input-hint" style="margin-top:8px;">
+                <strong>Logic:</strong> (Avg of last 2 Years Gross Income) minus (Latest Year Tax Paid)
+            </div>
+        </div>
+
+        <!-- CALCULATED NET INCOME -->
+        <div class="form-group" style="margin-top:15px; border-top:1px dashed #ddd; padding-top:10px;">
+            <label id="netLabel" for="avgNetIncome">Net Monthly Income (Calculated)</label>
+            <input type="number" id="avgNetIncome" readonly placeholder="Auto-calculated">
+        </div>
+
+        <!-- OTHER OBLIGATIONS -->
+        <div class="form-group">
+            <label for="existingEmis">Existing Total Monthly EMIs (₹)</label>
+            <input type="number" id="existingEmis" placeholder="Loans continuing after this loan" value="0"
+                   oninput="this.value=this.value.replace(/[^0-9.]/g,'');">
+        </div>
+        
+        <div class="form-group">
+            <label for="futureRent">Expected Rent (Proposed Property)</label>
+            <input type="number" id="futureRent" placeholder="If applicable (Capped at 100% Core Income)" value="0"
+                   oninput="this.value=this.value.replace(/[^0-9.]/g,'');">
+        </div>
+    </div>
+
+    <!-- 5. PROPERTY DETAILS -->
+    <div class="section-card">
+        <div class="section-title">Step 5: Property Details (For LTV)</div>
+        
+        <div class="form-group">
+            <label for="ownLand">Do you already own the Land/Plot?</label>
+            <select id="ownLand" onchange="togglePropertyFields()">
+                <option value="No">No - Buying Flat / House / Plot + Construction</option>
+                <option value="Yes">Yes - Constructing on Own Land</option>
+            </select>
+        </div>
+
+        <div id="noLandSection">
+            <div class="form-group">
+                <label for="compositeCost">Total Property Cost (Agreement Value) (₹)</label>
+                <input type="number" id="compositeCost" placeholder="Price of Flat/House"
+                       oninput="this.value=this.value.replace(/[^0-9.]/g,'');">
+            </div>
+        </div>
+
+        <div id="ownLandSection" class="hidden">
+            <div class="form-group">
+                <label for="constructionCost">Estimated Construction Cost (₹)</label>
+                <input type="number" id="constructionCost" placeholder="Cost to build"
+                       oninput="this.value=this.value.replace(/[^0-9.]/g,'');">
+            </div>
+            <div class="form-group">
+                <label for="landValueMargin">Current Market Value of Land (₹)</label>
+                <input type="number" id="landValueMargin" placeholder="Land value counts as margin"
+                       oninput="this.value=this.value.replace(/[^0-9.]/g,'');">
+            </div>
+        </div>
+    </div>
+
+    <button id="btnCalculate" class="action-btn" onclick="calculateEligibility()">Calculate Eligibility</button>
+
+    <div id="errorMsg" class="error-banner"></div>
+
+    <!-- 6. RESULT DISPLAY -->
+    <div id="resultCard" class="result-card">
+        <div class="result-title">Final Eligible Loan Amount</div>
+        <div class="result-value" id="finalAmount">₹ 0</div>
+        
+        <div class="result-sub-info" id="finalTenureDisplay">Tenure Applied: --</div>
+        <div class="result-sub-info" id="finalMoratoriumDisplay" style="font-size:13px; color:#555;">Moratorium: --</div>
+        <div class="result-emi" id="finalEMIDisplay">EMI: --</div>
+        
+        <div class="breakdown-table">
+            <div class="breakdown-row">
+                <span>Rate of Interest Applied:</span>
+                <span class="val-bold" id="resROI">0%</span>
+            </div>
+            <div class="breakdown-row">
+                <span>Net Monthly Income:</span>
+                <span class="val-bold" id="resIncome">₹ 0</span>
+            </div>
+            <div class="breakdown-row">
+                <span>Max EMI Capacity (FOIR <span id="resFOIRPct"></span>):</span>
+                <span class="val-bold" id="resMaxEMI">₹ 0</span>
+            </div>
+            <div class="breakdown-row">
+                <span>Limit by Income:</span>
+                <span class="val-bold" id="resIncomeLimit">₹ 0</span>
+            </div>
+            <div class="breakdown-row">
+                <span>Limit by LTV / Margin:</span>
+                <span class="val-bold" id="resLTVLimit">N/A</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7. REPAYMENT SCHEDULE -->
+    <div class="section-card" style="margin-top:20px;">
+        <div class="section-title">Step 6: Repayment Schedule</div>
+        
+        <div class="form-group">
+            <label for="disbDate">Disbursement Date</label>
+            <input type="date" id="disbDate">
+        </div>
+        
+        <div class="form-group">
+            <label for="repayDay">Preferred Repayment Date</label>
+            <select id="repayDay">
+                <option value="4">4th of every month</option>
+                <option value="10">10th of every month</option>
+            </select>
+        </div>
+
+        <button id="btnSchedule" class="action-btn" style="background-color:#0277bd;" onclick="generateSchedule()">Generate Schedule</button>
+
+        <div id="scheduleContainer" class="schedule-table-container" style="display:none;">
+            <table id="scheduleTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Interest</th>
+                        <th>Repayment</th>
+                        <th>Balance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- JS Rows -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Hidden Storage for Schedule -->
+    <input type="hidden" id="storedFinalAmount" value="0">
+    <input type="hidden" id="storedRate" value="0">
+    <input type="hidden" id="storedActualTenure" value="0">
+    <input type="hidden" id="storedMoratorium" value="0">
+
+</div>
+
+<script>
+    // --- CONFIGURATION ---
+    const EXPIRY_DATE = new Date('2026-04-10'); 
+    const MIN_ROI_FLOOR = 7.20;
+    const BRLLR = 7.90;
+    
+    // --- ROI DATA MATRIX ---
+    // Spread values relative to BRLLR (7.90)
+    // Structure: promo (all), std_sal (salaried), std_nonsal (non-salaried)
+    const ROI_MATRIX = [
+        { min: 825, max: 900, promo: -0.70, std_sal: 0.10, std_nonsal: 0.10 },
+        { min: 800, max: 824, promo: -0.60, std_sal: 0.10, std_nonsal: 0.10 },
+        { min: 771, max: 799, promo: -0.50, std_sal: 0.10, std_nonsal: 0.10 },
+        { min: 751, max: 770, promo: -0.50, std_sal: 0.10, std_nonsal: 0.20 },
+        { min: 726, max: 750, promo: -0.25, std_sal: 0.25, std_nonsal: 0.35 },
+        { min: 701, max: 725, promo: -0.20, std_sal: 0.35, std_nonsal: 0.45 },
+        { min: 0,   max: 700, promo: 1.05,  std_sal: 1.05, std_nonsal: 1.05 }, 
+        { min: -1,  max: -1,  promo: -0.15, std_sal: 0.35, std_nonsal: 0.45 } 
+    ];
+
+    // --- INITIALIZATION ---
+    window.onload = function() {
+        if(document.getElementById('empType')) {
+            toggleIncomeSection();
+        }
+        if(document.getElementById('ownLand')) {
+            togglePropertyFields();
+        }
+    };
+
+    // --- AGE & TENURE LOGIC ---
+    function handleProfileChange() {
+        const dobVal = document.getElementById('dob').value;
+        const empType = document.getElementById('empType').value;
+        const extendEl = document.getElementById('extRetirement');
+        const infoSection = document.getElementById('ageInfoSection');
+        const calcAgeEl = document.getElementById('calculatedAge');
+        
+        if(!dobVal) {
+            if(infoSection) infoSection.classList.add('hidden');
+            if(calcAgeEl) calcAgeEl.value = 0;
+            return;
+        }
+
+        if(infoSection) infoSection.classList.remove('hidden');
+        const dob = new Date(dobVal);
+        const now = new Date();
+        
+        let years = now.getFullYear() - dob.getFullYear();
+        let months = now.getMonth() - dob.getMonth();
+        if (months < 0 || (months === 0 && now.getDate() < dob.getDate())) {
+            years--;
+            months += 12;
+        }
+        
+        if(document.getElementById('currentAgeDisp')) 
+            document.getElementById('currentAgeDisp').textContent = `Current Age: ${years}y ${months}m`;
+        
+        if(calcAgeEl) calcAgeEl.value = years;
+
+        let retireAge = 0;
+        if(extendEl && extendEl.checked) {
+            retireAge = 70;
+        } else {
+            retireAge = (empType === 'Salaried') ? 60 : 65;
+        }
+
+        const targetDate = new Date(dob);
+        targetDate.setFullYear(dob.getFullYear() + retireAge);
+        
+        let remainingMonths = (targetDate.getFullYear() - now.getFullYear()) * 12 + (targetDate.getMonth() - now.getMonth());
+        
+        let maxAllowedMonths = Math.min(360, remainingMonths);
+        if(maxAllowedMonths < 0) maxAllowedMonths = 0;
+        
+        let displayYears = Math.floor(maxAllowedMonths / 12);
+        let displayMonths = maxAllowedMonths % 12;
+        
+        if(document.getElementById('remainingTenureDisp'))
+            document.getElementById('remainingTenureDisp').textContent = `Max Tenure: ${displayYears}y ${displayMonths}m`;
+        
+        checkAgeConcession(years);
+        
+        checkRoiEligibility();
+    }
+
+    // --- ROI LOGIC ---
+    function checkRoiEligibility() {
+        const today = new Date();
+        const loanAmountInput = document.getElementById('reqLoanAmt');
+        const scoreInput = document.getElementById('cibilScore');
+        
+        const banner = document.getElementById('roiStatusMsg');
+        const concessionList = document.getElementById('concessionList');
+        const concHint = document.getElementById('concHint');
+        const calcBtn = document.getElementById('btnCalculate');
+        const autoSection = document.getElementById('roi-auto-section');
+
+        if(!loanAmountInput || !scoreInput) return;
+
+        const loanAmount = parseFloat(loanAmountInput.value) || 0;
+        const scoreStr = scoreInput.value;
+        const score = parseInt(scoreStr);
+
+        // Safety check
+        if(!banner || !concessionList || !concHint || !calcBtn || !autoSection) return;
+
+        // 1. Hard Stop for 0-700
+        if (scoreStr !== "" && !isNaN(score)) {
+            if (score >= 0 && score <= 700) {
+                banner.style.display = 'block';
+                banner.textContent = "NOT ELIGIBLE: CIBIL Score 0-700 is not accepted.";
+                banner.className = "status-banner status-reject";
+                calcBtn.disabled = true;
+                calcBtn.style.opacity = 0.5;
+                autoSection.style.opacity = '0.5';
+                autoSection.style.pointerEvents = 'none';
+                return; // Stop here
+            } else {
+                calcBtn.disabled = false;
+                calcBtn.style.opacity = 1;
+                autoSection.style.opacity = '1';
+                autoSection.style.pointerEvents = 'auto';
+            }
+        }
+
+        // 2. Determine Scenario: Promo vs Standard
+        const isDateValid = today <= EXPIRY_DATE;
+        const isAmountValid = loanAmount > 1500000;
+        const isPromo = isDateValid && isAmountValid;
+
+        if (isPromo) {
+            banner.style.display = 'block';
+            banner.textContent = "PROMO APPLICABLE: Concessional Rates Active";
+            banner.className = "status-banner status-promo";
+            concessionList.classList.remove('disabled');
+            concHint.style.display = 'block';
+            
+            const ageEl = document.getElementById('calculatedAge');
+            const age = ageEl ? (parseInt(ageEl.value) || 0) : 0;
+            checkAgeConcession(age);
+        } else {
+            let reason = "";
+            if (!isDateValid) reason = "Concession Expired";
+            else if (!isAmountValid) reason = "Loan <= ₹15L";
+
+            banner.style.display = 'block';
+            banner.textContent = `STANDARD RATES APPLICABLE (${reason}): Auto-calculated`;
+            banner.className = "status-banner status-standard";
+            concessionList.classList.add('disabled');
+            concHint.style.display = 'none';
+            // Uncheck all concessions
+            document.querySelectorAll('#concessionList input[type="checkbox"]').forEach(c => c.checked = false);
+        }
+        
+        calculateROI();
+    }
+
+    // Auto-check Youth concession
+    function checkAgeConcession(age) {
+        const youthCheckbox = document.getElementById('concParam5');
+        const loanAmountInput = document.getElementById('reqLoanAmt');
+        
+        if(!youthCheckbox || !loanAmountInput) return;
+
+        const loanAmount = parseFloat(loanAmountInput.value) || 0;
+        const isPromoActive = loanAmount > 1500000 && new Date() <= EXPIRY_DATE;
+
+        if (isPromoActive) {
+            if (age > 0 && age <= 40) {
+                youthCheckbox.checked = true;
+            } else {
+                youthCheckbox.checked = false;
+            }
+            calculateROI();
+        }
+    }
+
+    function calculateROI() {
+        const rateInput = document.getElementById('finalRate');
+        if(!rateInput) return;
+        
+        // Only run if sections are active
+        if (!rateInput.hasAttribute('readonly')) return; 
+
+        const scoreInput = document.getElementById('cibilScore');
+        const loanInput = document.getElementById('reqLoanAmt');
+        const empTypeInput = document.getElementById('empType');
+        
+        if(!scoreInput || !loanInput || !empTypeInput) return;
+
+        const scoreStr = scoreInput.value;
+        const score = parseInt(scoreStr);
+        const loanAmount = parseFloat(loanInput.value) || 0;
+        const empType = empTypeInput.value;
+        const today = new Date();
+        
+        const isPromo = (loanAmount > 1500000 && today <= EXPIRY_DATE);
+
+        let spread = 0;
+        let tableRate = 0;
+
+        let bracket = null;
+        if (scoreStr !== "" && !isNaN(score)) {
+            if (score === -1) {
+                bracket = ROI_MATRIX.find(b => b.min === -1);
+            } else {
+                bracket = ROI_MATRIX.find(b => score >= b.min && score <= b.max);
+            }
+        }
+
+        if (bracket) {
+            if (isPromo) {
+                spread = bracket.promo;
+            } else {
+                if (empType === 'Salaried') {
+                    spread = bracket.std_sal;
+                } else {
+                    spread = bracket.std_nonsal;
+                }
+            }
+            tableRate = BRLLR + spread;
+        } else {
+            tableRate = 0;
+        }
+
+        let maxConcession = 0;
+        if (isPromo) {
+            let selectedConcessions = [];
+            const checkboxes = document.querySelectorAll('#concessionList input[type="checkbox"]');
+            checkboxes.forEach(box => {
+                if (box.checked) {
+                    selectedConcessions.push(parseFloat(box.value));
+                }
+            });
+            if (selectedConcessions.length > 0) {
+                maxConcession = Math.max(...selectedConcessions);
+            }
+        }
+
+        let final = 0;
+        if (tableRate > 0) {
+            final = tableRate - maxConcession;
+            if(final < MIN_ROI_FLOOR) final = MIN_ROI_FLOOR;
+        }
+
+        document.getElementById('finalRate').value = final.toFixed(2);
+        
+        if (tableRate > 0) {
+            if(document.getElementById('dispSpread')) document.getElementById('dispSpread').textContent = (spread >= 0 ? "+" : "") + spread.toFixed(2) + "%";
+            if(document.getElementById('dispBaseRate')) document.getElementById('dispBaseRate').textContent = tableRate.toFixed(2) + "%";
+            if(document.getElementById('dispCardRate2')) document.getElementById('dispCardRate2').textContent = tableRate.toFixed(2) + "%";
+            if(document.getElementById('dispConcessions')) document.getElementById('dispConcessions').textContent = maxConcession.toFixed(2) + "%";
+            if(document.getElementById('dispFinalRate')) document.getElementById('dispFinalRate').textContent = final.toFixed(2) + "%";
+        } else {
+            if(document.getElementById('dispSpread')) document.getElementById('dispSpread').textContent = "--";
+            if(document.getElementById('dispBaseRate')) document.getElementById('dispBaseRate').textContent = "--";
+            if(document.getElementById('dispCardRate2')) document.getElementById('dispCardRate2').textContent = "--";
+            if(document.getElementById('dispConcessions')) document.getElementById('dispConcessions').textContent = "--";
+            if(document.getElementById('dispFinalRate')) document.getElementById('dispFinalRate').textContent = "--";
+        }
+    }
+
+    function toggleIncomeSection() {
+        const type = document.getElementById('empType').value;
+        const sal = document.getElementById('salariedSection');
+        const nonSal = document.getElementById('nonSalariedSection');
+        const netLabel = document.getElementById('netLabel');
+        
+        if (type === 'Salaried') {
+            if(sal) sal.classList.remove('hidden');
+            if(nonSal) nonSal.classList.add('hidden');
+            if(netLabel) netLabel.textContent = "Net Monthly Income";
+        } else {
+            if(sal) sal.classList.add('hidden');
+            if(nonSal) nonSal.classList.remove('hidden');
+            if(netLabel) netLabel.textContent = "Net Annual Income / 12 (Monthly)";
+        }
+        calculateAverage();
+        handleProfileChange(); 
+    }
+
+    function togglePropertyFields() {
+        const val = document.getElementById('ownLand').value;
+        const ownLandSection = document.getElementById('ownLandSection');
+        const noLandSection = document.getElementById('noLandSection');
+
+        if(val === 'Yes') {
+            if(ownLandSection) ownLandSection.classList.remove('hidden');
+            if(noLandSection) noLandSection.classList.add('hidden');
+        } else {
+            if(ownLandSection) ownLandSection.classList.add('hidden');
+            if(noLandSection) noLandSection.classList.remove('hidden');
+        }
+    }
+
+    function calculateAverage() {
+        const type = document.getElementById('empType').value;
+        let finalMonthlyNet = 0;
+
+        if (type === 'Salaried') {
+            const grossInputs = document.querySelectorAll('.sal-gross');
+            let totalGross = 0;
+            let count = 0;
+            grossInputs.forEach(input => {
+                let v = parseFloat(input.value);
+                if(!isNaN(v)) { totalGross += v; count++; }
+            });
+            let avgGross = (count > 0) ? totalGross / 3 : 0; 
+            
+            const deductInput = document.getElementById('sal-deduct-latest');
+            let deduction = deductInput ? (parseFloat(deductInput.value) || 0) : 0;
+            
+            finalMonthlyNet = avgGross - deduction;
+        } else {
+            const grossInputs = document.querySelectorAll('.it-gross');
+            let totalGross = 0;
+            grossInputs.forEach(input => {
+                let g = parseFloat(input.value) || 0;
+                totalGross += g;
+            });
+            let avgGross = totalGross / 2;
+            
+            const taxInputs = document.querySelectorAll('.it-tax');
+            // Assuming first tax input is latest
+            let latestTax = 0;
+            if(taxInputs.length > 0) latestTax = parseFloat(taxInputs[0].value) || 0;
+            
+            let netAnnual = avgGross - latestTax;
+            finalMonthlyNet = netAnnual / 12; 
+        }
+
+        if(finalMonthlyNet < 0) finalMonthlyNet = 0;
+        if(document.getElementById('avgNetIncome'))
+            document.getElementById('avgNetIncome').value = finalMonthlyNet.toFixed(2);
+    }
+
+    function calculateEligibility() {
+        const age = parseInt(document.getElementById('calculatedAge').value) || 0;
+        const income = parseFloat(document.getElementById('avgNetIncome').value);
+        const rate = parseFloat(document.getElementById('finalRate').value);
+        const userReqYears = parseFloat(document.getElementById('tenure').value); 
+        const existingEMI = parseFloat(document.getElementById('existingEmis').value) || 0;
+        const rentIncome = parseFloat(document.getElementById('futureRent').value) || 0;
+        const location = document.getElementById('location').value;
+        const loanAmount = parseFloat(document.getElementById('reqLoanAmt').value) || 0;
+        const dobVal = document.getElementById('dob').value;
+        const moratoriumMonths = parseInt(document.getElementById('moratorium').value) || 0;
+
+        const err = document.getElementById('errorMsg');
+        const res = document.getElementById('resultCard');
+        if(err) err.style.display = 'none';
+        if(res) res.style.display = 'none';
+
+        if(!dobVal || !income || !rate || !userReqYears || !loanAmount) {
+            if(err) {
+                err.textContent = "Please fill in all required fields.";
+                err.style.display = 'block';
+            }
+            return;
+        }
+
+        // --- TENURE CALCULATION ---
+        const dob = new Date(dobVal);
+        const now = new Date();
+        const empType = document.getElementById('empType').value;
+        const extend = document.getElementById('extRetirement').checked;
+        let retireAge = extend ? 70 : ((empType === 'Salaried') ? 60 : 65);
+        
+        const targetDate = new Date(dob);
+        targetDate.setFullYear(dob.getFullYear() + retireAge);
+        let maxAgeMonths = (targetDate.getFullYear() - now.getFullYear()) * 12 + (targetDate.getMonth() - now.getMonth());
+        
+        let globalCapMonths = 360;
+        let maxFeasibleTotalMonths = Math.min(maxAgeMonths, globalCapMonths);
+        let userReqTotalMonths = userReqYears * 12;
+        let finalTotalDuration = Math.min(userReqTotalMonths, maxFeasibleTotalMonths);
+        
+        if(finalTotalDuration <= 0) {
+            if(err) {
+                err.textContent = "Applicant Age exceeds limit or Tenure invalid.";
+                err.style.display = 'block';
+            }
+            return;
+        }
+        
+        let actualRepaymentMonths = finalTotalDuration - moratoriumMonths;
+        if (actualRepaymentMonths <= 0) {
+             if(err) {
+                 err.textContent = `Moratorium (${moratoriumMonths}m) exceeds Total Tenure (${finalTotalDuration}m).`;
+                 err.style.display = 'block';
+             }
+             return;
+        }
+
+        // --- INCOME & FOIR ---
+        let cappedRent = Math.min(rentIncome, income);
+        let totalMonthlyIncome = income + cappedRent;
+
+        let foir = 0.40;
+        if(document.getElementById('empType').value === 'Salaried') {
+            if (totalMonthlyIncome >= 200000) foir = 0.75;
+            else if (totalMonthlyIncome >= 100000) foir = 0.70;
+            else if (totalMonthlyIncome >= 50000) foir = 0.65;
+            else if (totalMonthlyIncome >= 25000) foir = 0.60;
+            else foir = 0.40;
+        } else {
+            let annual = totalMonthlyIncome * 12;
+            if (annual > 600000) foir = 0.80;
+            else foir = 0.70;
+        }
+
+        let maxEMI = totalMonthlyIncome * foir;
+        let availableEMI = maxEMI - existingEMI;
+
+        let eligibleAmtIncome = 0;
+        if(availableEMI > 0) {
+            let r = (rate / 100) / 12;
+            let n = actualRepaymentMonths;
+            eligibleAmtIncome = availableEMI * ( (1 - Math.pow(1 + r, -n)) / r );
+        }
+
+        // --- LIMITS & LTV ---
+        let locCap = 0;
+        switch(location) {
+            case 'Mumbai': locCap = 200000000; break;
+            case 'Metro': locCap = 75000000; break;
+            case 'OtherMetro': locCap = 50000000; break;
+            case 'Urban': locCap = 30000000; break;
+            case 'SemiUrban': locCap = 10000000; break;
+        }
+
+        let propValue = 0;
+        if(document.getElementById('ownLand').value === 'Yes') {
+            let constCost = parseFloat(document.getElementById('constructionCost').value) || 0;
+            let landVal = parseFloat(document.getElementById('landValueMargin').value) || 0;
+            propValue = constCost + landVal;
+        } else {
+            propValue = parseFloat(document.getElementById('compositeCost').value) || 0;
+        }
+
+        let eligibleAmtLTV = Infinity;
+        if(propValue > 0) {
+            let ltv90 = propValue * 0.90;
+            let ltv80 = propValue * 0.80;
+            let ltv75 = propValue * 0.75;
+
+            if(ltv90 <= 3000000) eligibleAmtLTV = ltv90;
+            else if(ltv80 <= 7500000) eligibleAmtLTV = ltv80;
+            else eligibleAmtLTV = ltv75;
+        }
+
+        let finalAmount = Math.min(eligibleAmtIncome, locCap);
+        if(propValue > 0) finalAmount = Math.min(finalAmount, eligibleAmtLTV);
+        
+        let finalEMI = 0;
+        if (finalAmount > 0 && actualRepaymentMonths > 0) {
+             let r = (rate / 100) / 12;
+             finalEMI = finalAmount * r * Math.pow(1 + r, actualRepaymentMonths) / (Math.pow(1 + r, actualRepaymentMonths) - 1);
+        }
+
+        const fmt = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 });
+        
+        document.getElementById('finalAmount').textContent = fmt.format(finalAmount);
+        
+        // Store vals for schedule
+        document.getElementById('storedFinalAmount').value = finalAmount;
+        document.getElementById('storedRate').value = rate;
+        document.getElementById('storedActualTenure').value = actualRepaymentMonths;
+        document.getElementById('storedMoratorium').value = moratoriumMonths;
+        
+        let dispY = Math.floor(finalTotalDuration/12);
+        let dispM = finalTotalDuration % 12;
+        
+        document.getElementById('finalTenureDisplay').innerHTML = `
+            Total Duration: <b>${dispY}y ${dispM}m</b> 
+            <span style="font-size:13px; color:#666;">
+                (${actualRepaymentMonths}m Repayment + ${moratoriumMonths}m Moratorium)
+            </span>`;
+            
+        document.getElementById('finalMoratoriumDisplay').textContent = `Moratorium Period: ${moratoriumMonths} Months`;
+        document.getElementById('finalEMIDisplay').textContent = `EMI (after moratorium): ${fmt.format(finalEMI)}`;
+
+        document.getElementById('resROI').textContent = rate.toFixed(2) + "%";
+        document.getElementById('resIncome').textContent = fmt.format(totalMonthlyIncome);
+        document.getElementById('resFOIRPct').textContent = (foir*100) + "%";
+        document.getElementById('resMaxEMI').textContent = fmt.format(maxEMI);
+        document.getElementById('resIncomeLimit').textContent = fmt.format(eligibleAmtIncome);
+        document.getElementById('resLTVLimit').textContent = (propValue > 0) ? fmt.format(eligibleAmtLTV) : "N/A (Prop Value Missing)";
+
+        if(res) {
+            res.style.display = 'block';
+            res.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+
+    // --- SCHEDULE GENERATOR ---
+    function generateSchedule() {
+        const amount = parseFloat(document.getElementById('storedFinalAmount').value);
+        const rate = parseFloat(document.getElementById('storedRate').value);
+        const tenureMonths = parseInt(document.getElementById('storedActualTenure').value);
+        const moratoriumMonths = parseInt(document.getElementById('storedMoratorium').value);
+        const disbDateStr = document.getElementById('disbDate').value;
+        const repayDay = parseInt(document.getElementById('repayDay').value);
+
+        if(!amount || !disbDateStr) {
+            alert("Please calculate eligibility first and select a Disbursement Date.");
+            return;
+        }
+
+        const disbDate = new Date(disbDateStr);
+        const tbody = document.querySelector('#scheduleTable tbody');
+        tbody.innerHTML = "";
+        
+        // 1. Determine Start Date (15-Day Logic)
+        let targetMonth = disbDate.getMonth(); // 0-11
+        let targetYear = disbDate.getFullYear();
+        
+        let nextRepayDate = new Date(targetYear, targetMonth, repayDay);
+        if (nextRepayDate <= disbDate) {
+            nextRepayDate.setMonth(nextRepayDate.getMonth() + 1);
+        }
+        
+        const diffTime = Math.abs(nextRepayDate - disbDate);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+        
+        if (diffDays < 15) {
+            nextRepayDate.setMonth(nextRepayDate.getMonth() + 1);
+        }
+        
+        // 2. Loop Setup
+        let balance = amount;
+        let currentDate = nextRepayDate; // First payment date
+        let prevDate = disbDate; // For interest calc
+        
+        // Initial Row
+        const fmt = new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 });
+        let html = `<tr>
+            <td>-</td>
+            <td>${disbDate.toLocaleDateString()}</td>
+            <td>Disbursement</td>
+            <td>-</td>
+            <td>-</td>
+            <td>${fmt.format(balance)}</td>
+        </tr>`;
+        
+        // Moratorium Loop
+        for(let i=1; i <= moratoriumMonths; i++) {
+            let days = Math.round((currentDate - prevDate) / (1000 * 60 * 60 * 24));
+            let interest = Math.round((balance * rate * days) / (36500)); 
+            
+            html += `<tr class="row-moratorium">
+                <td>${i}</td>
+                <td>${currentDate.toLocaleDateString()}</td>
+                <td>Moratorium</td>
+                <td>${fmt.format(interest)}</td>
+                <td>${fmt.format(interest)}</td>
+                <td>${fmt.format(balance)}</td>
+            </tr>`;
+            
+            prevDate = new Date(currentDate); // Clone
+            currentDate.setMonth(currentDate.getMonth() + 1);
+        }
+        
+        // Repayment Loop (EMI Calc)
+        let r = rate / 1200;
+        let emi = Math.round(balance * r * Math.pow(1 + r, tenureMonths) / (Math.pow(1 + r, tenureMonths) - 1));
+        
+        for(let j=1; j <= tenureMonths; j++) {
+            let interest = Math.round(balance * r);
+            let principal = emi - interest;
+            
+            if (j === tenureMonths) {
+                principal = balance;
+                emi = principal + interest;
+                balance = 0;
+            } else {
+                balance -= principal;
+            }
+            
+            html += `<tr>
+                <td>${moratoriumMonths + j}</td>
+                <td>${currentDate.toLocaleDateString()}</td>
+                <td>EMI</td>
+                <td>${fmt.format(interest)}</td>
+                <td>${fmt.format(emi)}</td>
+                <td>${fmt.format(balance)}</td>
+            </tr>`;
+            
+            prevDate = new Date(currentDate);
+            currentDate.setMonth(currentDate.getMonth() + 1);
+        }
+        
+        tbody.innerHTML = html;
+        document.getElementById('scheduleContainer').style.display = 'block';
+        document.getElementById('scheduleContainer').scrollIntoView({behavior: 'smooth'});
+    }
+</script>
+
+</body>
+</html>
