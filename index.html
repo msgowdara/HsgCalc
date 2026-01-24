@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Version 2.1: Fixed CIBIL Input (-1) & Schedule Format -->
+<!-- Version 2.2: Final Amount capped by Required Loan Amount -->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -350,7 +350,7 @@
 
 <div class="container">
     <h2>BoB Home Loan Calculator</h2>
-    <div class="subtitle">Eligibility & ROI (Version 2)</div>
+    <div class="subtitle">Eligibility & ROI (Version 2.2)</div>
 
     <!-- 1. LOAN AMOUNT -->
     <div class="section-card">
@@ -427,7 +427,6 @@
         <div id="roiStatusMsg" class="status-banner"></div>
 
         <!-- CIBIL Input -->
-        <!-- Fixed: type="text" allows "-" to remain while typing -->
         <div class="form-group">
             <label for="cibilScore">Applicant CIBIL Score</label>
             <input type="text" inputmode="numeric" id="cibilScore" placeholder="Enter Score (-1 or 300-900)" maxlength="4"
@@ -719,9 +718,9 @@
     
     // --- ROI DATA MATRIX ---
     const ROI_MATRIX = [
-        { min: 825, max: 900, promo: -0.70, std_sal: 0.00, std_nonsal: 0.10 },
-        { min: 800, max: 824, promo: -0.60, std_sal: 0.00, std_nonsal: 0.10 },
-        { min: 771, max: 799, promo: -0.50, std_sal: 0.00, std_nonsal: 0.10 },
+        { min: 825, max: 900, promo: -0.70, std_sal: 0.10, std_nonsal: 0.10 },
+        { min: 800, max: 824, promo: -0.60, std_sal: 0.10, std_nonsal: 0.10 },
+        { min: 771, max: 799, promo: -0.50, std_sal: 0.10, std_nonsal: 0.10 },
         { min: 751, max: 770, promo: -0.50, std_sal: 0.10, std_nonsal: 0.20 },
         { min: 726, max: 750, promo: -0.25, std_sal: 0.25, std_nonsal: 0.35 },
         { min: 701, max: 725, promo: -0.20, std_sal: 0.35, std_nonsal: 0.45 },
@@ -1161,7 +1160,12 @@
             else eligibleAmtLTV = ltv75;
         }
 
-        let finalAmount = Math.min(eligibleAmtIncome, locCap);
+        // Final Amount Calculation (Updated logic: lower of all constraints)
+        // 1. Income Eligibility
+        // 2. Location Cap
+        // 3. Requested Loan Amount
+        // 4. LTV Eligibility (if property value exists)
+        let finalAmount = Math.min(eligibleAmtIncome, locCap, loanAmount);
         if(propValue > 0) finalAmount = Math.min(finalAmount, eligibleAmtLTV);
         
         let finalEMI = 0;
