@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Baroda Auto Loan - Final Compliance Engine</title>
+    <style>
+        :root { --primary: #ee6e1a; --dark: #2c3e50; --bg: #f5f7fa; --green: #2ecc71; --blue: #3498db; }
+        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: var(--bg); margin: 0; padding: 10px; color: #333; }
+        
+        .app-card { 
+            max-width: 480px; 
+            margin: 0 auto; 
+            background: #fff; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
+            border-top: 5px solid var(--primary);
+            padding-bottom: 20px;
+        }
+
+        /* Header */
+        .header { padding: 20px; text-align: center; border-bottom: 1px solid #eee; }
+        .header h2 { margin: 0; color: var(--primary); font-size: 18px; text-transform: uppercase; }
+        .header span { font-size: 11px; color: #888; }
+
+        /* Form Sections */
+        .section-header { 
+            background: #f8f9fa; 
+            padding: 10px 15px; 
+            font-weight: 700; 
+            font-size: 13px; 
+            color: var(--dark); 
+            border-left: 4px solid var(--primary);
+            margin: 20px 0 10px 0;
+            text-transform: uppercase;
+        }
+
+        .input-group { padding: 0 15px; margin-bottom: 15px; }
+        label { display: block; font-size: 11px; font-weight: 700; margin-bottom: 5px; color: #555; text-transform: uppercase; }
+        
+        /* FIX: target only text-like inputs for full width/appearance to avoid hiding checkboxes */
+        input:not([type="checkbox"]), select { 
+            width: 100%; 
+            padding: 12px; 
+            border: 1px solid #ddd; 
+            border-radius: 8px; 
+            font-size: 15px; 
+            background: #fff; 
+            box-sizing: border-box;
+            appearance: none; /* Removes native UI styling for text inputs */
+        }
+        input:focus, select:focus { border-color: var(--primary); outline: none; }
+
+        /* FIX: Explicit Checkbox Styling */
+        input[type="checkbox"] {
+            appearance: auto; /* Forces browser to render the checkbox */
+            width: 20px;
+            height: 20px;
+            accent-color: var(--primary);
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        /* Concessions & Options */
+        .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 15px; }
+        .cb-item { 
+            background: #fff8f4; 
+            border: 1px solid #ffe0cc; 
+            padding: 10px; 
+            border-radius: 6px; 
+            font-size: 12px; 
+            display: flex; 
+            align-items: center; 
+        }
+        
+        /* Insurance Toggle */
+        .ins-toggle {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            padding: 10px 15px;
+            margin: 0 15px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+        }
+        .ins-toggle span { font-size: 13px; font-weight: 600; color: #0d47a1; }
+
+        /* Main Button */
+        .btn-calc { 
+            display: block;
+            width: calc(100% - 30px);
+            margin: 20px 15px;
+            padding: 15px; 
+            background: var(--primary); 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            font-size: 16px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            box-shadow: 0 4px 10px rgba(238,110,26,0.3);
+        }
+
+        /* Results Area */
+        #resultArea { display: none; background: #fff; animation: slideUp 0.3s ease; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .final-box { 
+            background: #e8f5e9; 
+            margin: 15px; 
+            padding: 20px; 
+            border-radius: 8px; 
+            text-align: center; 
+            border: 1px solid #c8e6c9; 
+        }
+        .final-amount { font-size: 28px; font-weight: 900; color: #2e7d32; display: block; margin: 5px 0; }
+        
+        .auth-box {
+            background: #fff3e0;
+            border: 1px solid #ffe0b2;
+            margin: 0 15px 15px 15px;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        .auth-label { font-size: 10px; font-weight: bold; color: #e65100; text-transform: uppercase; }
+        .auth-val { font-size: 13px; font-weight: 800; color: #bf360c; }
+
+        .detail-row { 
+            display: flex; 
+            justify-content: space-between; 
+            padding: 8px 15px; 
+            font-size: 13px; 
+            border-bottom: 1px dashed #eee; 
+        }
+        .detail-row span:last-child { font-weight: 700; color: var(--dark); text-align: right; }
+        
+        .section-label { 
+            font-size: 12px; 
+            font-weight: 800; 
+            color: #999; 
+            padding: 15px 15px 5px 15px; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px;
+        }
+
+        /* Document List */
+        .doc-container { 
+            background: #fdfdfd; 
+            margin: 15px; 
+            padding: 15px; 
+            border: 1px solid #eee; 
+            border-radius: 8px; 
+        }
+        .doc-header { font-size: 13px; font-weight: bold; color: var(--primary); margin-bottom: 10px; text-decoration: underline; }
+        ul.doc-list { padding-left: 20px; margin: 0; font-size: 12px; color: #444; line-height: 1.5; }
+        li { margin-bottom: 6px; }
+
+        /* Action Buttons */
+        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 15px 15px 15px; }
+        .btn-act { padding: 12px; border: none; border-radius: 6px; color: white; font-weight: bold; font-size: 13px; cursor: pointer; }
+        .btn-copy { background: #34495e; }
+        .btn-wa { background: #25D366; }
+        .btn-amort { background: #7f8c8d; width: calc(100% - 30px); margin: 0 15px 20px 15px; }
+
+        /* Table */
+        .table-box { display: none; overflow-x: auto; margin: 0 15px 20px 15px; border: 1px solid #eee; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; white-space: nowrap; }
+        th, td { padding: 8px; border-bottom: 1px solid #eee; text-align: right; }
+        th { background: #f8f9fa; text-align: center; }
+    </style>
+</head>
+<body>
+
+<div class="app-card">
+    <div class="header">
+        <h2>Baroda Auto Loan</h2>
+        <span>Master Circular BCC:BR:114:665</span>
+    </div>
+
+    <div class="section-header">1. Applicant Details</div>
+    <div class="input-group">
+        <label>Borrower Type</label>
+        <select id="borr" onchange="updateUI()">
+            <option value="SAL">Salaried Individual</option>
+            <option value="STAFF">BOB Staff / Ex-Staff</option>
+            <option value="BIZ">Businessman (Individual)</option>
+            <option value="ENT">Entity (Firm/Co/LLP)</option>
+        </select>
+    </div>
+    <div class="input-group">
+        <label id="dobLbl">Date of Birth</label>
+        <input type="date" id="dob">
+    </div>
+    <div class="input-group">
+        <label>CIBIL (Credit Vision Score)</label>
+        <input type="number" id="cibil" value="750" placeholder="e.g. 750 or -1">
+        <div style="font-size:10px; color:#c0392b; margin-top:3px;">*Min Score 701. Score of -1 is eligible.</div>
+    </div>
+
+    <div class="section-header">2. Product & Invoice</div>
+    <div class="input-group">
+        <label>Product Category</label>
+        <select id="prod">
+            <option value="NEW">New Car Loan</option>
+            <option value="USED">Pre-Owned Car</option>
+        </select>
+    </div>
+    <div class="input-group"><label>Ex-Showroom Price (₹)</label><input type="number" id="ex" placeholder="0"></div>
+    <div class="input-group"><label>GST + Cess (₹)</label><input type="number" id="gst" placeholder="0"></div>
+    <div class="input-group"><label>RTO & Registration (₹)</label><input type="number" id="rto" placeholder="0"></div>
+    <div class="input-group"><label>Insurance (1yr/3yr) (₹)</label><input type="number" id="ins" placeholder="0"></div>
+    <div class="input-group"><label>Less: Dealer Discount (₹)</label><input type="number" id="disc" placeholder="0"></div>
+    <div class="input-group">
+        <label>Accessories (Not Funded)</label>
+        <input type="number" id="acc" placeholder="0">
+        <div style="font-size:10px; color:#c0392b; margin-top:3px;">*Warning: Invoice must be from Authorized Dealer (OEM).</div>
+    </div>
+    <div class="input-group"><label>Requested Loan Amount (₹)</label><input type="number" id="req"></div>
+
+    <div class="section-header">3. Income & Banking</div>
+    <div id="salInput">
+        <div class="input-group"><label>Gross Salary M1 (₹)</label><input type="number" id="s1"></div>
+        <div class="input-group"><label>Gross Salary M2 (₹)</label><input type="number" id="s2"></div>
+        <div class="input-group"><label>Gross Salary M3 (₹)</label><input type="number" id="s3"></div>
+    </div>
+    <div id="bizInput" style="display:none;">
+        <div class="input-group"><label>Annual Income Year 1 (₹)</label><input type="number" id="i1"></div>
+        <div class="input-group"><label>Annual Income Year 2 (₹)</label><input type="number" id="i2"></div>
+        <div style="padding:0 15px; font-size:10px; color:#e67e22; margin-top:-10px; margin-bottom:10px;">*For Entities: Use PAT (Profit After Tax)</div>
+    </div>
+    <div class="input-group">
+        <label>Existing Annual Deductions (₹)</label>
+        <input type="number" id="ded" placeholder="Total Annual EMIs">
+    </div>
+
+    <div class="section-header">4. Concessions & Risk</div>
+    
+    <div class="ins-toggle">
+        <input type="checkbox" id="cIns" checked>
+        <span>Opting for Credit Life Insurance?</span>
+    </div>
+    <div style="padding:0 15px 10px 15px; font-size:10px; color:#d35400;">*0.05% Risk Premium applicable if unchecked.</div>
+
+    <div class="checkbox-grid">
+        <div class="cb-item"><input type="checkbox" id="cEV"> New EV (0.25%)</div>
+        <div class="cb-item"><input type="checkbox" id="cColl"> >50% Collateral</div>
+        <div class="cb-item"><input type="checkbox" id="cICSI"> ICSI Member</div>
+        <div class="cb-item"><input type="checkbox" id="cHL"> Home Loan Cust</div>
+    </div>
+    <div id="hlWarn" style="display:none; padding:0 15px; font-size:10px; color:red; margin-top:5px;">* HL Concession not applicable for Entities</div>
+
+    <button class="btn-calc" onclick="calculate()">CALCULATE ELIGIBILITY</button>
+
+    <div id="resultArea">
+        <div class="final-box">
+            <div style="font-size:11px; text-transform:uppercase; color:#666; letter-spacing:1px;">Final Eligible Amount</div>
+            <span class="final-amt" id="outFinal">₹ 0</span>
+            <div style="font-size:11px; margin-top:5px;">(Lower of Income, LTV, or Product Cap)</div>
+        </div>
+
+        <div class="auth-box">
+            <div class="auth-label">Sanctioning Authority</div>
+            <div class="auth-val" id="outAuth">-</div>
+        </div>
+
+        <div class="section-label">Eligibility Breakdown</div>
+        <div class="detail-row"><span>Applicant Age:</span><span id="outAge">-</span></div>
+        <div class="detail-row"><span>Max Tenure:</span><span id="outTen">-</span></div>
+        <div class="detail-row"><span>Avg. Monthly Income:</span><span id="outInc">-</span></div>
+        <div class="detail-row"><span>Monthly Deductions:</span><span id="outDed">-</span></div>
+        <div class="detail-row"><span>FOIR Applied:</span><span id="outFoir">-</span></div>
+        <div class="detail-row" style="color:#2ecc71;"><span>Net Available for EMI:</span><span id="outAvail">-</span></div>
+
+        <div class="section-label">Interest & Repayment</div>
+        <div class="detail-row"><span>Base ROI (CIBIL):</span><span id="outBase">-</span></div>
+        <div class="detail-row"><span>Risk Premium (No Ins):</span><span id="outRisk" style="color:red;">-</span></div>
+        <div class="detail-row"><span>Concession:</span><span id="outConc">-</span></div>
+        <div class="detail-row" style="color:#d35400;"><span>Effective ROI:</span><span id="outRoi">-</span></div>
+        <div class="detail-row"><span>Monthly EMI:</span><span id="outEmi">-</span></div>
+        <div class="detail-row"><span>Total Interest:</span><span id="outInt">-</span></div>
+
+        <div class="section-label">Limits Comparison</div>
+        <div class="detail-row"><span>1. By Income:</span><span id="limInc">-</span></div>
+        <div class="detail-row"><span>2. By LTV (Cost):</span><span id="limLtv">-</span></div>
+        <div class="detail-row"><span>3. Product Cap:</span><span id="limCap">-</span></div>
+
+        <div class="doc-container">
+            <div class="doc-header">REQUIRED DOCUMENTS CHECKLIST</div>
+            <ul class="doc-list" id="docList"></ul>
+        </div>
+
+        <div class="action-grid">
+            <button class="btn-act btn-copy" onclick="copyData()">COPY REPORT</button>
+            <button class="btn-act btn-wa" onclick="shareWa()">WHATSAPP</button>
+        </div>
+
+        <button class="btn-act btn-amort" onclick="toggleTable()">VIEW REPAYMENT SCHEDULE</button>
+        <div class="table-box" id="tBox">
+            <table id="amortTable">
+                <thead><tr><th>Mth</th><th>EMI</th><th>Int</th><th>Prin</th><th>Bal</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+const INR = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 });
+const fmt = (n) => INR.format(n);
+let gData = {};
+
+function updateUI() {
+    const t = document.getElementById('borr').value;
+    const isEnt = (t === 'ENT');
+    const isBizOrEnt = (t === 'BIZ' || t === 'ENT');
+
+    document.getElementById('salInput').style.display = isBizOrEnt ? 'none' : 'block';
+    document.getElementById('bizInput').style.display = isBizOrEnt ? 'block' : 'none';
+    
+    document.getElementById('dobLbl').innerText = isEnt ? "Date of Incorporation" : "Date of Birth";
+    document.getElementById('hlWarn').style.display = isEnt ? 'block' : 'none';
+    if(isEnt) {
+        document.getElementById('cHL').checked = false; 
+        document.getElementById('cHL').disabled = true;
+    } else {
+        document.getElementById('cHL').disabled = false;
+    }
+}
+
+function calculate() {
+    // 1. INPUTS
+    const type = document.getElementById('borr').value;
+    const prod = document.getElementById('prod').value;
+    const dobVal = document.getElementById('dob').value;
+    if(!dobVal) return alert("Please select Date.");
+
+    // 2. CIBIL LOGIC
+    const cibil = parseInt(document.getElementById('cibil').value) || 0;
+    if(cibil !== -1 && cibil < 701) {
+        return alert("Applicant NOT ELIGIBLE.\nCIBIL Credit Vision score is below 701.");
+    }
+
+    // 3. AGE/TENURE
+    const age = new Date().getFullYear() - new Date(dobVal).getFullYear();
+    let maxTenure = (type === 'ENT') ? (prod==='NEW'?84:60) : Math.min((70-age)*12, (prod==='NEW'?84:60));
+    const tenure = Math.max(0, maxTenure);
+    if(tenure <= 0) return alert("Age exceeds eligibility limits.");
+
+    // 4. INCOME
+    let avgInc = 0;
+    if(type === 'SAL' || type === 'STAFF') {
+        avgInc = ((parseFloat(document.getElementById('s1').value)||0) + (parseFloat(document.getElementById('s2').value)||0) + (parseFloat(document.getElementById('s3').value)||0))/3;
+    } else {
+        avgInc = ((parseFloat(document.getElementById('i1').value)||0) + (parseFloat(document.getElementById('i2').value)||0))/24;
+    }
+
+    // 5. FOIR
+    let foir = 0.60;
+    const annualInc = avgInc * 12;
+    if(type === 'SAL' || type === 'STAFF') {
+        if(avgInc >= 150000) foir = 0.80; else if(avgInc >= 50000) foir = 0.70;
+    } else {
+        if(annualInc >= 600000) foir = 0.80;
+    }
+
+    const dedMonth = (parseFloat(document.getElementById('ded').value)||0)/12;
+    const avail = (avgInc * foir) - dedMonth;
+
+    // 6. ROI CALCULATION
+    const brllr = 7.90; const sp = 0.25; const floor = 8.15;
+    
+    // Spread Logic
+    let spread = 0.75; 
+    if(type === 'STAFF') spread = 0;
+    else if(cibil >= 771) spread = 0;
+    else if(cibil >= 751) spread = 0.20;
+    else if(cibil >= 726) spread = 0.30;
+    else if(cibil === -1) spread = 0.75; // -1 is eligible
+    
+    // Concessions
+    let conc = 0;
+    if(document.getElementById('cEV').checked) conc += 0.25;
+    if(document.getElementById('cColl').checked) conc += 0.50;
+    if(document.getElementById('cICSI').checked) conc += 0.25;
+    if(document.getElementById('cHL').checked && type !== 'ENT') conc += 0.25;
+
+    // Risk Premium Logic (If Insurance is CHECKED, ADD 0. If UNCHECKED, ADD 0.05)
+    let riskPrem = 0;
+    if(!document.getElementById('cIns').checked) {
+        riskPrem = 0.05;
+    }
+
+    // Final ROI
+    // Formula: Max(Floor, Base - Concession) + Risk Premium
+    // The Risk Premium is usually added OVER the final rate.
+    const calcBase = (brllr + sp + spread) - conc;
+    const finalRoi = Math.max(floor, calcBase) + riskPrem;
+    const r = (finalRoi/100)/12;
+
+    // 7. LIMITS
+    const limInc = avail > 0 ? avail * ((1 - Math.pow(1+r, -tenure))/r) : 0;
+    
+    const ex = parseFloat(document.getElementById('ex').value)||0;
+    const gst = parseFloat(document.getElementById('gst').value)||0;
+    const rto = parseFloat(document.getElementById('rto').value)||0;
+    const ins = parseFloat(document.getElementById('ins').value)||0;
+    const disc = parseFloat(document.getElementById('disc').value)||0;
+    const baseLtv = (ex + gst + rto + ins) - disc;
+    const limLtv = baseLtv * (prod === 'NEW' ? 0.90 : 0.75);
+    
+    // Product Cap
+    let limCap = (prod === 'USED') ? 5000000 : (type === 'ENT' ? 50000000 : 30000000);
+
+    const req = parseFloat(document.getElementById('req').value)||30000000;
+    const final = Math.max(0, Math.min(req, limInc, limLtv, limCap));
+    const emi = final > 0 ? final * r * Math.pow(1+r, tenure) / (Math.pow(1+r, tenure)-1) : 0;
+    const totInt = (emi * tenure) - final;
+
+    // Sanctioning Authority
+    let authority = "-";
+    if(final > 0) {
+        if(final <= 10000000) authority = "DLP of Sanctioning Authority";
+        else if(final <= 20000000) authority = "RMCC headed by AGM/DGM";
+        else authority = "ZOCC headed by GM";
+    }
+
+    // 8. RENDER
+    document.getElementById('resultArea').style.display = 'block';
+    document.getElementById('outFinal').innerText = fmt(final);
+    document.getElementById('outAuth').innerText = authority;
+    
+    document.getElementById('outAge').innerText = (type==='ENT'?'N/A':age+" Yrs");
+    document.getElementById('outTen').innerText = tenure+" Months";
+    
+    document.getElementById('outInc').innerText = fmt(avgInc);
+    document.getElementById('outDed').innerText = fmt(dedMonth);
+    document.getElementById('outFoir').innerText = (foir*100)+"%";
+    document.getElementById('outAvail').innerText = fmt(Math.max(0, avail));
+
+    document.getElementById('outBase').innerText = (brllr+sp+spread).toFixed(2)+"%";
+    document.getElementById('outRisk').innerText = riskPrem > 0 ? "+"+riskPrem+"%" : "NIL";
+    document.getElementById('outConc').innerText = conc.toFixed(2)+"%";
+    document.getElementById('outRoi').innerText = finalRoi.toFixed(2)+"%";
+    document.getElementById('outEmi').innerText = fmt(emi);
+    document.getElementById('outInt').innerText = fmt(totInt);
+
+    document.getElementById('limInc').innerText = fmt(limInc);
+    document.getElementById('limLtv').innerText = fmt(limLtv);
+    document.getElementById('limCap').innerText = fmt(limCap);
+
+    // 9. DOCUMENTS
+    let d = `<li><b>Proforma Invoice:</b> From Auth Dealer (OEM). Details: Basic, GST, RTO, Ins, Discount separate.</li>`;
+    d += `<li><b>KYC/App:</b> Application Form, Form 135, Photos, KYC Docs.</li>`;
+    
+    if(type === 'SAL') {
+        d += `<li><b>Income:</b> Latest 3 Month Salary Slips AND Form No. 16.</li>`;
+        d += `<li><b>Banking:</b> Latest 6 Months Bank Statement (Salary A/c).</li>`;
+    } else if(type === 'STAFF') {
+        d += `<li><b>Income:</b> Latest Salary Slip / HR Confirmation.</li>`;
+    } else if(type === 'BIZ') {
+        d += `<li><b>Income:</b> 2 Year ITR + Assessment Orders.</li>`;
+        d += `<li><b>Banking:</b> 1 Year Bank Statement.</li>`;
+    } else if(type === 'ENT') {
+        d += `<li><b>Income:</b> 2 Year ITR (Entity) + Audited Balance Sheet (PAT).</li>`;
+        d += `<li><b>Banking:</b> 1 Year Entity Operating Account Statement.</li>`;
+        d += `<li><b>Proof:</b> GST Cert / Partnership Deed / MOA.</li>`;
+    }
+    
+    if(prod === 'USED') d += `<li><b>Used Car:</b> Valuation Report, Annexure 13, Copy of RC/Ins.</li>`;
+    document.getElementById('docList').innerHTML = d;
+
+    gData = { final, authority, tenure, roi: finalRoi, emi, docList: document.getElementById('docList').innerText };
+    genTable(final, r, emi, tenure);
+}
+
+function genTable(bal, r, emi, m) {
+    const b = document.querySelector('#amortTable tbody');
+    b.innerHTML = '';
+    for(let i=1; i<=m; i++){
+        let int = bal*r; let prin = emi-int; let end = bal-prin;
+        b.innerHTML += `<tr><td>${i}</td><td>${Math.round(emi)}</td><td>${Math.round(int)}</td><td>${Math.round(prin)}</td><td>${Math.round(Math.max(0,end))}</td></tr>`;
+        bal = end; if(bal<=0) break;
+    }
+}
+
+function toggleTable() {
+    const d = document.getElementById('tBox');
+    d.style.display = (d.style.display==='block')?'none':'block';
+}
+
+function getTxt() {
+    return `BARODA AUTO LOAN\nEligible: ${fmt(gData.final)}\nAuth: ${gData.authority}\nEMI: ${fmt(gData.emi)}\nROI: ${gData.roi.toFixed(2)}%\nTenure: ${gData.tenure}m\n\nDOCS:\n${gData.docList}`;
+}
+
+function copyData() { navigator.clipboard.writeText(getTxt()).then(()=>alert("Copied!")); }
+function shareWa() { window.open(`https://wa.me/?text=${encodeURIComponent(getTxt())}`); }
+</script>
+</body>
+</html>
