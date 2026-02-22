@@ -229,7 +229,11 @@
                 <div class="space-y-3">
                     <p class="font-bold text-bob-vermillion border-b pb-1">Sender Information</p>
                     <input type="text" id="i_senderName" placeholder="Account Holder Name *" class="w-full border p-2 rounded focus:border-bob-vermillion focus:ring-1 focus:ring-bob-vermillion outline-none" oninput="update()">
-                    <input type="text" id="i_senderAcc" placeholder="Sender Account No. *" class="w-full border p-2 rounded focus:border-bob-vermillion focus:ring-1 focus:ring-bob-vermillion outline-none" maxlength="14" oninput="update()">
+                    <div class="flex gap-2 relative">
+                        <input type="text" id="i_senderAcc" placeholder="Sender Account No. *" class="w-full border p-2 rounded focus:border-bob-vermillion focus:ring-1 focus:ring-bob-vermillion outline-none" maxlength="14" list="savedSenders" oninput="handleSenderSelect()">
+                        <button id="btn_saveSender" onclick="saveSenderProfile()" class="bg-bob-light text-bob-vermillion border border-bob-vermillion px-4 rounded hover:bg-bob-vermillion hover:text-white transition-colors text-sm font-bold whitespace-nowrap" title="Save this profile locally">Save</button>
+                    </div>
+                    <datalist id="savedSenders"></datalist>
                     <input type="text" id="i_chequeNo" placeholder="Cheque No." class="w-full border p-2 rounded focus:border-bob-vermillion focus:ring-1 focus:ring-bob-vermillion outline-none" maxlength="6" oninput="update()">
                     <div class="flex gap-2">
                         <input type="text" id="i_mobile" placeholder="Mobile" class="w-full border p-2 rounded focus:border-bob-vermillion focus:ring-1 focus:ring-bob-vermillion outline-none" oninput="update()">
@@ -660,6 +664,77 @@
             update();
         }
 
+        // --- LOCAL STORAGE PROFILE MANAGEMENT ---
+        function loadSavedSenders() {
+            const senders = JSON.parse(localStorage.getItem('bob_senders') || '[]');
+            const datalist = document.getElementById('savedSenders');
+            datalist.innerHTML = '';
+            senders.forEach(s => {
+                const option = document.createElement('option');
+                option.value = s.acc;
+                option.text = `${s.name} - ${s.branch}`;
+                datalist.appendChild(option);
+            });
+        }
+
+        function saveSenderProfile() {
+            const acc = document.getElementById('i_senderAcc').value.trim();
+            const name = document.getElementById('i_senderName').value.trim();
+            const mob = document.getElementById('i_mobile').value.trim();
+            const pan = document.getElementById('i_pan').value.trim();
+            const branch = document.getElementById('i_branch').value.trim();
+
+            if (!acc || !name || acc.length !== 14) {
+                document.getElementById('errorText').innerText = "Please enter a valid 14-digit Account Number and Account Holder Name to save a profile.";
+                document.getElementById('errorModal').classList.remove('hidden');
+                return;
+            }
+
+            let senders = JSON.parse(localStorage.getItem('bob_senders') || '[]');
+            
+            const existingIndex = senders.findIndex(s => s.acc === acc);
+            const profile = { acc, name, mob, pan, branch };
+            
+            if (existingIndex >= 0) {
+                senders[existingIndex] = profile; // Update existing
+            } else {
+                senders.push(profile); // Add new
+            }
+            
+            localStorage.setItem('bob_senders', JSON.stringify(senders));
+            loadSavedSenders(); // Refresh dropdown
+
+            // Visual feedback on the button
+            const btn = document.getElementById('btn_saveSender');
+            btn.innerText = "Saved!";
+            btn.classList.add('bg-green-600', 'text-white', 'border-green-600');
+            btn.classList.remove('bg-bob-light', 'text-bob-vermillion', 'border-bob-vermillion');
+            setTimeout(() => {
+                btn.innerText = "Save";
+                btn.classList.remove('bg-green-600', 'text-white', 'border-green-600');
+                btn.classList.add('bg-bob-light', 'text-bob-vermillion', 'border-bob-vermillion');
+            }, 2000);
+        }
+
+        function handleSenderSelect() {
+            update(); // First process the typed input
+            
+            const currentAcc = document.getElementById('i_senderAcc').value.trim();
+            if (currentAcc.length === 14) {
+                const senders = JSON.parse(localStorage.getItem('bob_senders') || '[]');
+                const matched = senders.find(s => s.acc === currentAcc);
+                
+                if (matched) {
+                    if (matched.name) document.getElementById('i_senderName').value = matched.name;
+                    if (matched.mob) document.getElementById('i_mobile').value = matched.mob;
+                    if (matched.pan) document.getElementById('i_pan').value = matched.pan;
+                    if (matched.branch) document.getElementById('i_branch').value = matched.branch;
+                    update(); // Update the slip with auto-filled details
+                }
+            }
+        }
+        // ----------------------------------------
+
         function validateAndPrint() {
             const branch = document.getElementById('i_branch').value.trim();
             const date = document.getElementById('i_date').value;
@@ -864,6 +939,9 @@
             
             document.getElementById('i_date').value = `${year}-${month}-${day}`;
             update();
+            
+            // Load saved local profiles into datalist
+            loadSavedSenders();
             
             // Fetch the random advertisement
             fetchAdvertisement();
