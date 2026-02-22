@@ -825,20 +825,23 @@
 
                                     {/* MAIN REPORT PAGE */}
                                     <div className="a4-page word-doc">
-                                        {/* NEW LOGO AND REF HEADER */}
-                                        <div className="text-center mb-2">
-                                            <img src="GodownCsv/BOB%20Logo.png" onError={(e) => { e.target.onerror = null; e.target.src = 'https://raw.githubusercontent.com/msgowdara/HsgCalc/main/GodownCsv/BOB%20Logo.png'; }} alt="Bank of Baroda" style={{ height: '65px', margin: '0 auto' }} />
+                                        {/* NEW LOGO AND BANK HEADER */}
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', borderBottom: '2px solid black', paddingBottom: '10px', marginBottom: '15px' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+                                                <img src="GodownCsv/BOB%20Logo.png" onError={(e) => { e.target.onerror = null; e.target.src = 'https://raw.githubusercontent.com/msgowdara/HsgCalc/main/GodownCsv/BOB%20Logo.png'; }} alt="Bank of Baroda" style={{ height: '130px' }} />
+                                            </div>
+                                            <div style={{ textAlign: 'center' }}>
+                                                <h1 style={{fontSize: '20pt', fontWeight: 'bold', textTransform: 'uppercase', margin: 0}}>BANK OF BARODA</h1>
+                                                <h2 style={{fontSize: '13pt', fontWeight: 'bold', textTransform: 'uppercase', marginTop: '4pt', marginBottom: 0}}>
+                                                    {formData.branch ? `${formData.branch} BRANCH` : '______________ BRANCH'}, {formData.region ? `${formData.region} REGION` : '______________ REGION'}
+                                                </h2>
+                                            </div>
+                                            <div></div> {/* Empty div to balance centering */}
                                         </div>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '11pt', marginBottom: '10pt' }}>
+                                        
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '11pt', marginBottom: '15px' }}>
                                             <div>Ref: BOB:{settingsInput.alphaCode ? settingsInput.alphaCode.toUpperCase() : 'XXXXXX'}:VISITREPORT:{formData.accountNo || '__________'}</div>
                                             <div>Date: {formatDateStandard(formData.dateOfReporting)}</div>
-                                        </div>
-
-                                        <div className="text-center border-b-2 border-black pb-3 mb-6">
-                                            <h1 style={{fontSize: '18pt', fontWeight: 'bold', textTransform: 'uppercase'}}>BANK OF BARODA</h1>
-                                            <h2 style={{fontSize: '12pt', fontWeight: 'bold', textTransform: 'uppercase', marginTop: '4pt'}}>
-                                                {formData.branch ? `${formData.branch} BRANCH` : '______________ BRANCH'}, {formData.region ? `${formData.region} REGION` : '______________ REGION'}
-                                            </h2>
                                         </div>
 
                                         <h1 className="text-center font-bold" style={{fontSize: '13pt', textDecoration: 'underline'}}>GODOWN INSPECTION REPORT</h1>
@@ -935,10 +938,20 @@
 
                                     {/* BRANCH HEAD COVERING LETTER (NEW PAGE) */}
                                     <div className="a4-page word-doc page-break-before">
-                                        {/* NEW LOGO AND REF HEADER */}
-                                        <div className="text-center mb-2">
-                                            <img src="GodownCsv/BOB%20Logo.png" onError={(e) => { e.target.onerror = null; e.target.src = 'https://raw.githubusercontent.com/msgowdara/HsgCalc/main/GodownCsv/BOB%20Logo.png'; }} alt="Bank of Baroda" style={{ height: '65px', margin: '0 auto' }} />
+                                        {/* NEW LOGO AND BANK HEADER */}
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', borderBottom: '2px solid black', paddingBottom: '10px', marginBottom: '15px' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+                                                <img src="GodownCsv/BOB%20Logo.png" onError={(e) => { e.target.onerror = null; e.target.src = 'https://raw.githubusercontent.com/msgowdara/HsgCalc/main/GodownCsv/BOB%20Logo.png'; }} alt="Bank of Baroda" style={{ height: '130px' }} />
+                                            </div>
+                                            <div style={{ textAlign: 'center' }}>
+                                                <h1 style={{fontSize: '20pt', fontWeight: 'bold', textTransform: 'uppercase', margin: 0}}>BANK OF BARODA</h1>
+                                                <h2 style={{fontSize: '13pt', fontWeight: 'bold', textTransform: 'uppercase', marginTop: '4pt', marginBottom: 0}}>
+                                                    {formData.branch ? `${formData.branch} BRANCH` : '______________ BRANCH'}, {formData.region ? `${formData.region} REGION` : '______________ REGION'}
+                                                </h2>
+                                            </div>
+                                            <div></div> {/* Empty div to balance centering */}
                                         </div>
+
                                         <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '11pt', marginBottom: '15pt' }}>
                                             <div>Ref: BOB:{settingsInput.alphaCode ? settingsInput.alphaCode.toUpperCase() : 'XXXXXX'}:VISITREPORT:{formData.accountNo || '__________'}</div>
                                             <div>Date: {formatDateStandard(formData.dateOfReporting)}</div>
@@ -994,10 +1007,20 @@
                                     {/* BORROWER RECTIFICATION LETTER (NEW PAGE - CONDITIONAL) */}
                                     {borrowerFindings.length > 0 && (
                                         <div className="a4-page word-doc page-break-before">
-                                            {/* NEW LOGO AND REF HEADER */}
-                                            <div className="text-center mb-2">
-                                                <img src="GodownCsv/BOB%20Logo.png" onError={(e) => { e.target.onerror = null; e.target.src = 'https://raw.githubusercontent.com/msgowdara/HsgCalc/main/GodownCsv/BOB%20Logo.png'; }} alt="Bank of Baroda" style={{ height: '65px', margin: '0 auto' }} />
+                                            {/* NEW LOGO AND BANK HEADER */}
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', borderBottom: '2px solid black', paddingBottom: '10px', marginBottom: '15px' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+                                                    <img src="GodownCsv/BOB%20Logo.png" onError={(e) => { e.target.onerror = null; e.target.src = 'https://raw.githubusercontent.com/msgowdara/HsgCalc/main/GodownCsv/BOB%20Logo.png'; }} alt="Bank of Baroda" style={{ height: '130px' }} />
+                                                </div>
+                                                <div style={{ textAlign: 'center' }}>
+                                                    <h1 style={{fontSize: '20pt', fontWeight: 'bold', textTransform: 'uppercase', margin: 0}}>BANK OF BARODA</h1>
+                                                    <h2 style={{fontSize: '13pt', fontWeight: 'bold', textTransform: 'uppercase', marginTop: '4pt', marginBottom: 0}}>
+                                                        {formData.branch ? `${formData.branch} BRANCH` : '______________ BRANCH'}, {formData.region ? `${formData.region} REGION` : '______________ REGION'}
+                                                    </h2>
+                                                </div>
+                                                <div></div> {/* Empty div to balance centering */}
                                             </div>
+
                                             <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '11pt', marginBottom: '15pt' }}>
                                                 <div>Ref: BOB:{settingsInput.alphaCode ? settingsInput.alphaCode.toUpperCase() : 'XXXXXX'}:VISITREPORT:{formData.accountNo || '__________'}</div>
                                                 <div>Date: {formatDateStandard(formData.dateOfReporting)}</div>
