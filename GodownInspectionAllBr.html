@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Godown Inspector (Branch Sync V3)</title>
+    
+    <!-- Standard React CDNs -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Utilities: Tailwind, Babel, and PapaParse (For CSV operations) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+    <style>
+        @media print {
+            body, html { background-color: white !important; margin: 0; padding: 0; height: auto !important; overflow: visible !important; }
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            #report-container { box-shadow: none !important; margin: 0 !important; padding: 0 !important; width: 100% !important; max-width: none !important; }
+            ::-webkit-scrollbar { display: none; }
+            .page-break-avoid { page-break-inside: avoid; }
+            /* Force break and attempt to force to next right/odd page for duplex printing */
+            .page-break-before { page-break-before: always; break-before: right; padding-top: 10mm !important; }
+
+            /* FIX: Ensure a4-page stays inside printer margins and does not cause horizontal overflow */
+            .a4-page {
+                width: 100% !important;
+                min-height: auto !important;
+                margin: 0 !important;
+                padding: 10mm !important;
+                box-shadow: none !important;
+            }
+        }
+        
+        .a4-page {
+            width: 210mm; min-height: 297mm; background: white; margin: 0 auto;
+            box-sizing: border-box; /* Crucial for preventing width overflow */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); padding: 20mm 15mm;
+        }
+
+        .word-doc {
+            font-family: "Times New Roman", Times, serif; font-size: 11pt; line-height: 1.25; color: black;
+        }
+        .word-doc .doc-grid {
+            display: grid; grid-template-columns: 4.4in 1fr; margin-bottom: 2pt; page-break-inside: avoid;
+        }
+        .word-doc h2 {
+            font-size: 11pt; font-weight: bold; margin-top: 14pt; margin-bottom: 4pt; text-transform: uppercase; page-break-after: avoid;
+        }
+        body { background-color: #f8fafc; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body>
+    <!-- BEGIN MAIN MENU RIBBON -->
+    <nav class="no-print" style="background-color: #1e3a8a; color: white; padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; font-family: system-ui, -apple-system, sans-serif; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+        <div style="font-size: 1.25rem; font-weight: 700; letter-spacing: 0.5px;">
+            Banking Tools
+        </div>
+        <a href="https://msgowdara.github.io/HsgCalc/" style="color: white; text-decoration: none; background-color: rgba(255, 255, 255, 0.15); padding: 8px 16px; border-radius: 6px; font-size: 0.9rem; font-weight: 500; transition: background-color 0.2s; display: inline-flex; align-items: center; gap: 6px;" onmouseover="this.style.backgroundColor='rgba(255, 255, 255, 0.25)'" onmouseout="this.style.backgroundColor='rgba(255, 255, 255, 0.15)'">
+            <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            Back to Main Menu
+        </a>
+    </nav>
+    <!-- END MAIN MENU RIBBON -->
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+        const { createRoot } = ReactDOM;
+
+        // --- Extracted Excel Dropdowns ---
+        const DROPDOWNS = {
+            conditions: ["Satisfactory", "Not Satisfactory"],
+            storage: ["Proper", "Haphazard"],
+            yesNo: ["Yes", "No", "Not Applicable"],
+            insideOutside: ["Inside", "Outside", "Not Applicable"],
+            frequency: ["Monthly", "Quarterly", "Half Yearly", "Yearly", "Irregular"],
+            authorities: ["BRCM", "RLCC", "CAC", "ZO", "HO"],
+            margins: ["0", "10", "15", "20", "25", "30", "40", "50"]
+        };
+
+        // --- Auto-Suggested Remarks Dictionary & Letter Mapping ---
+        const SUGGESTED_REMARKS = {
+            conditionOfGodown: { trigger: 'Not Satisfactory', field: 'godownRemark', label: 'Condition of Godown', resp: 'Borrower', text: "Godown requires maintenance/cleaning." },
+            conditionOfStocks: { trigger: 'Not Satisfactory', field: 'conditionOfStocksRemark', label: 'Condition of Stocks', resp: 'Borrower', text: "Some stocks appear damaged/obsolete." },
+            modeOfStorage: { trigger: 'Haphazard', field: 'modeOfStorageRemark', label: 'Mode of Storage', resp: 'Borrower', text: "Advised customer to arrange and stack goods properly." },
+            modeOfValuationSatisfactory: { trigger: 'Not Satisfactory', field: 'valuationRemark', label: 'Valuation Mode', resp: 'Branch', text: "Valuation is not in line with current market rates." },
+            tradeDiscountDeducted: { trigger: 'No', field: 'tradeDiscountRemark', label: 'Trade Discount', resp: 'Branch', text: "Trade discount is not deducted from valuation." },
+            insuranceAdequate: { trigger: 'No', field: 'insuranceAdequateRemark', label: 'Insurance Adequacy', resp: 'Borrower', text: "Advised customer to increase insurance cover to match limit." },
+            insuranceComprehensive: { trigger: 'No', field: 'insuranceComprehensiveRemark', label: 'Comprehensive Insurance', resp: 'Borrower', text: "Advised to obtain comprehensive insurance policy." },
+            unpledgedInsured: { trigger: 'No', field: 'unpledgedInsuredRemark', label: 'Unpledged Stocks Insurance', resp: 'Borrower', text: "Unpledged stocks are currently uninsured." },
+            signboardsDisplayed: { trigger: 'No', field: 'signboardsDisplayedRemark', label: 'Bank Signboards', resp: 'Borrower', text: "Advised customer to display Bank's signboard immediately." },
+            godownKeeperSanctioned: { trigger: 'No', field: 'godownKeeperRemark', label: 'Godown Keeper', resp: 'Branch', text: "Godown keeper not sanctioned/required for this account." },
+            stockReportsRegular: { trigger: 'No', field: 'stockReportsRemark', label: 'Stock Reports Submission', resp: 'Borrower', text: "Advised customer to submit stock statements promptly." },
+            bankPossessionEffective: { trigger: 'No', field: 'bankPossessionRemark', label: 'Bank Possession', resp: 'Branch', text: "Advised branch to ensure strict possession of godown." },
+            registersMaintained: { trigger: 'No', field: 'registersMaintainedRemark', label: 'Stock Registers', resp: 'Borrower', text: "Advised customer to maintain proper stock registers." },
+            registersTally: { trigger: 'No', field: 'registersTallyRemark', label: 'Registers Tally', resp: 'Both', text: "Discrepancy observed between physical stock and records." },
+            inspectedPeriodically: { trigger: 'No', field: 'inspectedPeriodicallyRemark', label: 'Periodical Inspection', resp: 'Branch', text: "Advised branch to strictly follow inspection schedule." },
+            recordMaintained: { trigger: 'No', field: 'recordMaintainedRemark', label: 'Inspection Records', resp: 'Branch', text: "Advised branch to update inspection records." },
+            turnoverSatisfactory: { trigger: 'No', field: 'turnoverSatisfactoryRemark', label: 'Stock Turnover', resp: 'Borrower', text: "Turnover is not commensurate with the limit." },
+            accountTurnoverSatisfactory: { trigger: 'No', field: 'accountTurnoverSatisfactoryRemark', label: 'Account Turnover', resp: 'Borrower', text: "Advised the customer to route all sales proceeds through Cash Credit Account only." },
+            movementChecked: { trigger: 'No', field: 'movementRemark', label: 'Stock Movement', resp: 'Branch', text: "Movement of stocks needs closer monitoring." },
+            oldStockMoving: { trigger: 'No', field: 'oldStockRemark', label: 'Old Stock Movement', resp: 'Borrower', text: "Old stocks are slow-moving; advised early liquidation." },
+            deliveriesNotNew: { trigger: 'No', field: 'deliveriesRemark', label: 'Deliveries Preponderance', resp: 'Both', text: "Deliveries are mostly from newly arrived stocks." },
+            statementsOnRecord: { trigger: 'No', field: 'statementsRemark', label: 'Statements on Record', resp: 'Branch', text: "Stock statements are pending at branch." }
+        };
+
+        const Icons = {
+            Plus: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>,
+            Print: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>,
+            Home: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
+            Save: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>,
+            Settings: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>,
+            AlertCircle: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>,
+            Cloud: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>,
+            Loader: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-spin"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg>,
+            Search: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        };
+
+        // --- CLOUD API INTEGRATION ---
+        const CLOUD_SETTINGS_KEY = 'godown_cloud_settings_v3';
+        
+        const utf8ToBase64 = (str) => btoa(unescape(encodeURIComponent(str)));
+        const base64ToUtf8 = (str) => decodeURIComponent(escape(atob(str)));
+
+        const getCloudSettings = () => {
+            const saved = localStorage.getItem(CLOUD_SETTINGS_KEY);
+            return saved ? JSON.parse(saved) : { token: '', owner: 'msgowdara', repo: 'HsgCalc', alphaCode: '' };
+        };
+
+        const fetchFromCloud = async () => {
+            const { token, owner, repo, alphaCode } = getCloudSettings();
+            if (!token) throw new Error("No Cloud Token Configured");
+            if (!alphaCode || alphaCode.length !== 6) throw new Error("Invalid Branch Alpha Code");
+            
+            // Force lowercase and prepend the GodownCsv folder path
+            const filepath = `GodownCsv/Godown_${alphaCode.toLowerCase()}.csv`;
+            const url = `https://api.github.com/repos/${owner}/${repo}/contents/${filepath}`;
+            const res = await fetch(url, { headers: { Authorization: `token ${token}` } });
+            
+            if (res.status === 404) return { data: [], sha: null }; 
+            if (!res.ok) throw new Error(`Cloud API Error: ${res.statusText}`);
+            
+            const json = await res.json();
+            const csvContent = base64ToUtf8(json.content);
+            const parsed = Papa.parse(csvContent, { header: true, skipEmptyLines: true });
+            
+            return { data: parsed.data, sha: json.sha };
+        };
+
+        const pushToCloud = async (dataArray, currentSha) => {
+            const { token, owner, repo, alphaCode } = getCloudSettings();
+            if (!token) throw new Error("No Cloud Token Configured");
+            if (!alphaCode || alphaCode.length !== 6) throw new Error("Invalid Branch Alpha Code");
+
+            // Force lowercase and prepend the GodownCsv folder path
+            const filepath = `GodownCsv/Godown_${alphaCode.toLowerCase()}.csv`;
+            const csvContent = Papa.unparse(dataArray);
+            const encodedContent = utf8ToBase64(csvContent);
+
+            const url = `https://api.github.com/repos/${owner}/${repo}/contents/${filepath}`;
+            const body = {
+                message: "Update godown inspections data via App",
+                content: encodedContent,
+                ...(currentSha ? { sha: currentSha } : {})
+            };
+
+            const res = await fetch(url, {
+                method: 'PUT',
+                headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+
+            if (!res.ok) {
+                const errJson = await res.json();
+                throw new Error(`Cloud Save Failed: ${errJson.message}`);
+            }
+        };
+
+        const defaultFormState = {
+            id: '', accountNo: '', name: '', nature: '', limit: '', sanctioningAuthority: 'BRCM',
+            officeAddress: '', godownAddress: '', distance: '', branch: '', region: '',
+            dateOfReporting: new Date().toISOString().split('T')[0],
+            dateOfVerification: new Date().toISOString().split('T')[0],
+            inspectingOfficer: '', 
+            
+            conditionOfGodown: 'Satisfactory', godownRemark: '',
+            stockValue: '', stockMarginPercent: '25', stockMargin: '',
+            bookDebts: '', bdMarginPercent: '25', bookDebtsMargin: '', 
+            creditors: '', outstandingBalance: '',
+            
+            conditionOfStocks: 'Satisfactory', conditionOfStocksRemark: '', 
+            modeOfStorage: 'Proper', modeOfStorageRemark: '',
+            seasonYear: '', ageOfOldStockDays: '', amountOfOldStockRupees: '', percentOldStock: '',
+            
+            modeOfValuationSatisfactory: 'Satisfactory', valuationRemark: '',
+            tradeDiscountDeducted: 'No', tradeDiscountRemark: '',
+            unpledgedStocks: 'No', 
+            
+            insuranceAmount: '', 
+            insuranceAdequate: 'Yes', insuranceAdequateRemark: '',
+            insuranceComprehensive: 'Yes', insuranceComprehensiveRemark: '',
+            unpledgedInsured: 'Not Applicable', unpledgedInsuredRemark: '',
+            
+            signboardsDisplayed: 'Yes', signboardsDisplayedRemark: '', 
+            signboardsInsideOutside: 'Inside', 
+            godownKeeperSanctioned: 'Yes', godownKeeperRemark: '',
+            stockReportsRegular: 'Yes', stockReportsRemark: '', stockReportsFrequency: 'Monthly', 
+            bankPossessionEffective: 'Yes', bankPossessionRemark: '',
+            registersMaintained: 'Yes', registersMaintainedRemark: '',
+            registersTally: 'Yes', registersTallyRemark: '',
+            inspectedPeriodically: 'Yes', inspectedPeriodicallyRemark: '', inspectedHowOften: 'Quarterly by undersigned inspecting officer',
+            recordMaintained: 'Yes', recordMaintainedRemark: '',
+            
+            turnoverSatisfactory: 'Yes', turnoverSatisfactoryRemark: '', 
+            accountTurnoverSatisfactory: 'Yes', accountTurnoverSatisfactoryRemark: '',
+            movementChecked: 'Yes', movementRemark: '',
+            oldStockMoving: 'Yes', oldStockRemark: '',
+            deliveriesNotNew: 'Yes', deliveriesRemark: '',
+            statementsOnRecord: 'Yes', statementsRemark: ''
+        };
+
+        const App = () => {
+            const [view, setView] = useState('dashboard'); 
+            const [formData, setFormData] = useState(defaultFormState);
+            const [inspections, setInspections] = useState([]);
+            const [officers, setOfficers] = useState([]);
+            const [toast, setToast] = useState('');
+            const [searchQuery, setSearchQuery] = useState('');
+            
+            // App & API States
+            const [isFetching, setIsFetching] = useState(true);
+            const [isSaving, setIsSaving] = useState(false);
+            const [showSettings, setShowSettings] = useState(false);
+            const [settingsInput, setSettingsInput] = useState(getCloudSettings());
+
+            useEffect(() => {
+                if(getCloudSettings().token) {
+                    refreshDataFromCloud();
+                } else {
+                    setIsFetching(false);
+                    setShowSettings(true); 
+                }
+            }, []);
+
+            const refreshDataFromCloud = async () => {
+                setIsFetching(true);
+                try {
+                    const { data } = await fetchFromCloud();
+                    data.sort((a, b) => new Date(b.dateOfReporting) - new Date(a.dateOfReporting));
+                    setInspections(data);
+                    
+                    const offSet = new Set();
+                    data.forEach(d => { if (d.inspectingOfficer) offSet.add(d.inspectingOfficer) });
+                    setOfficers(Array.from(offSet));
+                } catch (e) {
+                    console.error(e);
+                    showToast("⚠️ Cloud Sync Failed: " + e.message);
+                } finally {
+                    setIsFetching(false);
+                }
+            };
+
+            const showToast = (msg) => {
+                setToast(msg);
+                setTimeout(() => setToast(''), 4000);
+            };
+
+            const handleSaveSettings = () => {
+                if (!settingsInput.alphaCode || settingsInput.alphaCode.length !== 6) {
+                    alert("Please enter exactly 6 letters for the Branch Alpha Code.");
+                    return;
+                }
+                localStorage.setItem(CLOUD_SETTINGS_KEY, JSON.stringify(settingsInput));
+                setShowSettings(false);
+                showToast("⚙️ Cloud Settings Saved!");
+                refreshDataFromCloud();
+            };
+
+            const handleSave = async () => {
+                if (!getCloudSettings().token) return setShowSettings(true);
+                
+                setIsSaving(true);
+                showToast("⏳ Syncing with Cloud...");
+                try {
+                    const cloudData = await fetchFromCloud();
+                    let latestArray = cloudData.data || [];
+                    
+                    const reportId = formData.id || Date.now().toString();
+                    const recordToSave = { 
+                        ...formData, 
+                        percentOldStock: calculateOldStockPercent(),
+                        id: reportId, 
+                        lastUpdated: new Date().toISOString() 
+                    };
+                    
+                    const existingIndex = latestArray.findIndex(item => item.id === reportId);
+                    if (existingIndex >= 0) {
+                        latestArray[existingIndex] = recordToSave;
+                    } else {
+                        latestArray.push(recordToSave);
+                    }
+                    
+                    await pushToCloud(latestArray, cloudData.sha);
+                    
+                    latestArray.sort((a, b) => new Date(b.dateOfReporting) - new Date(a.dateOfReporting));
+                    setInspections(latestArray);
+                    setFormData(recordToSave);
+                    
+                    showToast("☁️✅ Synced Successfully to CSV on Cloud!");
+                    setView('preview');
+                } catch (e) {
+                    alert("Error syncing to Cloud. " + e.message);
+                } finally {
+                    setIsSaving(false);
+                }
+            };
+
+            const handleDuplicate = (insp) => {
+                const duplicatedData = {
+                    ...insp,
+                    id: '', 
+                    dateOfReporting: new Date().toISOString().split('T')[0],
+                    dateOfVerification: new Date().toISOString().split('T')[0]
+                };
+                setFormData(duplicatedData);
+                setView('form');
+                showToast("📝 Report duplicated! Update stock amounts & Save.");
+            };
+
+            const handleDelete = async (id) => {
+                if (window.confirm("Delete this report permanently from Cloud?")) {
+                    setIsSaving(true);
+                    showToast("🗑️ Deleting from Cloud...");
+                    try {
+                        const cloudData = await fetchFromCloud();
+                        const newArray = (cloudData.data || []).filter(item => item.id !== id);
+                        await pushToCloud(newArray, cloudData.sha);
+                        setInspections(newArray.sort((a, b) => new Date(b.dateOfReporting) - new Date(a.dateOfReporting)));
+                        showToast("🗑️ Report successfully deleted from Cloud.");
+                    } catch (e) {
+                        alert("Failed to delete. " + e.message);
+                    } finally {
+                        setIsSaving(false);
+                    }
+                }
+            };
+
+            const handleAccountBlur = () => {
+                if (!formData.accountNo) return;
+                const history = inspections.filter(i => i.accountNo === formData.accountNo);
+                if (history.length > 0) {
+                    const last = history[0]; 
+                    setFormData(prev => ({
+                        ...prev,
+                        name: last.name, nature: last.nature, limit: last.limit, sanctioningAuthority: last.sanctioningAuthority,
+                        officeAddress: last.officeAddress, godownAddress: last.godownAddress, distance: last.distance, 
+                        branch: last.branch, region: last.region, inspectingOfficer: last.inspectingOfficer || prev.inspectingOfficer,
+                        conditionOfGodown: last.conditionOfGodown, conditionOfStocks: last.conditionOfStocks,
+                        modeOfStorage: last.modeOfStorage, stockMarginPercent: last.stockMarginPercent, bdMarginPercent: last.bdMarginPercent,
+                        signboardsDisplayed: last.signboardsDisplayed, signboardsInsideOutside: last.signboardsInsideOutside, 
+                        insuranceAmount: last.insuranceAmount, insuranceAdequate: last.insuranceAdequate, insuranceComprehensive: last.insuranceComprehensive,
+                        inspectedHowOften: last.inspectedHowOften, stockReportsFrequency: last.stockReportsFrequency,
+                        godownKeeperSanctioned: last.godownKeeperSanctioned
+                    }));
+                    showToast("✨ Details auto-filled from Cloud History!");
+                }
+            };
+
+            const handleNumberChange = (field, value) => {
+                let newData = { ...formData, [field]: value };
+                if (field === 'stockValue' || field === 'stockMarginPercent') {
+                    const val = parseFloat(newData.stockValue) || 0;
+                    const pct = parseFloat(newData.stockMarginPercent) || 0;
+                    newData.stockMargin = (val * (pct / 100)).toFixed(2);
+                }
+                if (field === 'bookDebts' || field === 'bdMarginPercent') {
+                    const val = parseFloat(newData.bookDebts) || 0;
+                    const pct = parseFloat(newData.bdMarginPercent) || 0;
+                    newData.bookDebtsMargin = (val * (pct / 100)).toFixed(2);
+                }
+                setFormData(newData);
+            };
+
+            const handleSelectChange = (field, value) => {
+                let newData = { ...formData, [field]: value };
+
+                if (field === 'signboardsDisplayed') {
+                    if (value === 'No') newData.signboardsInsideOutside = 'Not Applicable';
+                    else if (value === 'Yes' && newData.signboardsInsideOutside === 'Not Applicable') newData.signboardsInsideOutside = 'Outside';
+                }
+                if (field === 'unpledgedStocks') {
+                    if (value === 'No') newData.unpledgedInsured = 'Not Applicable';
+                    else if (value === 'Yes' && newData.unpledgedInsured === 'Not Applicable') newData.unpledgedInsured = 'Yes';
+                }
+
+                if (SUGGESTED_REMARKS[field]) {
+                    const config = SUGGESTED_REMARKS[field];
+                    if (value === config.trigger) {
+                        if (!newData[config.field]) {
+                            newData[config.field] = config.text; 
+                        }
+                    } else {
+                        newData[config.field] = ''; 
+                    }
+                }
+                
+                setFormData(newData);
+            };
+
+            const calculateDP = () => {
+                const s = parseFloat(formData.stockValue) || 0;
+                const sm = parseFloat(formData.stockMargin) || 0;
+                const bd = parseFloat(formData.bookDebts) || 0;
+                const bdm = parseFloat(formData.bookDebtsMargin) || 0;
+                const cr = parseFloat(formData.creditors) || 0;
+                const dp = (s - sm) + (bd - bdm) - cr;
+                return dp > 0 ? dp : 0;
+            };
+
+            const calculateOldStockPercent = () => {
+                const amount = parseFloat(formData.amountOfOldStockRupees) || 0;
+                const stockVal = parseFloat(formData.stockValue) || 0;
+                if (stockVal === 0) return "0.00 %";
+                return ((amount / stockVal) * 100).toFixed(2) + " %";
+            };
+
+            const formatCurrency = (val) => {
+                if (!val) return "₹.      0.00";
+                const num = parseFloat(val);
+                if (isNaN(num)) return val;
+                return "₹. " + num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            };
+
+            const formatDateCompact = (dateStr) => dateStr ? dateStr.replace(/-/g, '') : '';
+            const formatDateStandard = (dateStr) => {
+                if(!dateStr) return '';
+                const parts = dateStr.split('-');
+                return parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : dateStr;
+            };
+
+            const renderFieldWithRemark = (label, field, type, remarkField, triggerValue) => {
+                const isNegative = formData[field] === triggerValue;
+                return (
+                    <div className="flex flex-col mb-4">
+                        <label className="block text-xs font-bold text-slate-600 mb-1">{label}</label>
+                        <select className={`w-full border-slate-300 rounded px-3 py-2 border text-sm ${isNegative ? 'bg-amber-50 border-amber-300 font-bold text-amber-900' : 'bg-white'}`} 
+                                value={formData[field]} onChange={e => handleSelectChange(field, e.target.value)}>
+                            {DROPDOWNS[type].map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                        </select>
+                        {isNegative && (
+                            <div className="mt-2 animate-fade-in">
+                                <label className="flex items-center gap-1 text-[11px] font-bold text-amber-700 mb-1"><Icons.AlertCircle/> Suggested reply (Edit if needed):</label>
+                                <input type="text" className="w-full border-amber-300 rounded px-3 py-1.5 border bg-amber-50 text-sm focus:ring-amber-500 font-medium text-amber-900" 
+                                       value={formData[remarkField]} onChange={e => setFormData({...formData, [remarkField]: e.target.value})} placeholder="Enter justification/remark..." />
+                            </div>
+                        )}
+                    </div>
+                );
+            };
+
+            const formatPrintValue = (mainValue, remark) => {
+                if (remark && remark.trim() !== '') return `${mainValue}. ${remark}`;
+                return mainValue;
+            };
+
+            // Filter Inspections Array based on Search Query
+            const filteredInspections = inspections.filter(insp => {
+                if (!searchQuery) return true;
+                const term = searchQuery.toLowerCase();
+                return (
+                    (insp.name || '').toLowerCase().includes(term) ||
+                    (insp.accountNo || '').toLowerCase().includes(term) ||
+                    (insp.inspectingOfficer || '').toLowerCase().includes(term) ||
+                    (insp.dateOfReporting || '').includes(term) ||
+                    (insp.branch || '').toLowerCase().includes(term)
+                );
+            });
+
+            // --- Analyze Remarks for Dynamic Letters ---
+            const adverseFindings = Object.keys(SUGGESTED_REMARKS).map(key => {
+                const config = SUGGESTED_REMARKS[key];
+                if (formData[key] === config.trigger) {
+                    return {
+                        label: config.label,
+                        resp: config.resp,
+                        userRemark: formData[config.field] || config.text,
+                        suggestion: config.text
+                    };
+                }
+                return null;
+            }).filter(Boolean);
+
+            const borrowerFindings = adverseFindings.filter(f => f.resp === 'Borrower' || f.resp === 'Both');
+
+            return (
+                <div className="min-h-screen flex flex-col font-sans print:block print:min-h-0">
+                    
+                    {/* Header */}
+                    <div className="no-print bg-slate-900 text-white shadow-md z-10 sticky top-0">
+                        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="bg-indigo-600 p-1.5 rounded"><Icons.Cloud /></div>
+                                <h1 className="font-bold text-lg tracking-wide hidden sm:block">Godown Inspector Pro <span className="text-xs text-indigo-300 font-normal ml-2">Branch Sync V3</span></h1>
+                            </div>
+                            
+                            <div className="flex items-center gap-2">
+                                <button onClick={() => setShowSettings(true)} className="p-2 rounded text-slate-300 hover:bg-slate-800 transition mr-2 flex items-center gap-1" title="Settings">
+                                    <Icons.Settings />
+                                </button>
+                                <button onClick={() => setView('dashboard')} className={`p-2 rounded hover:bg-slate-800 transition ${view === 'dashboard' ? 'bg-slate-800 text-indigo-400' : 'text-slate-300'}`}>
+                                    <Icons.Home />
+                                </button>
+                                {view === 'dashboard' && (
+                                    <button onClick={() => { setFormData(defaultFormState); setView('form'); }} className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded text-sm font-medium transition-colors">
+                                        <Icons.Plus /> New Report
+                                    </button>
+                                )}
+                                {(view === 'form' || view === 'preview') && (
+                                    <button onClick={handleSave} disabled={isSaving} className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded text-sm font-medium transition-colors disabled:opacity-50">
+                                        <Icons.Save /> {isSaving ? 'Syncing...' : 'Save to Cloud'}
+                                    </button>
+                                )}
+                                {view === 'preview' && (
+                                    <button onClick={() => window.print()} className="flex items-center gap-2 bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded text-sm font-medium transition-colors ml-2">
+                                        <Icons.Print /> Print Document
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Toast */}
+                    {toast && (
+                        <div className="fixed bottom-4 right-4 bg-indigo-600 text-white px-6 py-3 rounded shadow-lg z-50 animate-bounce font-medium">
+                            {toast}
+                        </div>
+                    )}
+
+                    {/* Generic Cloud Settings Modal */}
+                    {showSettings && (
+                        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+                            <div className="bg-white rounded-lg shadow-xl max-w-md w-full overflow-hidden">
+                                <div className="bg-slate-100 border-b px-4 py-3 flex justify-between items-center">
+                                    <h3 className="font-bold text-slate-800 flex items-center gap-2"><Icons.Cloud /> Cloud Database Settings</h3>
+                                </div>
+                                <div className="p-6 space-y-4">
+                                    <p className="text-sm text-slate-600 mb-4 bg-indigo-50 p-3 rounded">This app saves data securely to your connected Cloud Repository. An Access Token is required to enable remote sync.</p>
+                                    
+                                    <div><label className="block text-xs font-bold text-slate-600 mb-1">Cloud Access Token (PAT)</label>
+                                        <input type="password" placeholder="Enter your access token" className="w-full border-slate-300 rounded px-3 py-2 border shadow-sm" value={settingsInput.token} onChange={e => setSettingsInput({...settingsInput, token: e.target.value})} />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div><label className="block text-xs font-bold text-slate-600 mb-1">Account / Username</label><input type="text" className="w-full border-slate-300 rounded px-3 py-2 border shadow-sm bg-slate-50" value={settingsInput.owner} onChange={e => setSettingsInput({...settingsInput, owner: e.target.value})} /></div>
+                                        <div><label className="block text-xs font-bold text-slate-600 mb-1">Repository Name</label><input type="text" className="w-full border-slate-300 rounded px-3 py-2 border shadow-sm bg-slate-50" value={settingsInput.repo} onChange={e => setSettingsInput({...settingsInput, repo: e.target.value})} /></div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-600 mb-1">Branch Alpha Code (6 Letters)</label>
+                                        <input 
+                                            type="text" 
+                                            maxLength="6" 
+                                            placeholder="e.g. dharwa" 
+                                            className="w-full border-slate-300 rounded px-3 py-2 border shadow-sm bg-slate-50 font-mono text-sm lowercase" 
+                                            value={settingsInput.alphaCode} 
+                                            onChange={e => setSettingsInput({...settingsInput, alphaCode: e.target.value.replace(/[^a-zA-Z]/g, '').toLowerCase()})} 
+                                        />
+                                        <p className="text-[10px] text-slate-500 mt-1">Data will be saved as: <strong>GodownCsv/Godown_{settingsInput.alphaCode ? settingsInput.alphaCode.toLowerCase() : 'xxxxxx'}.csv</strong></p>
+                                    </div>
+                                    
+                                    <div className="flex justify-end gap-3 mt-6 pt-4 border-t">
+                                        <button onClick={() => setShowSettings(false)} className="px-4 py-2 text-slate-600 font-medium hover:bg-slate-100 rounded">Cancel</button>
+                                        <button onClick={handleSaveSettings} className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded font-bold shadow">Save Settings & Link</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="flex-1 overflow-auto bg-slate-100 p-4 print:p-0 print:overflow-visible print:bg-white">
+                        <div className="max-w-6xl mx-auto h-full print:h-auto print:max-w-none">
+                            
+                            {/* DASHBOARD */}
+                            {view === 'dashboard' && (
+                                <div className="bg-white rounded-lg shadow border border-slate-200 p-6">
+                                    <div className="flex justify-between items-center mb-4 border-b pb-2">
+                                        <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">Cloud Database {isFetching && <span className="text-indigo-600"><Icons.Loader/></span>}</h2>
+                                        <span className="bg-indigo-100 text-indigo-800 font-bold text-xs px-3 py-1.5 rounded-full border border-indigo-200 shadow-inner">Total Records: {inspections.length}</span>
+                                    </div>
+
+                                    {/* SEARCH BAR UI */}
+                                    {inspections.length > 0 && (
+                                        <div className="mb-6 relative">
+                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                                                <Icons.Search />
+                                            </div>
+                                            <input 
+                                                type="text" 
+                                                className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-sm" 
+                                                placeholder="Search by Name, Account No, Officer, Branch, or Date..." 
+                                                value={searchQuery}
+                                                onChange={e => setSearchQuery(e.target.value)}
+                                            />
+                                        </div>
+                                    )}
+                                    
+                                    {!getCloudSettings().token ? (
+                                        <div className="text-center py-12 text-slate-500 bg-slate-50 rounded-lg border border-dashed border-slate-300">
+                                            <p className="mb-4 font-bold text-slate-700">Setup Required</p>
+                                            <p className="text-sm mb-4">Please connect your Cloud repository in settings to start saving and retrieving data.</p>
+                                            <button onClick={() => setShowSettings(true)} className="bg-indigo-600 text-white px-6 py-2 rounded shadow hover:bg-indigo-700">Open Settings</button>
+                                        </div>
+                                    ) : isFetching ? (
+                                        <div className="text-center py-12 text-slate-500">
+                                            <p>Pulling latest data from Cloud...</p>
+                                        </div>
+                                    ) : inspections.length === 0 ? (
+                                        <div className="text-center py-12 text-slate-500 bg-slate-50 rounded-lg border border-dashed border-slate-300">
+                                            <p className="mb-4">No inspection records found in cloud CSV.</p>
+                                            <button onClick={() => { setFormData(defaultFormState); setView('form'); }} className="bg-indigo-600 text-white px-6 py-2 rounded shadow hover:bg-indigo-700">Start First Inspection</button>
+                                        </div>
+                                    ) : (
+                                        <div className="overflow-x-auto">
+                                            {filteredInspections.length === 0 ? (
+                                                <div className="text-center py-12 text-slate-500 bg-slate-50 rounded-lg border border-dashed border-slate-300">
+                                                    <p>No reports match your search criteria "{searchQuery}".</p>
+                                                </div>
+                                            ) : (
+                                                <table className="w-full text-left text-sm text-slate-600">
+                                                    <thead className="bg-slate-50 text-slate-800 font-semibold border-b border-slate-200">
+                                                        <tr>
+                                                            <th className="p-3">Date</th><th className="p-3">Account No</th>
+                                                            <th className="p-3">Name</th>
+                                                            <th className="p-3 text-right">Drawing Power</th><th className="p-3 text-center">Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {filteredInspections.map(insp => {
+                                                            const dp = (parseFloat(insp.stockValue||0) - parseFloat(insp.stockMargin||0)) + (parseFloat(insp.bookDebts||0) - parseFloat(insp.bookDebtsMargin||0)) - parseFloat(insp.creditors||0);
+                                                            return (
+                                                                <tr key={insp.id} className="border-b border-slate-100 hover:bg-indigo-50 transition-colors">
+                                                                    <td className="p-3 font-medium text-slate-900">{formatDateStandard(insp.dateOfReporting)}</td>
+                                                                    <td className="p-3 font-mono">{insp.accountNo}</td><td className="p-3">{insp.name}</td>
+                                                                    <td className="p-3 text-right font-medium">{formatCurrency(dp > 0 ? dp : 0)}</td>
+                                                                    <td className="p-3 text-center">
+                                                                        <div className="flex justify-center gap-2 text-xs font-semibold">
+                                                                            <button onClick={() => { setFormData(insp); setView('form'); }} className="text-blue-600 hover:text-blue-800 hover:underline px-2 py-1 rounded hover:bg-blue-100">Edit</button>
+                                                                            <span className="text-slate-300 mt-1">|</span>
+                                                                            <button onClick={() => handleDuplicate(insp)} className="text-indigo-600 hover:text-indigo-800 hover:underline px-2 py-1 rounded hover:bg-indigo-100" title="Copy for next month">Copy</button>
+                                                                            <span className="text-slate-300 mt-1">|</span>
+                                                                            <button onClick={() => { setFormData(insp); setView('preview'); }} className="text-emerald-600 hover:text-emerald-800 hover:underline px-2 py-1 rounded hover:bg-emerald-100">Print</button>
+                                                                            <span className="text-slate-300 mt-1">|</span>
+                                                                            <button onClick={() => handleDelete(insp.id)} disabled={isSaving} className="text-red-600 hover:text-red-800 hover:underline px-2 py-1 rounded hover:bg-red-100 disabled:opacity-50">Delete</button>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            );
+                                                        })}
+                                                    </tbody>
+                                                </table>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* FORM ENTRY */}
+                            {view === 'form' && (
+                                <div className="space-y-6 pb-12">
+                                    <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+                                        <div className="bg-slate-50 border-b border-slate-200 px-6 py-4"><h3 className="font-bold text-slate-800">1. Basic Details & Godown</h3></div>
+                                        <div className="p-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                                            <div><label className="block text-xs font-bold text-slate-600 mb-1">Account No *</label><input type="text" className="w-full border-slate-300 rounded px-3 py-2 border bg-indigo-50 font-bold focus:ring-indigo-500" value={formData.accountNo} onChange={e => handleSelectChange('accountNo', e.target.value)} onBlur={handleAccountBlur} /></div>
+                                            <div><label className="block text-xs font-bold text-slate-600 mb-1">Name of Account</label><input type="text" className="w-full border-slate-300 rounded px-3 py-2 border" value={formData.name} onChange={e => handleSelectChange('name', e.target.value)} /></div>
+                                            <div><label className="block text-xs font-bold text-slate-600 mb-1">Nature of Business</label><input type="text" className="w-full border-slate-300 rounded px-3 py-2 border" value={formData.nature} onChange={e => handleSelectChange('nature', e.target.value)} placeholder="e.g. RETAIL SELLING" /></div>
+                                            <div><label className="block text-xs font-bold text-slate-600 mb-1">Sanc. Authority</label><select className="w-full border-slate-300 rounded px-3 py-2 border bg-white" value={formData.sanctioningAuthority} onChange={e => handleSelectChange('sanctioningAuthority', e.target.value)}>{DROPDOWNS.authorities.map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></div>
+                                            <div className="md:col-span-2"><label className="block text-xs font-bold text-slate-600 mb-1">Office Address</label><input type="text" className="w-full border-slate-300 rounded px-3 py-2 border" value={formData.officeAddress} onChange={e => handleSelectChange('officeAddress', e.target.value)} /></div>
+                                            <div className="md:col-span-2"><label className="block text-xs font-bold text-slate-600 mb-1">Godown Address</label><input type="text" className="w-full border-slate-300 rounded px-3 py-2 border" value={formData.godownAddress} onChange={e => handleSelectChange('godownAddress', e.target.value)} /></div>
+                                            <div><label className="block text-xs font-bold text-slate-600 mb-1">Limit (₹)</label><input type="number" className="w-full border-slate-300 rounded px-3 py-2 border" value={formData.limit} onChange={e => handleSelectChange('limit', e.target.value)} /></div>
+                                            <div><label className="block text-xs font-bold text-slate-600 mb-1">Date of Reporting</label><input type="date" className="w-full border-slate-300 rounded px-3 py-2 border" value={formData.dateOfReporting} onChange={e => handleSelectChange('dateOfReporting', e.target.value)} /></div>
+                                            <div><label className="block text-xs font-bold text-slate-600 mb-1">Date of Verification</label><input type="date" className="w-full border-slate-300 rounded px-3 py-2 border" value={formData.dateOfVerification} onChange={e => handleSelectChange('dateOfVerification', e.target.value)} /></div>
+                                            <div>
+                                                <label className="block text-xs font-bold text-slate-600 mb-1">Inspecting Officer</label>
+                                                <input list="officers-list" className="w-full border-slate-300 rounded px-3 py-2 border bg-white" value={formData.inspectingOfficer} onChange={e => handleSelectChange('inspectingOfficer', e.target.value)} placeholder="Select or Type New" />
+                                                <datalist id="officers-list">{officers.map(opt => <option key={opt} value={opt} />)}</datalist>
+                                            </div>
+                                            <div><label className="block text-xs font-bold text-slate-600 mb-1">Branch</label><input type="text" className="w-full border-slate-300 rounded px-3 py-2 border" value={formData.branch} onChange={e => handleSelectChange('branch', e.target.value)} /></div>
+                                            <div><label className="block text-xs font-bold text-slate-600 mb-1">Region</label><input type="text" className="w-full border-slate-300 rounded px-3 py-2 border" value={formData.region} onChange={e => handleSelectChange('region', e.target.value)} /></div>
+                                            <div><label className="block text-xs font-bold text-slate-600 mb-1">Distance</label><input type="text" className="w-full border-slate-300 rounded px-3 py-2 border" value={formData.distance} onChange={e => handleSelectChange('distance', e.target.value)} /></div>
+                                            <div>{renderFieldWithRemark('Condition of Godown', 'conditionOfGodown', 'conditions', 'godownRemark', 'Not Satisfactory')}</div>
+                                        </div>
+                                    </div>
+
+                                    {/* Smart Math Section */}
+                                    <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+                                        <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 flex justify-between items-center">
+                                            <h3 className="font-bold text-slate-800">2. Financial Valuation</h3>
+                                            <span className="bg-emerald-100 text-emerald-800 text-sm font-bold px-4 py-1.5 rounded-full border border-emerald-200 shadow-sm">DP: {formatCurrency(calculateDP())}</span>
+                                        </div>
+                                        <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                                            <div className="bg-slate-50 p-4 rounded border border-slate-200">
+                                                <div className="grid grid-cols-3 gap-3 mb-3">
+                                                    <div className="col-span-2"><label className="block text-xs font-bold text-slate-600 mb-1">Stock Value (₹)</label><input type="number" className="w-full border-slate-300 rounded px-3 py-2 border font-mono text-right" value={formData.stockValue} onChange={e => handleNumberChange('stockValue', e.target.value)} /></div>
+                                                    <div><label className="block text-xs font-bold text-slate-600 mb-1">Margin %</label><select className="w-full border-slate-300 rounded px-3 py-2 border bg-white font-mono" value={formData.stockMarginPercent} onChange={e => handleNumberChange('stockMarginPercent', e.target.value)}>{DROPDOWNS.margins.map(opt => <option key={opt} value={opt}>{opt}%</option>)}</select></div>
+                                                </div>
+                                                <div className="flex justify-between items-center bg-white p-2 rounded border border-red-100"><span className="text-sm font-semibold text-slate-600">Auto Deduct (Stock):</span><span className="font-mono font-bold text-red-600">{formatCurrency(formData.stockMargin)}</span></div>
+                                            </div>
+
+                                            <div className="bg-slate-50 p-4 rounded border border-slate-200">
+                                                <div className="grid grid-cols-3 gap-3 mb-3">
+                                                    <div className="col-span-2"><label className="block text-xs font-bold text-slate-600 mb-1">Book Debts (₹)</label><input type="number" className="w-full border-slate-300 rounded px-3 py-2 border font-mono text-right" value={formData.bookDebts} onChange={e => handleNumberChange('bookDebts', e.target.value)} /></div>
+                                                    <div><label className="block text-xs font-bold text-slate-600 mb-1">Margin %</label><select className="w-full border-slate-300 rounded px-3 py-2 border bg-white font-mono" value={formData.bdMarginPercent} onChange={e => handleNumberChange('bdMarginPercent', e.target.value)}>{DROPDOWNS.margins.map(opt => <option key={opt} value={opt}>{opt}%</option>)}</select></div>
+                                                </div>
+                                                <div className="flex justify-between items-center bg-white p-2 rounded border border-red-100"><span className="text-sm font-semibold text-slate-600">Auto Deduct (BD):</span><span className="font-mono font-bold text-red-600">{formatCurrency(formData.bookDebtsMargin)}</span></div>
+                                            </div>
+
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div><label className="block text-xs font-bold text-slate-600 mb-1">Creditors (₹)</label><input type="number" className="w-full border-slate-300 rounded px-3 py-2 border font-mono text-right text-red-600" value={formData.creditors} onChange={e => handleNumberChange('creditors', e.target.value)} /></div>
+                                                <div><label className="block text-xs font-bold text-slate-600 mb-1">O/S Balance (₹)</label><input type="number" className="w-full border-blue-400 rounded px-3 py-2 border font-mono font-bold text-right bg-blue-50" value={formData.outstandingBalance} onChange={e => handleSelectChange('outstandingBalance', e.target.value)} /></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Smart Logic Checklists */}
+                                    <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+                                        <div className="bg-slate-50 border-b border-slate-200 px-6 py-4"><h3 className="font-bold text-slate-800">3-10. Detailed Inspections & Compliances</h3></div>
+                                        <div className="p-6 space-y-6">
+                                            
+                                            <div className="bg-slate-50 p-4 rounded border border-slate-200">
+                                                <h4 className="text-sm font-bold text-slate-800 mb-3 border-b pb-1">Stocks & Storage</h4>
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                    {renderFieldWithRemark('Condition of stocks', 'conditionOfStocks', 'conditions', 'conditionOfStocksRemark', 'Not Satisfactory')}
+                                                    {renderFieldWithRemark('Mode of storage', 'modeOfStorage', 'storage', 'modeOfStorageRemark', 'Haphazard')}
+                                                </div>
+                                                <div className="mt-4 grid grid-cols-1 md:grid-cols-4 gap-4 border-t border-slate-200 pt-3">
+                                                    <div><label className="block text-xs font-bold text-slate-600 mb-1">Season/Year of purchase</label><input type="number" className="w-full border-slate-300 rounded px-2 py-1.5 border bg-white text-sm" value={formData.seasonYear} onChange={e => setFormData({...formData, seasonYear: e.target.value})} /></div>
+                                                    <div><label className="block text-xs font-bold text-slate-600 mb-1">Age of old stock (Days)</label><input type="number" className="w-full border-slate-300 rounded px-2 py-1.5 border bg-white text-sm" value={formData.ageOfOldStockDays} onChange={e => setFormData({...formData, ageOfOldStockDays: e.target.value})} /></div>
+                                                    <div><label className="block text-xs font-bold text-slate-600 mb-1">Amount of old stock (₹)</label><input type="number" className="w-full border-slate-300 rounded px-2 py-1.5 border bg-white text-sm" value={formData.amountOfOldStockRupees} onChange={e => setFormData({...formData, amountOfOldStockRupees: e.target.value})} /></div>
+                                                    <div><label className="block text-xs font-bold text-slate-600 mb-1">% of old stocks to total</label><input type="text" className="w-full border-slate-300 rounded px-2 py-1.5 border bg-slate-100 text-sm font-bold text-slate-600" value={calculateOldStockPercent()} readOnly /></div>
+                                                </div>
+                                            </div>
+
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                <div className="bg-slate-50 p-4 rounded border border-slate-200">
+                                                    <h4 className="text-sm font-bold text-slate-800 mb-3 border-b pb-1">Valuation</h4>
+                                                    {renderFieldWithRemark('Is the mode of Valuation Satisfactory', 'modeOfValuationSatisfactory', 'conditions', 'valuationRemark', 'Not Satisfactory')}
+                                                    {renderFieldWithRemark('Whether trade discount, if any, deducted?', 'tradeDiscountDeducted', 'yesNo', 'tradeDiscountRemark', 'No')}
+                                                    <div className="mb-4"><label className="block text-xs font-bold text-slate-600 mb-1">Unpledged stocks, if any stored?</label><select className="w-full border-slate-300 rounded px-3 py-2 border bg-white text-sm" value={formData.unpledgedStocks} onChange={e => handleSelectChange('unpledgedStocks', e.target.value)}>{DROPDOWNS.yesNo.map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></div>
+                                                </div>
+
+                                                <div className="bg-slate-50 p-4 rounded border border-slate-200">
+                                                    <h4 className="text-sm font-bold text-slate-800 mb-3 border-b pb-1">Insurance</h4>
+                                                    <div className="mb-4"><label className="block text-xs font-bold text-slate-600 mb-1">Amount of Insurance (₹)</label><input type="number" className="w-full border-slate-300 rounded px-3 py-2 border text-sm" value={formData.insuranceAmount} onChange={e => handleSelectChange('insuranceAmount', e.target.value)} /></div>
+                                                    {renderFieldWithRemark('Is Insurance cover adequate?', 'insuranceAdequate', 'yesNo', 'insuranceAdequateRemark', 'No')}
+                                                    {renderFieldWithRemark('Is insurance cover all comprehensive?', 'insuranceComprehensive', 'yesNo', 'insuranceComprehensiveRemark', 'No')}
+                                                    {formData.unpledgedStocks === 'Yes' && (
+                                                        renderFieldWithRemark('Are unpledged stocks adequately insured?', 'unpledgedInsured', 'yesNo', 'unpledgedInsuredRemark', 'No')
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            <div className="bg-slate-50 p-4 rounded border border-slate-200">
+                                                <h4 className="text-sm font-bold text-slate-800 mb-3 border-b pb-1">General Compliances & Records</h4>
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                                                    <div>{renderFieldWithRemark('Are bank’s signboards displayed?', 'signboardsDisplayed', 'yesNo', 'signboardsDisplayedRemark', 'No')}</div>
+                                                    <div><label className="block text-xs font-bold text-slate-600 mb-1">Inside / Outside</label><select className="w-full border-slate-300 rounded px-2 py-1.5 border bg-white text-sm disabled:bg-gray-200" disabled={formData.signboardsDisplayed === 'No'} value={formData.signboardsInsideOutside} onChange={e => handleSelectChange('signboardsInsideOutside', e.target.value)}>{DROPDOWNS.insideOutside.map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></div>
+                                                    <div className="sm:col-span-2 md:col-span-1">{renderFieldWithRemark('Godown keeper/chokidar sanctioned?', 'godownKeeperSanctioned', 'yesNo', 'godownKeeperRemark', 'No')}</div>
+                                                    
+                                                    <div className="sm:col-span-2 md:col-span-1">{renderFieldWithRemark('Signed stock reports received?', 'stockReportsRegular', 'yesNo', 'stockReportsRemark', 'No')}</div>
+                                                    <div><label className="block text-xs font-bold text-slate-600 mb-1">Report Frequency</label><select className="w-full border-slate-300 rounded px-2 py-1.5 border bg-white text-sm" value={formData.stockReportsFrequency} onChange={e => handleSelectChange('stockReportsFrequency', e.target.value)}>{DROPDOWNS.frequency.map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></div>
+                                                    
+                                                    <div className="sm:col-span-2 md:col-span-1">{renderFieldWithRemark('Bank possession fully effective?', 'bankPossessionEffective', 'yesNo', 'bankPossessionRemark', 'No')}</div>
+                                                    <div className="sm:col-span-2 md:col-span-1">{renderFieldWithRemark('Registers/cards properly maintained?', 'registersMaintained', 'yesNo', 'registersMaintainedRemark', 'No')}</div>
+                                                    <div className="sm:col-span-2 md:col-span-1">{renderFieldWithRemark('Registers tally with godown cards?', 'registersTally', 'yesNo', 'registersTallyRemark', 'No')}</div>
+                                                </div>
+                                            </div>
+
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                <div className="bg-slate-50 p-4 rounded border border-slate-200">
+                                                    <h4 className="text-sm font-bold text-slate-800 mb-3 border-b pb-1">Control</h4>
+                                                    {renderFieldWithRemark('Are godown inspected periodically?', 'inspectedPeriodically', 'yesNo', 'inspectedPeriodicallyRemark', 'No')}
+                                                    <div className="mb-4"><label className="block text-xs font-bold text-slate-600 mb-1">How often and by whom?</label><input type="text" className="w-full border-slate-300 rounded px-3 py-2 border bg-white text-sm" value={formData.inspectedHowOften} onChange={e => handleSelectChange('inspectedHowOften', e.target.value)} /></div>
+                                                    {renderFieldWithRemark('Is record of inspection maintained?', 'recordMaintained', 'yesNo', 'recordMaintainedRemark', 'No')}
+                                                </div>
+
+                                                <div className="bg-slate-50 p-4 rounded border border-slate-200">
+                                                    <h4 className="text-sm font-bold text-slate-800 mb-3 border-b pb-1">Movement of Stocks</h4>
+                                                    <div>{renderFieldWithRemark('Is turnover in stocks satisfactory?', 'turnoverSatisfactory', 'yesNo', 'turnoverSatisfactoryRemark', 'No')}</div>
+                                                    <div>{renderFieldWithRemark('Is turnover in account satisfactory?', 'accountTurnoverSatisfactory', 'yesNo', 'accountTurnoverSatisfactoryRemark', 'No')}</div>
+                                                </div>
+                                            </div>
+
+                                            <div className="bg-slate-50 p-4 rounded border border-slate-200">
+                                                <h4 className="text-sm font-bold text-slate-800 mb-3 border-b pb-1">10. Officer Certificates</h4>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    {renderFieldWithRemark('The movement of stocks in the account has been carefully checked.', 'movementChecked', 'yesNo', 'movementRemark', 'No')}
+                                                    {renderFieldWithRemark('Stock older that three months are also moving out satisfactorily.', 'oldStockMoving', 'yesNo', 'oldStockRemark', 'No')}
+                                                    {renderFieldWithRemark('Deliveries effected since last inspection have not been preponderating from new stocks.', 'deliveriesNotNew', 'yesNo', 'deliveriesRemark', 'No')}
+                                                    {renderFieldWithRemark('All the stocks statements of the borrower are on branch record.', 'statementsOnRecord', 'yesNo', 'statementsRemark', 'No')}
+                                                </div>
+                                            </div>
+                                            
+                                        </div>
+                                    </div>
+
+                                    <div className="flex justify-end gap-4 mt-6">
+                                        <button onClick={() => setView('preview')} className="bg-slate-200 hover:bg-slate-300 text-slate-800 px-6 py-3 rounded shadow-sm font-bold transition">Preview</button>
+                                        <button onClick={handleSave} disabled={isSaving} className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded shadow font-bold text-lg transition flex items-center gap-2 disabled:opacity-50">
+                                            <Icons.Save /> {isSaving ? 'Syncing...' : 'Save to Cloud'}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* EXACT WORD DOCUMENT PRINT/PREVIEW VIEW */}
+                            {view === 'preview' && (
+                                <div id="report-container" className="relative">
+
+                                    {/* MAIN REPORT PAGE */}
+                                    <div className="a4-page word-doc">
+                                        <div className="text-center border-b-2 border-black pb-3 mb-6">
+                                            <h1 style={{fontSize: '18pt', fontWeight: 'bold', textTransform: 'uppercase'}}>BANK OF BARODA</h1>
+                                            <h2 style={{fontSize: '12pt', fontWeight: 'bold', textTransform: 'uppercase', marginTop: '4pt'}}>
+                                                {formData.branch ? `${formData.branch} BRANCH` : '______________ BRANCH'}, {formData.region ? `${formData.region} REGION` : '______________ REGION'}
+                                            </h2>
+                                        </div>
+
+                                        <div className="text-right font-bold mb-4">
+                                            {formatDateCompact(formData.dateOfReporting)} {formData.name} {formData.accountNo}
+                                        </div>
+
+                                        <h1 className="text-center font-bold" style={{fontSize: '13pt', textDecoration: 'underline'}}>GODOWN INSPECTION REPORT</h1>
+                                        <br/>
+
+                                        <div className="doc-grid"><div>Date of Reporting</div><div>{formatDateStandard(formData.dateOfReporting)}</div></div>
+                                        <div className="doc-grid"><div>Branch- </div><div>{formData.branch}</div></div>
+                                        <div className="doc-grid"><div> Region-</div><div>{formData.region}</div></div>
+                                        <div className="doc-grid"><div>Date of Stock Verification</div><div>{formatDateStandard(formData.dateOfVerification)}</div></div>
+                                        <div className="doc-grid"><div>Inspecting Officer</div><div>{formData.inspectingOfficer}</div></div>
+                                        <br/>
+                                        <div className="doc-grid"><div>Name of account & its nature</div><div>{formData.name} {formData.nature ? `- ${formData.nature}` : ''} - {formData.accountNo}</div></div>
+                                        <div className="doc-grid"><div>Limit</div><div>{formatCurrency(formData.limit)}</div></div>
+                                        <div className="doc-grid"><div>Sanctioning Authority</div><div>{formData.sanctioningAuthority}</div></div>
+                                        
+                                        <h2>PARTICULARS OF THE GODOWN</h2>
+                                        <div className="doc-grid"><div>Location</div><div>Office Address : {formData.officeAddress}<br/>Godown Address : {formData.godownAddress}</div></div>
+                                        <div className="doc-grid"><div>Distance</div><div>{formData.distance}</div></div>
+                                        <div className="doc-grid"><div>Condition of Godown</div><div>{formatPrintValue(formData.conditionOfGodown, formData.godownRemark)}</div></div>
+
+                                        <h2>STOCKS</h2>
+                                        <div className="doc-grid"><div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a) Value of stock pledged/Hypothecated </div><div>{formatCurrency(formData.stockValue)}</div></div>
+                                        <div className="doc-grid"><div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Less margin(Stock) @ {formData.stockMarginPercent}%</div><div>{formatCurrency(formData.stockMargin)}</div></div>
+                                        <div className="doc-grid"><div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Book Debts                                         </div><div>{formatCurrency(formData.bookDebts)}</div></div>
+                                        <div className="doc-grid"><div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Creditors                                             </div><div>{formatCurrency(formData.creditors)}</div></div>
+                                        <div className="doc-grid"><div>Less Margin (BD) @ {formData.bdMarginPercent}%</div><div>{formatCurrency(formData.bookDebtsMargin)}</div></div>
+                                        <div className="doc-grid"><div>Drawing Power</div><div>{formatCurrency(calculateDP())}</div></div>
+                                        <div className="doc-grid"><div>Outstanding balance</div><div>{formatCurrency(formData.outstandingBalance)}</div></div>
+                                        <br/>
+                                        
+                                        <div className="doc-grid"><div>Season/Year of purchase of manufactured goods</div><div>{formData.seasonYear || '-'}</div></div>
+                                        <div className="doc-grid"><div>Age & amount of old stock</div><div>{(formData.ageOfOldStockDays || '0')} Days & {formatCurrency(formData.amountOfOldStockRupees || '0')}</div></div>
+                                        <div className="doc-grid"><div>Percentage of old stocks to total stocks</div><div>{calculateOldStockPercent()}</div></div>
+
+                                        <div className="doc-grid"><div>Condition of stocks</div><div>{formatPrintValue(formData.conditionOfStocks, formData.conditionOfStocksRemark)}</div></div>
+                                        <div className="doc-grid"><div>Mode of storage (Proper/Haphazard)</div><div>{formatPrintValue(formData.modeOfStorage, formData.modeOfStorageRemark)}</div></div>
+
+                                        <h2>VALUATION</h2>
+                                        <div className="doc-grid"><div>Is the mode of Valuation Satisfactory</div><div>{formatPrintValue(formData.modeOfValuationSatisfactory, formData.valuationRemark)}</div></div>
+                                        <div className="doc-grid"><div>Whether trade discount, if any, allowed is deducted while arriving at the value      of stocks</div><div>{formatPrintValue(formData.tradeDiscountDeducted, formData.tradeDiscountRemark)}</div></div>
+                                        <div className="doc-grid"><div>Unpledged stocks, if any stored in the godown</div><div>{formData.unpledgedStocks}</div></div>
+
+                                        <h2>INSURANCE</h2>
+                                        <div className="doc-grid"><div>Amount of Insurance</div><div>{formatCurrency(formData.insuranceAmount)}</div></div>
+                                        <div className="doc-grid"><div>Is Insurance cover adequate as to the amount</div><div>{formatPrintValue(formData.insuranceAdequate, formData.insuranceAdequateRemark)}</div></div>
+                                        <div className="doc-grid"><div>Is insurance cover all comprehensive, state if any fire or R.R.C burglary etc</div><div>{formatPrintValue(formData.insuranceComprehensive, formData.insuranceComprehensiveRemark)}</div></div>
+                                        {formData.unpledgedStocks === 'Yes' && (
+                                            <div className="doc-grid"><div>Are unpledged stocks, if any adequately insured</div><div>{formatPrintValue(formData.unpledgedInsured, formData.unpledgedInsuredRemark)}</div></div>
+                                        )}
+
+                                        <h2>IN ALL CASES</h2>
+                                        <div className="doc-grid"><div>Are bank’s signboards displayed? </div><div>{formatPrintValue(formData.signboardsDisplayed, formData.signboardsDisplayedRemark)}</div></div>
+                                        {formData.signboardsDisplayed === 'Yes' && (
+                                            <div className="doc-grid"><div>"(State whether inside or outside, if not outside, state authority)	"</div><div>{formData.signboardsInsideOutside}</div></div>
+                                        )}
+                                        <div className="doc-grid"><div>If godown keeper/ godown chokidar sanctioned? 		</div><div>{formatPrintValue(formData.godownKeeperSanctioned, formData.godownKeeperRemark)}</div></div>
+                                        <div className="doc-grid"><div>Are duly signed stock reports received regularly?		</div><div>{formatPrintValue(formData.stockReportsRegular, formData.stockReportsRemark)}</div></div>
+                                        <div className="doc-grid"><div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(State frequency)</div><div>{formData.stockReportsFrequency}</div></div>
+                                        <div className="doc-grid"><div>Is bank’s possession fully effective and secured? 		</div><div>{formatPrintValue(formData.bankPossessionEffective, formData.bankPossessionRemark)}</div></div>
+
+                                        <h2>7. BOOKS AND RECORDS</h2>
+                                        <div className="doc-grid"><div>Are godown registers/ cards properly maintained?</div><div>{formatPrintValue(formData.registersMaintained, formData.registersMaintainedRemark)}</div></div>
+                                        <div className="doc-grid"><div>Do godown registers tally with godown cards?</div><div>{formatPrintValue(formData.registersTally, formData.registersTallyRemark)}</div></div>
+
+                                        <h2>8. CONTROL</h2>
+                                        <div className="doc-grid"><div>Are godown inspected periodically? </div><div>{formatPrintValue(formData.inspectedPeriodically, formData.inspectedPeriodicallyRemark)}</div></div>
+                                        <div className="doc-grid"><div>How often and by whom? </div><div>{formData.inspectedHowOften}</div></div>
+                                        <div className="doc-grid"><div>Is record of inspection maintained?</div><div>{formatPrintValue(formData.recordMaintained, formData.recordMaintainedRemark)}</div></div>
+
+                                        <h2>9. MOVEMENT OF STOCKS</h2>
+                                        <div className="doc-grid"><div>Is turnover in stocks satisfactory? </div><div>{formatPrintValue(formData.turnoverSatisfactory, formData.turnoverSatisfactoryRemark)}</div></div>
+                                        <div className="doc-grid" style={{alignItems: 'start'}}><div>Is turnover in account satisfactory? 	</div><div>{formatPrintValue(formData.accountTurnoverSatisfactory, formData.accountTurnoverSatisfactoryRemark)}</div></div>
+
+                                        <h2>10. CERTIFICATE TO BE GIVEN BY THE INSPECTING OFFICER CERTIFYING THAT</h2>
+                                        <div className="doc-grid"><div>The movement of stocks in the account has been carefully checked. </div><div>{formatPrintValue(formData.movementChecked, formData.movementRemark)}</div></div>
+                                        <div className="doc-grid"><div>Stock older that three months are also moving out satisfactorily. </div><div>{formatPrintValue(formData.oldStockMoving, formData.oldStockRemark)}</div></div>
+                                        <div className="doc-grid"><div>Deliveries effected since last inspection have not been preponderating from new stocks.</div><div>{formatPrintValue(formData.deliveriesNotNew, formData.deliveriesRemark)}</div></div>
+                                        <div className="doc-grid"><div>All the stocks statements of the borrower are on branch record.</div><div>{formatPrintValue(formData.statementsOnRecord, formData.statementsRemark)}</div></div>
+
+                                        <div style={{fontSize: '9pt', fontStyle: 'italic', marginTop: '30pt', marginBottom: '50pt'}}>
+                                            Note: Please refer Guidelines in the reverse	      
+                                        </div>
+
+                                        <div style={{display: 'flex', justifyContent: 'space-between', padding: '0 40pt'}}>
+                                            <div style={{textAlign: 'center', fontWeight: 'bold'}}>
+                                                <div style={{minHeight: '1.5em', marginBottom: '4pt'}}>{formData.inspectingOfficer ? formData.inspectingOfficer.toUpperCase() : ''}</div>
+                                                <div>INSPECTING OFFICER</div>
+                                            </div>
+                                            <div style={{textAlign: 'center', fontWeight: 'bold', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end'}}>
+                                                <div>MANAGER</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* BRANCH HEAD COVERING LETTER (NEW PAGE) */}
+                                    <div className="a4-page word-doc page-break-before">
+                                        <h2 style={{ textAlign: 'center', textDecoration: 'underline', marginBottom: '30pt' }}>INTERNAL MEMO</h2>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20pt' }}>
+                                            <div>
+                                                <strong>To:</strong><br/>
+                                                The Branch Head,<br/>
+                                                Bank of Baroda, {formData.branch} Branch
+                                            </div>
+                                            <div style={{ textAlign: 'right', paddingLeft: '10px' }}><strong>Date:</strong> {formatDateStandard(formData.dateOfReporting) || new Date().toLocaleDateString('en-GB')}</div>
+                                        </div>
+                                        <div style={{ marginBottom: '20pt' }}>
+                                            <strong>Subject:</strong> Outcome of Godown Inspection - {formData.name} (A/c: {formData.accountNo})
+                                        </div>
+                                        <p style={{ marginBottom: '15pt' }}>Dear Sir/Madam,</p>
+                                        <p style={{ marginBottom: '15pt' }}>
+                                            The regular godown inspection for the subject account was conducted on {formatDateStandard(formData.dateOfVerification)}. 
+                                            {adverseFindings.length === 0 
+                                                ? " We are pleased to report that no adverse observations were noted during the visit. The condition of stocks and maintenance of records are satisfactory." 
+                                                : " During the visit, the following irregularities/adverse findings were observed. We suggest the below rectification measures for monitoring by the Credit Department and follow-up action."}
+                                        </p>
+
+                                        {adverseFindings.length > 0 && (
+                                            <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '15pt', marginBottom: '20pt', fontSize: '10pt' }} border="1">
+                                                <thead>
+                                                    <tr style={{ backgroundColor: '#f0f0f0' }}>
+                                                        <th style={{ padding: '8px' }}>Sl</th>
+                                                        <th style={{ padding: '8px' }}>Parameter</th>
+                                                        <th style={{ padding: '8px' }}>Adverse Observation</th>
+                                                        <th style={{ padding: '8px' }}>Suggested Rectification Measure</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {adverseFindings.map((item, idx) => (
+                                                        <tr key={idx}>
+                                                            <td style={{ padding: '8px', textAlign: 'center' }}>{idx + 1}</td>
+                                                            <td style={{ padding: '8px', fontWeight: 'bold' }}>{item.label}</td>
+                                                            <td style={{ padding: '8px' }}>{item.userRemark}</td>
+                                                            <td style={{ padding: '8px' }}>{item.suggestion}</td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        )}
+                                        
+                                        <p>Submitted for your information and necessary action.</p>
+                                        <div style={{ marginTop: '50pt' }}>
+                                            <strong>{formData.inspectingOfficer ? formData.inspectingOfficer.toUpperCase() : 'INSPECTING OFFICER'}</strong><br/>
+                                            Inspecting Official
+                                        </div>
+                                    </div>
+
+                                    {/* BORROWER RECTIFICATION LETTER (NEW PAGE - CONDITIONAL) */}
+                                    {borrowerFindings.length > 0 && (
+                                        <div className="a4-page word-doc page-break-before">
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20pt' }}>
+                                                <div>
+                                                    <strong>To:</strong><br/>
+                                                    {formData.name}<br/>
+                                                    {formData.officeAddress}
+                                                </div>
+                                                <div style={{ textAlign: 'right', paddingLeft: '10px' }}><strong>Date:</strong> {formatDateStandard(formData.dateOfReporting) || new Date().toLocaleDateString('en-GB')}</div>
+                                            </div>
+                                            <div style={{ marginBottom: '20pt' }}>
+                                                <strong>Subject:</strong> Rectification of irregularities observed during Godown Inspection dated {formatDateStandard(formData.dateOfVerification)}
+                                            </div>
+                                            <p style={{ marginBottom: '15pt' }}>Dear Sir/Madam,</p>
+                                            <p style={{ marginBottom: '15pt' }}>
+                                                During the routine godown inspection of your premises located at <em>{formData.godownAddress}</em> on {formatDateStandard(formData.dateOfVerification)}, the following irregularities were observed.
+                                            </p>
+                                            <p style={{ marginBottom: '15pt' }}>You are advised to take immediate corrective actions as suggested below:</p>
+                                            
+                                            <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '15pt', marginBottom: '20pt', fontSize: '10pt' }} border="1">
+                                                <thead>
+                                                    <tr style={{ backgroundColor: '#f0f0f0' }}>
+                                                        <th style={{ padding: '8px' }}>Sl</th>
+                                                        <th style={{ padding: '8px' }}>Area of Concern</th>
+                                                        <th style={{ padding: '8px' }}>Observation Details</th>
+                                                        <th style={{ padding: '8px' }}>Required Action by You</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {borrowerFindings.map((item, idx) => (
+                                                        <tr key={idx}>
+                                                            <td style={{ padding: '8px', textAlign: 'center' }}>{idx + 1}</td>
+                                                            <td style={{ padding: '8px', fontWeight: 'bold' }}>{item.label}</td>
+                                                            <td style={{ padding: '8px' }}>{item.userRemark}</td>
+                                                            <td style={{ padding: '8px' }}>{item.suggestion}</td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                            
+                                            <p>Please confirm compliance of the above points at the earliest to ensure smooth continuation of your credit facilities.</p>
+                                            <div style={{ marginTop: '50pt' }}>
+                                                Yours faithfully,<br/><br/><br/>
+                                                <strong>Manager / Branch Head</strong><br/>
+                                                Bank of Baroda, {formData.branch} Branch
+                                            </div>
+                                        </div>
+                                    )}
+
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
