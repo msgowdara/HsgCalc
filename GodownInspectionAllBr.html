@@ -985,84 +985,85 @@
 
                                         <h1 className="text-center font-bold" style={{fontSize: '13pt', textDecoration: 'underline', marginBottom: '8px'}}>GODOWN INSPECTION REPORT</h1>
 
-                                        <div className="doc-grid"><div>Date of Reporting</div><div>{formatDateStandard(formData.dateOfReporting)}</div></div>
-                                        <div className="doc-grid"><div>Branch- </div><div>{formData.branch}</div></div>
-                                        <div className="doc-grid"><div> Region-</div><div>{formData.region}</div></div>
-                                        <div className="doc-grid"><div>Date of Stock Verification</div><div>{formatDateStandard(formData.dateOfVerification)}</div></div>
-                                        <div className="doc-grid"><div>Inspecting Officer</div><div>{formData.inspectingOfficer}</div></div>
+                                        <h2>1. BASIC DETAILS</h2>
+                                        <div className="doc-grid"><div>a) Date of Reporting</div><div>{formatDateStandard(formData.dateOfReporting)}</div></div>
+                                        <div className="doc-grid"><div>b) Branch</div><div>{formData.branch}</div></div>
+                                        <div className="doc-grid"><div>c) Region</div><div>{formData.region}</div></div>
+                                        <div className="doc-grid"><div>d) Date of Stock Verification</div><div>{formatDateStandard(formData.dateOfVerification)}</div></div>
+                                        <div className="doc-grid"><div>e) Inspecting Officer</div><div>{formData.inspectingOfficer}</div></div>
                                         <br/>
-                                        <div className="doc-grid"><div>Name of account & its nature</div><div>{formData.name} {formData.nature ? `- ${formData.nature}` : ''} - {formData.accountNo}</div></div>
-                                        <div className="doc-grid"><div>Limit</div><div>{formatCurrency(formData.limit)}</div></div>
-                                        <div className="doc-grid"><div>Sanctioning Authority</div><div>{formData.sanctioningAuthority}</div></div>
+                                        <div className="doc-grid"><div>f) Name of account & its nature</div><div>{formData.name} {formData.nature ? `- ${formData.nature}` : ''} - {formData.accountNo}</div></div>
+                                        <div className="doc-grid"><div>g) Limit</div><div>{formatCurrency(formData.limit)}</div></div>
+                                        <div className="doc-grid"><div>h) Sanctioning Authority</div><div>{formData.sanctioningAuthority}</div></div>
                                         
-                                        <h2>PARTICULARS OF THE GODOWN</h2>
-                                        <div className="doc-grid"><div>Location</div><div>Office Address : {formData.officeAddress}<br/>Godown Address : {formData.godownAddress}</div></div>
-                                        <div className="doc-grid"><div>Distance</div><div>{formData.distance}</div></div>
-                                        <div className="doc-grid"><div>Condition of Godown</div><div>{formatPrintValue(formData.conditionOfGodown, formData.godownRemark)}</div></div>
+                                        <h2>2. PARTICULARS OF THE GODOWN</h2>
+                                        <div className="doc-grid"><div>a) Location</div><div>Office Address : {formData.officeAddress}<br/>Godown Address : {formData.godownAddress}</div></div>
+                                        <div className="doc-grid"><div>b) Distance</div><div>{formData.distance}</div></div>
+                                        <div className="doc-grid"><div>c) Condition of Godown</div><div>{formatPrintValue(formData.conditionOfGodown, formData.godownRemark)}</div></div>
 
-                                        <h2>STOCKS</h2>
-                                        <div className="doc-grid"><div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a) Value of stock pledged/Hypothecated </div><div>{formatCurrency(formData.stockValue)}</div></div>
-                                        <div className="doc-grid"><div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Less margin(Stock) @ {formData.stockMarginPercent}%</div><div>{formatCurrency(formData.stockMargin)}</div></div>
-                                        <div className="doc-grid"><div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Book Debts                                         </div><div>{formatCurrency(formData.bookDebts)}</div></div>
-                                        <div className="doc-grid"><div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Creditors                                             </div><div>{formatCurrency(formData.creditors)}</div></div>
-                                        <div className="doc-grid"><div>Less Margin (BD) @ {formData.bdMarginPercent}%</div><div>{formatCurrency(formData.bookDebtsMargin)}</div></div>
-                                        <div className="doc-grid"><div>Drawing Power</div><div>{formatCurrency(calculateDP())}</div></div>
-                                        <div className="doc-grid"><div>Outstanding balance</div><div>{formatCurrency(formData.outstandingBalance)}</div></div>
+                                        <h2>3. STOCKS</h2>
+                                        <div className="doc-grid"><div>a) Value of stock pledged/Hypothecated </div><div>{formatCurrency(formData.stockValue)}</div></div>
+                                        <div className="doc-grid"><div style={{paddingLeft: '1.2rem'}}>- Less margin (Stock) @ {formData.stockMarginPercent}%</div><div>{formatCurrency(formData.stockMargin)}</div></div>
+                                        <div className="doc-grid"><div>b) Book Debts</div><div>{formatCurrency(formData.bookDebts)}</div></div>
+                                        <div className="doc-grid"><div style={{paddingLeft: '1.2rem'}}>- Less margin (BD) @ {formData.bdMarginPercent}%</div><div>{formatCurrency(formData.bookDebtsMargin)}</div></div>
+                                        <div className="doc-grid"><div>c) Creditors</div><div>{formatCurrency(formData.creditors)}</div></div>
+                                        <div className="doc-grid"><div>d) Drawing Power</div><div>{formatCurrency(calculateDP())}</div></div>
+                                        <div className="doc-grid"><div>e) Outstanding balance</div><div>{formatCurrency(formData.outstandingBalance)}</div></div>
                                         <br/>
+                                        
+                                        <div className="doc-grid"><div>f) Condition of stocks</div><div>{formatPrintValue(formData.conditionOfStocks, formData.conditionOfStocksRemark)}</div></div>
+                                        <div className="doc-grid"><div>g) Mode of storage (Proper/Haphazard)</div><div>{formatPrintValue(formData.modeOfStorage, formData.modeOfStorageRemark)}</div></div>
                                         
                                         {formData.conditionOfStocks === 'Not Satisfactory' && (
                                             <>
-                                                <div className="doc-grid"><div>Season/Year of purchase of manufactured goods</div><div>{formData.seasonYear || '-'}</div></div>
-                                                <div className="doc-grid"><div>Age & amount of old stock</div><div>{(formData.ageOfOldStockDays || '0')} Days & {formatCurrency(formData.amountOfOldStockRupees || '0')}</div></div>
-                                                <div className="doc-grid"><div>Percentage of old stocks to total stocks</div><div>{calculateOldStockPercent()}</div></div>
+                                                <div className="doc-grid"><div>h) Season/Year of purchase of manufactured goods</div><div>{formData.seasonYear || '-'}</div></div>
+                                                <div className="doc-grid"><div>i) Age & amount of old stock</div><div>{(formData.ageOfOldStockDays || '0')} Days & {formatCurrency(formData.amountOfOldStockRupees || '0')}</div></div>
+                                                <div className="doc-grid"><div>j) Percentage of old stocks to total stocks</div><div>{calculateOldStockPercent()}</div></div>
                                             </>
                                         )}
 
-                                        <div className="doc-grid"><div>Condition of stocks</div><div>{formatPrintValue(formData.conditionOfStocks, formData.conditionOfStocksRemark)}</div></div>
-                                        <div className="doc-grid"><div>Mode of storage (Proper/Haphazard)</div><div>{formatPrintValue(formData.modeOfStorage, formData.modeOfStorageRemark)}</div></div>
+                                        <h2>4. VALUATION</h2>
+                                        <div className="doc-grid"><div>a) Is the mode of Valuation Satisfactory</div><div>{formatPrintValue(formData.modeOfValuationSatisfactory, formData.valuationRemark)}</div></div>
+                                        <div className="doc-grid"><div>b) Whether trade discount, if any, allowed is deducted while arriving at the value of stocks</div><div>{formatPrintValue(formData.tradeDiscountDeducted, formData.tradeDiscountRemark)}</div></div>
+                                        <div className="doc-grid"><div>c) Unpledged stocks, if any stored in the godown</div><div>{formData.unpledgedStocks}</div></div>
 
-                                        <h2>VALUATION</h2>
-                                        <div className="doc-grid"><div>Is the mode of Valuation Satisfactory</div><div>{formatPrintValue(formData.modeOfValuationSatisfactory, formData.valuationRemark)}</div></div>
-                                        <div className="doc-grid"><div>Whether trade discount, if any, allowed is deducted while arriving at the value      of stocks</div><div>{formatPrintValue(formData.tradeDiscountDeducted, formData.tradeDiscountRemark)}</div></div>
-                                        <div className="doc-grid"><div>Unpledged stocks, if any stored in the godown</div><div>{formData.unpledgedStocks}</div></div>
-
-                                        <h2>INSURANCE</h2>
-                                        <div className="doc-grid"><div>Amount of Insurance</div><div>{formatCurrency(formData.insuranceAmount)}</div></div>
-                                        <div className="doc-grid"><div>Insurance Validity Date</div><div>{formatDateStandard(formData.insuranceValidityDate)}</div></div>
-                                        <div className="doc-grid"><div>Is Insurance cover adequate as to the amount</div><div>{formatPrintValue(formData.insuranceAdequate, formData.insuranceAdequateRemark)}</div></div>
-                                        <div className="doc-grid"><div>Is insurance cover all comprehensive, state if any fire or R.R.C burglary etc</div><div>{formatPrintValue(formData.insuranceComprehensive, formData.insuranceComprehensiveRemark)}</div></div>
+                                        <h2>5. INSURANCE</h2>
+                                        <div className="doc-grid"><div>a) Amount of Insurance</div><div>{formatCurrency(formData.insuranceAmount)}</div></div>
+                                        <div className="doc-grid"><div>b) Insurance Validity Date</div><div>{formatDateStandard(formData.insuranceValidityDate)}</div></div>
+                                        <div className="doc-grid"><div>c) Is Insurance cover adequate as to the amount</div><div>{formatPrintValue(formData.insuranceAdequate, formData.insuranceAdequateRemark)}</div></div>
+                                        <div className="doc-grid"><div>d) Is insurance cover all comprehensive, state if any fire or R.R.C burglary etc</div><div>{formatPrintValue(formData.insuranceComprehensive, formData.insuranceComprehensiveRemark)}</div></div>
                                         {formData.unpledgedStocks === 'Yes' && (
-                                            <div className="doc-grid"><div>Are unpledged stocks, if any adequately insured</div><div>{formatPrintValue(formData.unpledgedInsured, formData.unpledgedInsuredRemark)}</div></div>
+                                            <div className="doc-grid"><div>e) Are unpledged stocks, if any adequately insured</div><div>{formatPrintValue(formData.unpledgedInsured, formData.unpledgedInsuredRemark)}</div></div>
                                         )}
 
-                                        <h2>IN ALL CASES</h2>
-                                        <div className="doc-grid"><div>Are bank’s signboards displayed? </div><div>{formatPrintValue(formData.signboardsDisplayed, formData.signboardsDisplayedRemark)}</div></div>
+                                        <h2>6. IN ALL CASES</h2>
+                                        <div className="doc-grid"><div>a) Are bank’s signboards displayed? </div><div>{formatPrintValue(formData.signboardsDisplayed, formData.signboardsDisplayedRemark)}</div></div>
                                         {formData.signboardsDisplayed === 'Yes' && (
-                                            <div className="doc-grid"><div>"(State whether inside or outside, if not outside, state authority)	"</div><div>{formData.signboardsInsideOutside}</div></div>
+                                            <div className="doc-grid"><div style={{paddingLeft: '1.2rem'}}>- (State whether inside or outside, if not outside, state authority)</div><div>{formData.signboardsInsideOutside}</div></div>
                                         )}
-                                        <div className="doc-grid"><div>If godown keeper/ godown chokidar sanctioned? 		</div><div>{formatPrintValue(formData.godownKeeperSanctioned, formData.godownKeeperRemark)}</div></div>
-                                        <div className="doc-grid"><div>Are duly signed stock reports received regularly?		</div><div>{formatPrintValue(formData.stockReportsRegular, formData.stockReportsRemark)}</div></div>
-                                        <div className="doc-grid"><div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(State frequency)</div><div>{formData.stockReportsFrequency}</div></div>
-                                        <div className="doc-grid"><div>Is bank’s possession fully effective and secured? 		</div><div>{formatPrintValue(formData.bankPossessionEffective, formData.bankPossessionRemark)}</div></div>
+                                        <div className="doc-grid"><div>b) Is godown keeper/ godown chokidar sanctioned? </div><div>{formatPrintValue(formData.godownKeeperSanctioned, formData.godownKeeperRemark)}</div></div>
+                                        <div className="doc-grid"><div>c) Are duly signed stock reports received regularly?</div><div>{formatPrintValue(formData.stockReportsRegular, formData.stockReportsRemark)}</div></div>
+                                        <div className="doc-grid"><div style={{paddingLeft: '1.2rem'}}>- (State frequency)</div><div>{formData.stockReportsFrequency}</div></div>
+                                        <div className="doc-grid"><div>d) Is bank’s possession fully effective and secured? </div><div>{formatPrintValue(formData.bankPossessionEffective, formData.bankPossessionRemark)}</div></div>
 
                                         <h2>7. BOOKS AND RECORDS</h2>
-                                        <div className="doc-grid"><div>Are godown registers/ cards properly maintained?</div><div>{formatPrintValue(formData.registersMaintained, formData.registersMaintainedRemark)}</div></div>
-                                        <div className="doc-grid"><div>Do godown registers tally with godown cards?</div><div>{formatPrintValue(formData.registersTally, formData.registersTallyRemark)}</div></div>
+                                        <div className="doc-grid"><div>a) Are godown registers/ cards properly maintained?</div><div>{formatPrintValue(formData.registersMaintained, formData.registersMaintainedRemark)}</div></div>
+                                        <div className="doc-grid"><div>b) Do godown registers tally with godown cards?</div><div>{formatPrintValue(formData.registersTally, formData.registersTallyRemark)}</div></div>
 
                                         <h2>8. CONTROL</h2>
-                                        <div className="doc-grid"><div>Are godown inspected periodically? </div><div>{formatPrintValue(formData.inspectedPeriodically, formData.inspectedPeriodicallyRemark)}</div></div>
-                                        <div className="doc-grid"><div>How often and by whom? </div><div>{formData.inspectedHowOften}</div></div>
-                                        <div className="doc-grid"><div>Is record of inspection maintained?</div><div>{formatPrintValue(formData.recordMaintained, formData.recordMaintainedRemark)}</div></div>
+                                        <div className="doc-grid"><div>a) Are godown inspected periodically? </div><div>{formatPrintValue(formData.inspectedPeriodically, formData.inspectedPeriodicallyRemark)}</div></div>
+                                        <div className="doc-grid"><div>b) How often and by whom? </div><div>{formData.inspectedHowOften}</div></div>
+                                        <div className="doc-grid"><div>c) Is record of inspection maintained?</div><div>{formatPrintValue(formData.recordMaintained, formData.recordMaintainedRemark)}</div></div>
 
                                         <h2>9. MOVEMENT OF STOCKS</h2>
-                                        <div className="doc-grid"><div>Is turnover in stocks satisfactory? </div><div>{formatPrintValue(formData.turnoverSatisfactory, formData.turnoverSatisfactoryRemark)}</div></div>
-                                        <div className="doc-grid" style={{alignItems: 'start'}}><div>Is turnover in account satisfactory? 	</div><div>{formatPrintValue(formData.accountTurnoverSatisfactory, formData.accountTurnoverSatisfactoryRemark)}</div></div>
+                                        <div className="doc-grid"><div>a) Is turnover in stocks satisfactory? </div><div>{formatPrintValue(formData.turnoverSatisfactory, formData.turnoverSatisfactoryRemark)}</div></div>
+                                        <div className="doc-grid" style={{alignItems: 'start'}}><div>b) Is turnover in account satisfactory? 	</div><div>{formatPrintValue(formData.accountTurnoverSatisfactory, formData.accountTurnoverSatisfactoryRemark)}</div></div>
 
                                         <h2>10. CERTIFICATE TO BE GIVEN BY THE INSPECTING OFFICER CERTIFYING THAT</h2>
-                                        <div className="doc-grid"><div>The movement of stocks in the account has been carefully checked. </div><div>{formatPrintValue(formData.movementChecked, formData.movementRemark)}</div></div>
-                                        <div className="doc-grid"><div>Stock older that three months are also moving out satisfactorily. </div><div>{formatPrintValue(formData.oldStockMoving, formData.oldStockRemark)}</div></div>
-                                        <div className="doc-grid"><div>Deliveries effected since last inspection have not been preponderating from new stocks.</div><div>{formatPrintValue(formData.deliveriesNotNew, formData.deliveriesRemark)}</div></div>
-                                        <div className="doc-grid"><div>All the stocks statements of the borrower are on branch record.</div><div>{formatPrintValue(formData.statementsOnRecord, formData.statementsRemark)}</div></div>
+                                        <div className="doc-grid"><div>a) The movement of stocks in the account has been carefully checked. </div><div>{formatPrintValue(formData.movementChecked, formData.movementRemark)}</div></div>
+                                        <div className="doc-grid"><div>b) Stock older that three months are also moving out satisfactorily. </div><div>{formatPrintValue(formData.oldStockMoving, formData.oldStockRemark)}</div></div>
+                                        <div className="doc-grid"><div>c) Deliveries effected since last inspection have not been preponderating from new stocks.</div><div>{formatPrintValue(formData.deliveriesNotNew, formData.deliveriesRemark)}</div></div>
+                                        <div className="doc-grid"><div>d) All the stocks statements of the borrower are on branch record.</div><div>{formatPrintValue(formData.statementsOnRecord, formData.statementsRemark)}</div></div>
 
                                         <div style={{fontSize: '9pt', fontStyle: 'italic', marginTop: '30pt', marginBottom: '50pt'}}>
                                             Note: Please refer Guidelines in the reverse	      
