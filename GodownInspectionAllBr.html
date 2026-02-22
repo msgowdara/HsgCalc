@@ -203,7 +203,7 @@
 
         const defaultFormState = {
             id: '', accountNo: '', name: '', nature: '', limit: '', sanctioningAuthority: 'BRCM',
-            officeAddress: '', godownAddress: '', distance: '', branch: '', branchAlpha: '', region: '',
+            officeAddress: '', godownAddress: '', distance: '', branch: '', region: '',
             dateOfReporting: new Date().toISOString().split('T')[0],
             dateOfVerification: new Date().toISOString().split('T')[0],
             inspectingOfficer: '', 
@@ -384,7 +384,7 @@
                         ...prev,
                         name: last.name, nature: last.nature, limit: last.limit, sanctioningAuthority: last.sanctioningAuthority,
                         officeAddress: last.officeAddress, godownAddress: last.godownAddress, distance: last.distance, 
-                        branch: last.branch, branchAlpha: last.branchAlpha, region: last.region, inspectingOfficer: last.inspectingOfficer || prev.inspectingOfficer,
+                        branch: last.branch, region: last.region, inspectingOfficer: last.inspectingOfficer || prev.inspectingOfficer,
                         conditionOfGodown: last.conditionOfGodown, conditionOfStocks: last.conditionOfStocks,
                         modeOfStorage: last.modeOfStorage, stockMarginPercent: last.stockMarginPercent, bdMarginPercent: last.bdMarginPercent,
                         signboardsDisplayed: last.signboardsDisplayed, signboardsInsideOutside: last.signboardsInsideOutside, 
@@ -820,9 +820,8 @@
                                                 <datalist id="officers-list">{officers.map(opt => <option key={opt} value={opt} />)}</datalist>
                                             </div>
                                             <div><label className="block text-xs font-bold text-slate-600 mb-1">Branch Name</label><input required type="text" className="w-full border-slate-300 rounded px-3 py-2 border" value={formData.branch} onChange={e => handleSelectChange('branch', e.target.value)} /></div>
-                                            <div><label className="block text-xs font-bold text-slate-600 mb-1">Branch Alpha (6 Letters)</label><input required type="text" maxLength="6" placeholder="e.g. DHARWA" className="w-full border-slate-300 rounded px-3 py-2 border font-mono uppercase" value={formData.branchAlpha} onChange={e => handleSelectChange('branchAlpha', e.target.value.replace(/[^a-zA-Z]/g, ''))} /></div>
                                             <div><label className="block text-xs font-bold text-slate-600 mb-1">Region</label><input required type="text" className="w-full border-slate-300 rounded px-3 py-2 border" value={formData.region} onChange={e => handleSelectChange('region', e.target.value)} /></div>
-                                            <div><label className="block text-xs font-bold text-slate-600 mb-1">Distance in km</label><input required type="text" className="w-full border-slate-300 rounded px-3 py-2 border" value={formData.distance} onChange={e => handleSelectChange('distance', e.target.value)} /></div>
+                                            <div><label className="block text-xs font-bold text-slate-600 mb-1">Distance</label><input required type="text" className="w-full border-slate-300 rounded px-3 py-2 border" value={formData.distance} onChange={e => handleSelectChange('distance', e.target.value)} /></div>
                                             <div className="sm:col-span-2">{renderFieldWithRemark('Condition of Godown', 'conditionOfGodown', 'conditions', 'godownRemark', 'Not Satisfactory')}</div>
                                         </div>
                                     </div>
@@ -979,7 +978,7 @@
                                         
                                         {/* REFERENCE AND DATE */}
                                         <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '11pt', marginBottom: '8px' }}>
-                                            <div>Ref: BOB:{formData.branchAlpha ? formData.branchAlpha.toUpperCase() : 'XXXXXX'}:VISITREPORT:{formData.accountNo || '__________'}</div>
+                                            <div>Ref: BOB:{settingsInput.alphaCode ? settingsInput.alphaCode.toUpperCase() : 'XXXXXX'}:VISITREPORT:{formData.accountNo || '__________'}</div>
                                             <div>Date: {formatDateStandard(formData.dateOfReporting)}</div>
                                         </div>
 
@@ -1097,7 +1096,7 @@
                                             <div></div>
                                         </div>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '11pt', marginBottom: '8px' }}>
-                                            <div>Ref: BOB:{formData.branchAlpha ? formData.branchAlpha.toUpperCase() : 'XXXXXX'}:VISITREPORT:{formData.accountNo || '__________'}</div>
+                                            <div>Ref: BOB:{settingsInput.alphaCode ? settingsInput.alphaCode.toUpperCase() : 'XXXXXX'}:VISITREPORT:{formData.accountNo || '__________'}</div>
                                             <div>Date: {formatDateStandard(formData.dateOfReporting)}</div>
                                         </div>
 
@@ -1187,19 +1186,19 @@
                                                     <img src="GodownCsv/BOB%20Logo.png" onError={(e) => { e.target.onerror = null; e.target.src = 'https://raw.githubusercontent.com/msgowdara/HsgCalc/main/GodownCsv/BOB%20Logo.png'; }} alt="Bank of Baroda" style={{ height: '100px' }} />
                                                 </div>
                                                 <div style={{ textAlign: 'center' }}>
-                                                    <h1 style={{fontSize: '20pt', fontWeight: 'bold', textTransform: 'uppercase', margin: 0}}>BANK OF BARODA</h1>
-                                                    <h2 style={{fontSize: '13pt', fontWeight: 'bold', textTransform: 'uppercase', marginTop: '4pt', marginBottom: 0}}>
-                                                        {formData.branch ? `${formData.branch} BRANCH` : '______________ BRANCH'}, {formData.region ? `${formData.region} REGION` : '______________ REGION'}
-                                                    </h2>
-                                                </div>
-                                                <div></div>
+                                                <h1 style={{fontSize: '20pt', fontWeight: 'bold', textTransform: 'uppercase', margin: 0}}>BANK OF BARODA</h1>
+                                                <h2 style={{fontSize: '13pt', fontWeight: 'bold', textTransform: 'uppercase', marginTop: '4pt', marginBottom: 0}}>
+                                                    {formData.branch ? `${formData.branch} BRANCH` : '______________ BRANCH'}, {formData.region ? `${formData.region} REGION` : '______________ REGION'}
+                                                </h2>
                                             </div>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '11pt', marginBottom: '8px' }}>
-                                                <div>Ref: BOB:{formData.branchAlpha ? formData.branchAlpha.toUpperCase() : 'XXXXXX'}:VISITREPORT:{formData.accountNo || '__________'}</div>
-                                                <div>Date: {formatDateStandard(formData.dateOfReporting)}</div>
-                                            </div>
+                                            <div></div>
+                                        </div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '11pt', marginBottom: '8px' }}>
+                                            <div>Ref: BOB:{settingsInput.alphaCode ? settingsInput.alphaCode.toUpperCase() : 'XXXXXX'}:VISITREPORT:{formData.accountNo || '__________'}</div>
+                                            <div>Date: {formatDateStandard(formData.dateOfReporting)}</div>
+                                        </div>
 
-                                            <div style={{ marginBottom: '10pt' }}>
+                                        <div style={{ marginBottom: '10pt' }}>
                                                 <strong>To:</strong><br/>
                                                 {formData.name}<br/>
                                                 {formData.officeAddress}
