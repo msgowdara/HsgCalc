@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HsgCalc - Banking & Loan Utilities</title>
+    <!-- Using Tailwind CSS for modern, responsive styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom animations for a smooth user experience */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col font-sans text-slate-800">
+
+    <!-- Header / Hero Section -->
+    <header class="bg-blue-900 text-white shadow-md py-12 px-4 sm:px-6 lg:px-8 text-center">
+        <div class="max-w-4xl mx-auto animate-fade-in">
+            <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight mb-4">
+                HsgCalc Utilities
+            </h1>
+            <p class="text-lg sm:text-xl text-blue-200 max-w-2xl mx-auto">
+                Your centralized dashboard for banking calculators and inspection tools. Select a utility below to get started.
+            </p>
+        </div>
+    </header>
+
+    <!-- Main Content Grid -->
+    <main class="flex-grow max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+            <!-- Card 1: Auto Loan -->
+            <a href="AutoLoan.html" class="group block h-full bg-white rounded-2xl shadow-sm hover:shadow-xl border border-slate-200 transition-all duration-300 hover:-translate-y-1 opacity-0 animate-fade-in delay-100 overflow-hidden">
+                <div class="h-2 bg-blue-500 w-full"></div>
+                <div class="p-6">
+                    <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                        <!-- Car Icon -->
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18a2 2 0 012 2v4a2 2 0 01-2 2h-18a2 2 0 01-2-2v-4a2 2 0 012-2z" class="hidden"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 11h14v2a2 2 0 01-2 2H7a2 2 0 01-2-2v-2z"></path>
+                            <circle cx="7" cy="17" r="2"></circle>
+                            <circle cx="17" cy="17" r="2"></circle>
+                        </svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mb-2 group-hover:text-blue-600 transition-colors">Auto Loan</h2>
+                    <p class="text-slate-600 leading-relaxed">
+                        Calculate auto loan Equated Monthly Installments (EMI), total interest, and payment schedules.
+                    </p>
+                </div>
+                <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-blue-600 font-medium">
+                    <span>Open Calculator</span>
+                    <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                    </svg>
+                </div>
+            </a>
+
+            <!-- Card 2: Godown Inspection -->
+            <a href="GodownInspection.html" class="group block h-full bg-white rounded-2xl shadow-sm hover:shadow-xl border border-slate-200 transition-all duration-300 hover:-translate-y-1 opacity-0 animate-fade-in delay-200 overflow-hidden">
+                <div class="h-2 bg-emerald-500 w-full"></div>
+                <div class="p-6">
+                    <div class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                        <!-- Warehouse/Clipboard Icon -->
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                        </svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mb-2 group-hover:text-emerald-600 transition-colors">Godown Inspection</h2>
+                    <p class="text-slate-600 leading-relaxed">
+                        Comprehensive tool for conducting godown inspections, stock verification, and generating reports.
+                    </p>
+                </div>
+                <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-emerald-600 font-medium">
+                    <span>Open Tool</span>
+                    <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                    </svg>
+                </div>
+            </a>
+
+            <!-- Card 3: Housing Loan -->
+            <a href="HousingLoan.html" class="group block h-full bg-white rounded-2xl shadow-sm hover:shadow-xl border border-slate-200 transition-all duration-300 hover:-translate-y-1 opacity-0 animate-fade-in delay-300 overflow-hidden">
+                <div class="h-2 bg-purple-500 w-full"></div>
+                <div class="p-6">
+                    <div class="w-14 h-14 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                        <!-- House Icon -->
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                        </svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mb-2 group-hover:text-purple-600 transition-colors">Housing Loan</h2>
+                    <p class="text-slate-600 leading-relaxed">
+                        Calculate housing loan eligibility, estimate maximum loan amounts, and view repayment schedules.
+                    </p>
+                </div>
+                <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-purple-600 font-medium">
+                    <span>Open Calculator</span>
+                    <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                    </svg>
+                </div>
+            </a>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 mt-auto">
+        <div class="max-w-6xl mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-sm text-slate-500">
+            <p>&copy; <span id="year"></span> msgowdara.github.io/HsgCalc. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Script to set current year in footer -->
+    <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+    </script>
+</body>
+</html>
