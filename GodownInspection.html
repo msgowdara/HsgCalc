@@ -16,14 +16,14 @@
 
     <style>
         @media print {
-            body { background-color: white !important; margin: 0; padding: 0; }
+            body, html { background-color: white !important; margin: 0; padding: 0; height: auto !important; overflow: visible !important; }
             .no-print { display: none !important; }
             .print-only { display: block !important; }
             #report-container { box-shadow: none !important; margin: 0 !important; padding: 0 0 50px 0 !important; width: 100% !important; max-width: none !important; }
             ::-webkit-scrollbar { display: none; }
             .page-break-avoid { page-break-inside: avoid; }
             /* Force break and attempt to force to next right/odd page for duplex printing */
-            .page-break-before { page-break-before: always; break-before: right; }
+            .page-break-before { page-break-before: always; break-before: right; padding-top: 10mm !important; }
             
             .print-only-footer { 
                 display: block; position: fixed; bottom: 0; left: 0; width: 100%;
@@ -31,10 +31,20 @@
                 background: white; border-top: 1px solid black; padding-top: 5px; padding-bottom: 5px; z-index: 1000;
             }
             .screen-only-footer { display: none !important; }
+
+            /* FIX: Ensure a4-page stays inside printer margins and does not cause horizontal overflow */
+            .a4-page {
+                width: 100% !important;
+                min-height: auto !important;
+                margin: 0 !important;
+                padding: 10mm !important;
+                box-shadow: none !important;
+            }
         }
         
         .a4-page {
             width: 210mm; min-height: 297mm; background: white; margin: 0 auto;
+            box-sizing: border-box; /* Crucial for preventing width overflow */
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); padding: 20mm 15mm;
         }
 
@@ -479,10 +489,10 @@
             const borrowerFindings = adverseFindings.filter(f => f.resp === 'Borrower' || f.resp === 'Both');
 
             return (
-                <div className="min-h-screen flex flex-col font-sans">
-                    {/* Header */}
-                    <div className="no-print bg-slate-900 text-white shadow-md z-10 sticky top-0">
-                        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+                <div className="min-h-screen flex flex-col font-sans print:block print:min-h-0">
+                    {/* BEGIN MAIN MENU RIBBON */}
+                    <nav className="no-print" style={{backgroundColor: '#1e3a8a', color: 'white', padding: '12px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontFamily: 'system-ui, -apple-system, sans-serif', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'}}>
+                        <div style={{fontSize: '1.25rem', fontWeight: '700', letterSpacing: '0.5px'}}>
                             <div className="flex items-center gap-3">
                                 <div className="bg-indigo-600 p-1.5 rounded"><Icons.Cloud /></div>
                                 <h1 className="font-bold text-lg tracking-wide hidden sm:block">Godown Inspector Pro <span className="text-xs text-indigo-300 font-normal ml-2">Cloud Sync V2</span></h1>
@@ -549,8 +559,8 @@
                         </div>
                     )}
 
-                    <div className="flex-1 overflow-auto bg-slate-100 p-4 print:p-0">
-                        <div className="max-w-6xl mx-auto h-full">
+                    <div className="flex-1 overflow-auto bg-slate-100 p-4 print:p-0 print:overflow-visible print:bg-white">
+                        <div className="max-w-6xl mx-auto h-full print:h-auto print:max-w-none">
                             
                             {/* DASHBOARD */}
                             {view === 'dashboard' && (
@@ -890,7 +900,7 @@
                                                 The Branch Head,<br/>
                                                 Bank of Baroda, {formData.branch} Branch
                                             </div>
-                                            <div><strong>Date:</strong> {formatDateStandard(formData.dateOfReporting) || new Date().toLocaleDateString('en-GB')}</div>
+                                            <div style={{ textAlign: 'right', paddingLeft: '10px' }}><strong>Date:</strong> {formatDateStandard(formData.dateOfReporting) || new Date().toLocaleDateString('en-GB')}</div>
                                         </div>
                                         <div style={{ marginBottom: '20pt' }}>
                                             <strong>Subject:</strong> Outcome of Godown Inspection - {formData.name} (A/c: {formData.accountNo})
@@ -942,7 +952,7 @@
                                                     {formData.name}<br/>
                                                     {formData.officeAddress}
                                                 </div>
-                                                <div><strong>Date:</strong> {formatDateStandard(formData.dateOfReporting) || new Date().toLocaleDateString('en-GB')}</div>
+                                                <div style={{ textAlign: 'right', paddingLeft: '10px' }}><strong>Date:</strong> {formatDateStandard(formData.dateOfReporting) || new Date().toLocaleDateString('en-GB')}</div>
                                             </div>
                                             <div style={{ marginBottom: '20pt' }}>
                                                 <strong>Subject:</strong> Rectification of irregularities observed during Godown Inspection dated {formatDateStandard(formData.dateOfVerification)}
