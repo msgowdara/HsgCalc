@@ -11,6 +11,7 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
     <style>
         @media print {
@@ -131,55 +132,68 @@
             Print: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>,
             Home: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
             Save: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>,
-            AlertCircle: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            AlertCircle: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>,
+            Settings: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>,
+            Cloud: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>,
+            Loader: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-spin"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg>,
+            Search: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
         };
 
-        // --- IndexedDB Offline Storage Logic ---
-        const DB_NAME = 'SmartGodownDB';
-        const STORE_NAME = 'inspections';
+        // --- CLOUD API INTEGRATION ---
+        const CLOUD_SETTINGS_KEY = 'godown_cloud_settings_v3';
+        const utf8ToBase64 = (str) => btoa(unescape(encodeURIComponent(str)));
+        const base64ToUtf8 = (str) => decodeURIComponent(escape(atob(str)));
 
-        const initDB = () => {
-            return new Promise((resolve, reject) => {
-                const request = indexedDB.open(DB_NAME, 1);
-                request.onupgradeneeded = (e) => {
-                    const db = e.target.result;
-                    if (!db.objectStoreNames.contains(STORE_NAME)) {
-                        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
-                    }
-                };
-                request.onsuccess = () => resolve(request.result);
-                request.onerror = () => reject(request.error);
-            });
+        const getCloudSettings = () => {
+            const saved = localStorage.getItem(CLOUD_SETTINGS_KEY);
+            return saved ? JSON.parse(saved) : { token: '', owner: 'msgowdara', repo: 'HsgCalc', alphaCode: '' };
         };
 
-        const saveToDB = async (record) => {
-            const db = await initDB();
-            return new Promise((resolve, reject) => {
-                const tx = db.transaction(STORE_NAME, 'readwrite');
-                tx.objectStore(STORE_NAME).put(record);
-                tx.oncomplete = () => resolve();
-                tx.onerror = () => reject(tx.error);
-            });
+        const fetchFromCloud = async () => {
+            const { token, owner, repo, alphaCode } = getCloudSettings();
+            if (!token) throw new Error("No Cloud Token Configured");
+            if (!alphaCode || alphaCode.length !== 6) throw new Error("Invalid Branch Alpha Code");
+            
+            const filepath = `GodownCsv/Godown_${alphaCode.toLowerCase()}.csv`;
+            const url = `https://api.github.com/repos/${owner}/${repo}/contents/${filepath}`;
+            const res = await fetch(url, { headers: { Authorization: `token ${token}` } });
+            
+            if (res.status === 404) return { data: [], sha: null }; 
+            if (!res.ok) throw new Error(`Cloud API Error: ${res.statusText}`);
+            
+            const json = await res.json();
+            const csvContent = base64ToUtf8(json.content);
+            const parsed = Papa.parse(csvContent, { header: true, skipEmptyLines: true });
+            
+            return { data: parsed.data, sha: json.sha };
         };
 
-        const loadFromDB = async () => {
-            const db = await initDB();
-            return new Promise((resolve, reject) => {
-                const tx = db.transaction(STORE_NAME, 'readonly');
-                const request = tx.objectStore(STORE_NAME).getAll();
-                request.onsuccess = () => resolve(request.result);
-                request.onerror = () => reject(request.error);
-            });
-        };
+        const pushToCloud = async (dataArray, currentSha) => {
+            const { token, owner, repo, alphaCode } = getCloudSettings();
+            if (!token) throw new Error("No Cloud Token Configured");
+            if (!alphaCode || alphaCode.length !== 6) throw new Error("Invalid Branch Alpha Code");
 
-        const deleteFromDB = async (id) => {
-            const db = await initDB();
-            return new Promise((resolve, reject) => {
-                const tx = db.transaction(STORE_NAME, 'readwrite');
-                const request = tx.objectStore(STORE_NAME).delete(id);
-                request.onsuccess = () => resolve();
-                request.onerror = () => reject(request.error);
+            const filepath = `GodownCsv/Godown_${alphaCode.toLowerCase()}.csv`;
+            const csvContent = Papa.unparse(dataArray);
+            const encodedContent = utf8ToBase64(csvContent);
+
+            const url = `https://api.github.com/repos/${owner}/${repo}/contents/${filepath}`;
+            const body = {
+                message: "Update godown inspections data via App",
+                content: encodedContent,
+                ...(currentSha ? { sha: currentSha } : {})
+            };
+
+            const res = await fetch(url, {
+                method: 'PUT',
+                headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
             });
+
+            if (!res.ok) {
+                const errJson = await res.json();
+                throw new Error(`Cloud Save Failed: ${errJson.message}`);
+            }
         };
 
         const defaultFormState = {
@@ -227,15 +241,27 @@
             const [inspections, setInspections] = useState([]);
             const [officers, setOfficers] = useState([]);
             const [toast, setToast] = useState('');
+            const [searchQuery, setSearchQuery] = useState('');
+            
+            // App & API States
+            const [isFetching, setIsFetching] = useState(true);
             const [isSaving, setIsSaving] = useState(false);
+            const [showSettings, setShowSettings] = useState(false);
+            const [settingsInput, setSettingsInput] = useState(getCloudSettings());
 
             useEffect(() => {
-                refreshData();
+                if(getCloudSettings().token) {
+                    refreshDataFromCloud();
+                } else {
+                    setIsFetching(false);
+                    setShowSettings(true); 
+                }
             }, []);
 
-            const refreshData = async () => {
+            const refreshDataFromCloud = async () => {
+                setIsFetching(true);
                 try {
-                    const data = await loadFromDB();
+                    const { data } = await fetchFromCloud();
                     data.sort((a, b) => new Date(b.dateOfReporting) - new Date(a.dateOfReporting));
                     setInspections(data);
                     
@@ -243,21 +269,41 @@
                     data.forEach(d => { if (d.inspectingOfficer) offSet.add(d.inspectingOfficer) });
                     setOfficers(Array.from(offSet));
                 } catch (e) {
-                    console.error("Error loading data from IndexedDB", e);
+                    console.error(e);
+                    showToast("⚠️ Cloud Sync Failed: " + e.message);
+                } finally {
+                    setIsFetching(false);
                 }
             };
 
             const showToast = (msg) => {
                 setToast(msg);
-                setTimeout(() => setToast(''), 3000);
+                setTimeout(() => setToast(''), 4000);
+            };
+
+            const handleSaveSettings = () => {
+                if (!settingsInput.alphaCode || settingsInput.alphaCode.length !== 6) {
+                    alert("Please enter exactly 6 letters for the Branch Alpha Code.");
+                    return;
+                }
+                localStorage.setItem(CLOUD_SETTINGS_KEY, JSON.stringify(settingsInput));
+                setShowSettings(false);
+                showToast("⚙️ Cloud Settings Saved!");
+                refreshDataFromCloud();
             };
 
             const handleSave = async () => {
                 const form = document.getElementById('inspectionForm');
                 if (form && !form.reportValidity()) return; // Native HTML5 Validation Check
 
+                if (!getCloudSettings().token) return setShowSettings(true);
+
                 setIsSaving(true);
+                showToast("⏳ Syncing with Cloud...");
                 try {
+                    const cloudData = await fetchFromCloud();
+                    let latestArray = cloudData.data || [];
+                    
                     const reportId = formData.id || Date.now().toString();
                     const recordToSave = { 
                         ...formData, 
@@ -266,17 +312,23 @@
                         lastUpdated: new Date().toISOString() 
                     };
                     
-                    await saveToDB(recordToSave);
+                    const existingIndex = latestArray.findIndex(item => item.id === reportId);
+                    if (existingIndex >= 0) {
+                        latestArray[existingIndex] = recordToSave;
+                    } else {
+                        latestArray.push(recordToSave);
+                    }
                     
-                    const data = await loadFromDB();
-                    data.sort((a, b) => new Date(b.dateOfReporting) - new Date(a.dateOfReporting));
+                    await pushToCloud(latestArray, cloudData.sha);
                     
-                    setInspections(data);
+                    latestArray.sort((a, b) => new Date(b.dateOfReporting) - new Date(a.dateOfReporting));
+                    setInspections(latestArray);
                     setFormData(recordToSave);
-                    showToast("💾 Report Saved Successfully!");
+                    
+                    showToast("☁️✅ Synced Successfully to CSV on Cloud!");
                     setView('preview');
                 } catch (e) {
-                    alert("Error saving data. " + e.message);
+                    alert("Error syncing to Cloud. " + e.message);
                 } finally {
                     setIsSaving(false);
                 }
@@ -301,13 +353,19 @@
             };
 
             const handleDelete = async (id) => {
-                if (window.confirm("Are you sure you want to delete this report? This cannot be undone.")) {
+                if (window.confirm("Delete this report permanently from Cloud?")) {
+                    setIsSaving(true);
+                    showToast("🗑️ Deleting from Cloud...");
                     try {
-                        await deleteFromDB(id);
-                        setInspections(prev => prev.filter(item => item.id !== id));
-                        showToast("🗑️ Report deleted.");
+                        const cloudData = await fetchFromCloud();
+                        const newArray = (cloudData.data || []).filter(item => item.id !== id);
+                        await pushToCloud(newArray, cloudData.sha);
+                        setInspections(newArray.sort((a, b) => new Date(b.dateOfReporting) - new Date(a.dateOfReporting)));
+                        showToast("🗑️ Report successfully deleted from Cloud.");
                     } catch (e) {
-                        alert("Failed to delete report. " + e.message);
+                        alert("Failed to delete. " + e.message);
+                    } finally {
+                        setIsSaving(false);
                     }
                 }
             };
@@ -493,6 +551,19 @@
                 return mainValue;
             };
 
+            // Filter Inspections Array based on Search Query
+            const filteredInspections = inspections.filter(insp => {
+                if (!searchQuery) return true;
+                const term = searchQuery.toLowerCase();
+                return (
+                    (insp.name || '').toLowerCase().includes(term) ||
+                    (insp.accountNo || '').toLowerCase().includes(term) ||
+                    (insp.inspectingOfficer || '').toLowerCase().includes(term) ||
+                    (insp.dateOfReporting || '').includes(term) ||
+                    (insp.branch || '').toLowerCase().includes(term)
+                );
+            });
+
             // --- Analyze Remarks for Dynamic Letters (Critical vs Other) ---
             const branchCritical = [];
             const branchOther = [];
@@ -564,22 +635,25 @@
                     <div className="no-print bg-slate-900 text-white shadow-md z-10 sticky top-0">
                         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <div className="bg-blue-600 p-1.5 rounded"><Icons.Home /></div>
-                                <h1 className="font-bold text-lg tracking-wide hidden sm:block">Godown Inspector Pro <span className="text-xs text-emerald-400 font-normal ml-2">Final Validated</span></h1>
+                                <div className="bg-indigo-600 p-1.5 rounded"><Icons.Cloud /></div>
+                                <h1 className="font-bold text-lg tracking-wide hidden sm:block">Godown Inspector Pro <span className="text-xs text-indigo-300 font-normal ml-2">Branch Sync V3</span></h1>
                             </div>
                             
                             <div className="flex items-center gap-2">
-                                <button type="button" onClick={() => setView('dashboard')} className={`p-2 rounded hover:bg-slate-800 transition ${view === 'dashboard' ? 'bg-slate-800 text-blue-400' : 'text-slate-300'}`}>
+                                <button type="button" onClick={() => setShowSettings(true)} className="p-2 rounded text-slate-300 hover:bg-slate-800 transition mr-2 flex items-center gap-1" title="Settings">
+                                    <Icons.Settings />
+                                </button>
+                                <button type="button" onClick={() => setView('dashboard')} className={`p-2 rounded hover:bg-slate-800 transition ${view === 'dashboard' ? 'bg-slate-800 text-indigo-400' : 'text-slate-300'}`}>
                                     <Icons.Home />
                                 </button>
                                 {view === 'dashboard' && (
-                                    <button type="button" onClick={() => { setFormData(defaultFormState); setView('form'); }} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded text-sm font-medium transition-colors">
+                                    <button type="button" onClick={() => { setFormData(defaultFormState); setView('form'); }} className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded text-sm font-medium transition-colors">
                                         <Icons.Plus /> New Report
                                     </button>
                                 )}
                                 {(view === 'form' || view === 'preview') && (
                                     <button type="button" onClick={handleSave} disabled={isSaving} className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded text-sm font-medium transition-colors disabled:opacity-50">
-                                        <Icons.Save /> {isSaving ? 'Saving...' : 'Save Data'}
+                                        <Icons.Save /> {isSaving ? 'Syncing...' : 'Save to Cloud'}
                                     </button>
                                 )}
                                 {view === 'preview' && (
@@ -592,8 +666,47 @@
                     </div>
 
                     {toast && (
-                        <div className="fixed bottom-4 right-4 bg-emerald-600 text-white px-6 py-3 rounded shadow-lg z-50 animate-bounce font-medium">
+                        <div className="fixed bottom-4 right-4 bg-indigo-600 text-white px-6 py-3 rounded shadow-lg z-50 animate-bounce font-medium">
                             {toast}
+                        </div>
+                    )}
+
+                    {/* Generic Cloud Settings Modal */}
+                    {showSettings && (
+                        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+                            <div className="bg-white rounded-lg shadow-xl max-w-md w-full overflow-hidden">
+                                <div className="bg-slate-100 border-b px-4 py-3 flex justify-between items-center">
+                                    <h3 className="font-bold text-slate-800 flex items-center gap-2"><Icons.Cloud /> Cloud Database Settings</h3>
+                                </div>
+                                <div className="p-6 space-y-4">
+                                    <p className="text-sm text-slate-600 mb-4 bg-indigo-50 p-3 rounded">This app saves data securely to your connected Cloud Repository. An Access Token is required to enable remote sync.</p>
+                                    
+                                    <div><label className="block text-xs font-bold text-slate-600 mb-1">Cloud Access Token (PAT)</label>
+                                        <input type="password" placeholder="Enter your access token" className="w-full border-slate-300 rounded px-3 py-2 border shadow-sm" value={settingsInput.token} onChange={e => setSettingsInput({...settingsInput, token: e.target.value})} />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div><label className="block text-xs font-bold text-slate-600 mb-1">Account / Username</label><input type="text" className="w-full border-slate-300 rounded px-3 py-2 border shadow-sm bg-slate-50" value={settingsInput.owner} onChange={e => setSettingsInput({...settingsInput, owner: e.target.value})} /></div>
+                                        <div><label className="block text-xs font-bold text-slate-600 mb-1">Repository Name</label><input type="text" className="w-full border-slate-300 rounded px-3 py-2 border shadow-sm bg-slate-50" value={settingsInput.repo} onChange={e => setSettingsInput({...settingsInput, repo: e.target.value})} /></div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-600 mb-1">Branch Alpha Code (6 Letters)</label>
+                                        <input 
+                                            type="text" 
+                                            maxLength="6" 
+                                            placeholder="e.g. dharwa" 
+                                            className="w-full border-slate-300 rounded px-3 py-2 border shadow-sm bg-slate-50 font-mono text-sm lowercase" 
+                                            value={settingsInput.alphaCode} 
+                                            onChange={e => setSettingsInput({...settingsInput, alphaCode: e.target.value.replace(/[^a-zA-Z]/g, '').toLowerCase()})} 
+                                        />
+                                        <p className="text-[10px] text-slate-500 mt-1">Data will be saved as: <strong>GodownCsv/Godown_{settingsInput.alphaCode ? settingsInput.alphaCode.toLowerCase() : 'xxxxxx'}.csv</strong></p>
+                                    </div>
+                                    
+                                    <div className="flex justify-end gap-3 mt-6 pt-4 border-t">
+                                        <button type="button" onClick={() => setShowSettings(false)} className="px-4 py-2 text-slate-600 font-medium hover:bg-slate-100 rounded">Cancel</button>
+                                        <button type="button" onClick={handleSaveSettings} className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded font-bold shadow">Save Settings & Link</button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     )}
 
@@ -603,50 +716,82 @@
                             {/* DASHBOARD */}
                             {view === 'dashboard' && (
                                 <div className="bg-white rounded-lg shadow border border-slate-200 p-6">
-                                    <div className="flex justify-between items-center mb-6 border-b pb-2">
-                                        <h2 className="text-xl font-bold text-slate-800">Inspection Database</h2>
-                                        <span className="bg-slate-100 text-slate-600 text-xs px-2 py-1 rounded border">Records: {inspections.length}</span>
+                                    <div className="flex justify-between items-center mb-4 border-b pb-2">
+                                        <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">Cloud Database {isFetching && <span className="text-indigo-600"><Icons.Loader/></span>}</h2>
+                                        <span className="bg-indigo-100 text-indigo-800 font-bold text-xs px-3 py-1.5 rounded-full border border-indigo-200 shadow-inner">Total Records: {inspections.length}</span>
                                     </div>
+
+                                    {/* SEARCH BAR UI */}
+                                    {inspections.length > 0 && (
+                                        <div className="mb-6 relative">
+                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                                                <Icons.Search />
+                                            </div>
+                                            <input 
+                                                type="text" 
+                                                className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-sm" 
+                                                placeholder="Search by Name, Account No, Officer, Branch, or Date..." 
+                                                value={searchQuery}
+                                                onChange={e => setSearchQuery(e.target.value)}
+                                            />
+                                        </div>
+                                    )}
                                     
-                                    {inspections.length === 0 ? (
+                                    {!getCloudSettings().token ? (
                                         <div className="text-center py-12 text-slate-500 bg-slate-50 rounded-lg border border-dashed border-slate-300">
-                                            <p className="mb-4">No inspection records found in secure local storage.</p>
-                                            <button type="button" onClick={() => { setFormData(defaultFormState); setView('form'); }} className="bg-blue-600 text-white px-6 py-2 rounded shadow hover:bg-blue-700">Start First Inspection</button>
+                                            <p className="mb-4 font-bold text-slate-700">Setup Required</p>
+                                            <p className="text-sm mb-4">Please connect your Cloud repository in settings to start saving and retrieving data.</p>
+                                            <button type="button" onClick={() => setShowSettings(true)} className="bg-indigo-600 text-white px-6 py-2 rounded shadow hover:bg-indigo-700">Open Settings</button>
+                                        </div>
+                                    ) : isFetching ? (
+                                        <div className="text-center py-12 text-slate-500">
+                                            <p>Pulling latest data from Cloud...</p>
+                                        </div>
+                                    ) : inspections.length === 0 ? (
+                                        <div className="text-center py-12 text-slate-500 bg-slate-50 rounded-lg border border-dashed border-slate-300">
+                                            <p className="mb-4">No inspection records found in cloud CSV.</p>
+                                            <button type="button" onClick={() => { setFormData(defaultFormState); setView('form'); }} className="bg-indigo-600 text-white px-6 py-2 rounded shadow hover:bg-indigo-700">Start First Inspection</button>
                                         </div>
                                     ) : (
                                         <div className="overflow-x-auto">
-                                            <table className="w-full text-left text-sm text-slate-600">
-                                                <thead className="bg-slate-50 text-slate-800 font-semibold border-b border-slate-200">
-                                                    <tr>
-                                                        <th className="p-3">Date</th><th className="p-3">Account No</th>
-                                                        <th className="p-3">Name</th>
-                                                        <th className="p-3 text-right">Drawing Power</th><th className="p-3 text-center">Actions</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {inspections.map(insp => {
-                                                        const dp = (parseFloat(insp.stockValue||0) - parseFloat(insp.stockMargin||0)) + (parseFloat(insp.bookDebts||0) - parseFloat(insp.bookDebtsMargin||0)) - parseFloat(insp.creditors||0);
-                                                        return (
-                                                            <tr key={insp.id} className="border-b border-slate-100 hover:bg-blue-50">
-                                                                <td className="p-3 font-medium text-slate-900">{formatDateStandard(insp.dateOfReporting)}</td>
-                                                                <td className="p-3">{insp.accountNo}</td><td className="p-3">{insp.name}</td>
-                                                                <td className="p-3 text-right font-medium">{formatCurrency(dp > 0 ? dp : 0)}</td>
-                                                                <td className="p-3 text-center">
-                                                                    <div className="flex justify-center gap-2 text-xs font-semibold">
-                                                                        <button type="button" onClick={() => { setFormData(insp); setView('form'); }} className="text-blue-600 hover:text-blue-800 hover:underline">Edit</button>
-                                                                        <span className="text-slate-300">|</span>
-                                                                        <button type="button" onClick={() => handleDuplicate(insp)} className="text-indigo-600 hover:text-indigo-800 hover:underline" title="Copy for next month">Copy</button>
-                                                                        <span className="text-slate-300">|</span>
-                                                                        <button type="button" onClick={() => { setFormData(insp); setView('preview'); }} className="text-emerald-600 hover:text-emerald-800 hover:underline">Print</button>
-                                                                        <span className="text-slate-300">|</span>
-                                                                        <button type="button" onClick={() => handleDelete(insp.id)} className="text-red-600 hover:text-red-800 hover:underline">Delete</button>
-                                                                    </div>
-                                                                </td>
-                                                            </tr>
-                                                        );
-                                                    })}
-                                                </tbody>
-                                            </table>
+                                            {filteredInspections.length === 0 ? (
+                                                <div className="text-center py-12 text-slate-500 bg-slate-50 rounded-lg border border-dashed border-slate-300">
+                                                    <p>No reports match your search criteria "{searchQuery}".</p>
+                                                </div>
+                                            ) : (
+                                                <table className="w-full text-left text-sm text-slate-600">
+                                                    <thead className="bg-slate-50 text-slate-800 font-semibold border-b border-slate-200">
+                                                        <tr>
+                                                            <th className="p-3">Date</th><th className="p-3">Account No</th>
+                                                            <th className="p-3">Name</th>
+                                                            <th className="p-3 text-right">Drawing Power</th><th className="p-3 text-center">Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {filteredInspections.map(insp => {
+                                                            const dp = (parseFloat(insp.stockValue||0) - parseFloat(insp.stockMargin||0)) + (parseFloat(insp.bookDebts||0) - parseFloat(insp.bookDebtsMargin||0)) - parseFloat(insp.creditors||0);
+                                                            return (
+                                                                <tr key={insp.id} className="border-b border-slate-100 hover:bg-indigo-50 transition-colors">
+                                                                    <td className="p-3 font-medium text-slate-900">{formatDateStandard(insp.dateOfReporting)}</td>
+                                                                    <td className="p-3 font-mono">{insp.accountNo}</td><td className="p-3">{insp.name}</td>
+                                                                    <td className="p-3 text-right font-medium">{formatCurrency(dp > 0 ? dp : 0)}</td>
+                                                                    <td className="p-3 text-center">
+                                                                        <div className="flex justify-center gap-2 text-xs font-semibold">
+                                                                            <button type="button" onClick={() => { setFormData(insp); setView('form'); }} className="text-blue-600 hover:text-blue-800 hover:underline px-2 py-1 rounded hover:bg-blue-100">Edit</button>
+                                                                            <span className="text-slate-300 mt-1">|</span>
+                                                                            <button type="button" onClick={() => handleDuplicate(insp)} className="text-indigo-600 hover:text-indigo-800 hover:underline px-2 py-1 rounded hover:bg-indigo-100" title="Copy for next month">Copy</button>
+                                                                            <span className="text-slate-300 mt-1">|</span>
+                                                                            <button type="button" onClick={() => { setFormData(insp); setView('preview'); }} className="text-emerald-600 hover:text-emerald-800 hover:underline px-2 py-1 rounded hover:bg-emerald-100">Print</button>
+                                                                            <span className="text-slate-300 mt-1">|</span>
+                                                                            <button type="button" onClick={() => handleDelete(insp.id)} disabled={isSaving} className="text-red-600 hover:text-red-800 hover:underline px-2 py-1 rounded hover:bg-red-100 disabled:opacity-50">Delete</button>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            );
+                                                        })}
+                                                    </tbody>
+                                                </table>
+                                            )}
                                         </div>
                                     )}
                                 </div>
@@ -803,7 +948,7 @@
                                     <div className="flex justify-end gap-4 mt-6">
                                         <button type="button" onClick={handlePreview} className="bg-slate-200 hover:bg-slate-300 text-slate-800 px-6 py-3 rounded shadow-sm font-bold transition">Preview</button>
                                         <button type="submit" disabled={isSaving} className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded shadow font-bold text-lg transition flex items-center gap-2 disabled:opacity-50">
-                                            <Icons.Save /> {isSaving ? 'Saving...' : 'Save Data'}
+                                            <Icons.Save /> {isSaving ? 'Syncing...' : 'Save to Cloud'}
                                         </button>
                                     </div>
                                 </form>
