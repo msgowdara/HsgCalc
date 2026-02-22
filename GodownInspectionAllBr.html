@@ -143,7 +143,6 @@
             if (!token) throw new Error("No Cloud Token Configured");
             if (!alphaCode || alphaCode.length !== 6) throw new Error("Invalid Branch Alpha Code");
             
-            // Force lowercase and prepend the GodownCsv folder path
             const filepath = `GodownCsv/Godown_${alphaCode.toLowerCase()}.csv`;
             const url = `https://api.github.com/repos/${owner}/${repo}/contents/${filepath}`;
             const res = await fetch(url, { headers: { Authorization: `token ${token}` } });
@@ -163,7 +162,6 @@
             if (!token) throw new Error("No Cloud Token Configured");
             if (!alphaCode || alphaCode.length !== 6) throw new Error("Invalid Branch Alpha Code");
 
-            // Force lowercase and prepend the GodownCsv folder path
             const filepath = `GodownCsv/Godown_${alphaCode.toLowerCase()}.csv`;
             const csvContent = Papa.unparse(dataArray);
             const encodedContent = utf8ToBase64(csvContent);
@@ -204,7 +202,7 @@
             seasonYear: '', ageOfOldStockDays: '', amountOfOldStockRupees: '', percentOldStock: '',
             
             modeOfValuationSatisfactory: 'Satisfactory', valuationRemark: '',
-            tradeDiscountDeducted: 'No', tradeDiscountRemark: '',
+            tradeDiscountDeducted: 'Yes', tradeDiscountRemark: '',
             unpledgedStocks: 'No', 
             
             insuranceAmount: '', 
@@ -753,7 +751,7 @@
                                                 <div className="bg-slate-50 p-4 rounded border border-slate-200">
                                                     <h4 className="text-sm font-bold text-slate-800 mb-3 border-b pb-1">Valuation</h4>
                                                     {renderFieldWithRemark('Is the mode of Valuation Satisfactory', 'modeOfValuationSatisfactory', 'conditions', 'valuationRemark', 'Not Satisfactory')}
-                                                    {renderFieldWithRemark('Whether trade discount, if any, deducted?', 'tradeDiscountDeducted', 'yesNo', 'tradeDiscountRemark', 'Yes')}
+                                                    {renderFieldWithRemark('Whether trade discount, if any, deducted?', 'tradeDiscountDeducted', 'yesNo', 'tradeDiscountRemark', 'No')}
                                                     <div className="mb-4"><label className="block text-xs font-bold text-slate-600 mb-1">Unpledged stocks, if any stored?</label><select className="w-full border-slate-300 rounded px-3 py-2 border bg-white text-sm" value={formData.unpledgedStocks} onChange={e => handleSelectChange('unpledgedStocks', e.target.value)}>{DROPDOWNS.yesNo.map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></div>
                                                 </div>
 
