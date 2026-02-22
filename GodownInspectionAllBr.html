@@ -615,17 +615,17 @@
                         suggestion: config.text
                     };
 
+                    // Borrower letter securely gets ONLY items where they are responsible
                     if (config.resp === 'Borrower' || config.resp === 'Both') {
                         borrowerFindings.push(finding);
                     }
 
-                    if (config.resp === 'Branch' || config.resp === 'Both') {
-                        // Force Insurance Adequacy into Critical list as requested
-                        if (key === 'insuranceAdequate') {
-                            branchCritical.push(finding); 
-                        } else {
-                            branchOther.push(finding);
-                        }
+                    // Branch Head Memo is the master document: It gets ALL findings. 
+                    // Force Insurance Adequacy into Critical list, everything else goes to Other Observations.
+                    if (key === 'insuranceAdequate') {
+                        branchCritical.push(finding); 
+                    } else {
+                        branchOther.push(finding);
                     }
                 }
             });
