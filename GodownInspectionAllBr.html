@@ -97,7 +97,7 @@
             yesNo: ["Yes", "No", "Not Applicable"],
             insideOutside: ["Inside", "Outside", "Not Applicable"],
             frequency: ["Monthly", "Quarterly", "Half Yearly", "Yearly", "Irregular"],
-            authorities: ["BRCM", "RLCC", "CAC", "ZO", "HO"],
+            authorities: ["BRBH", "BRSM", "BRCM", "BRAGM", "BRDGM", "ROCC-DRM", "ROCC-RM", "ZOCC-BD", "ZOCC-DGM", "ZOCC-GM", "COCC-GM", "COCC-CGM", "COCC-ED", "COCC-CMD", "COCC-MCB"],
             margins: ["0", "10", "15", "20", "25", "30", "40", "50"]
         };
 
@@ -979,7 +979,7 @@
                                         
                                         {/* REFERENCE AND DATE */}
                                         <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '11pt', marginBottom: '8px' }}>
-                                            <div>Ref: BOB:{formData.branchAlpha ? formData.branchAlpha.toUpperCase() : 'XXXXXX'}:VISIT_REPORT:{formData.accountNo || '__________'}</div>
+                                            <div>Ref: BOB:{formData.branchAlpha ? formData.branchAlpha.toUpperCase() : 'XXXXXX'}:VISITREPORT:{formData.accountNo || '__________'}</div>
                                             <div>Date: {formatDateStandard(formData.dateOfReporting)}</div>
                                         </div>
 
@@ -998,7 +998,7 @@
                                         
                                         <h2>2. PARTICULARS OF THE GODOWN</h2>
                                         <div className="doc-grid"><div>a) Location</div><div>Office Address : {formData.officeAddress}<br/>Godown Address : {formData.godownAddress}</div></div>
-                                        <div className="doc-grid"><div>b) Distance</div><div>{formData.distance}</div></div>
+                                        <div className="doc-grid"><div>b) Distance</div><div>{formData.distance ? (String(formData.distance).toLowerCase().includes('km') ? formData.distance : formData.distance + ' km') : ''}</div></div>
                                         <div className="doc-grid"><div>c) Condition of Godown</div><div>{formatPrintValue(formData.conditionOfGodown, formData.godownRemark)}</div></div>
 
                                         <h2>3. STOCKS</h2>
