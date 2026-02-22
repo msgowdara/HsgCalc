@@ -141,21 +141,26 @@
 
         // --- CLOUD API INTEGRATION ---
         const CLOUD_SETTINGS_KEY = 'godown_cloud_settings_v3';
+        
+        // HARDCODED GITHUB REPOSITORY DETAILS
+        const GITHUB_OWNER = 'msgowdara';
+        const GITHUB_REPO = 'HsgCalc';
+
         const utf8ToBase64 = (str) => btoa(unescape(encodeURIComponent(str)));
         const base64ToUtf8 = (str) => decodeURIComponent(escape(atob(str)));
 
         const getCloudSettings = () => {
             const saved = localStorage.getItem(CLOUD_SETTINGS_KEY);
-            return saved ? JSON.parse(saved) : { token: '', owner: 'msgowdara', repo: 'HsgCalc', alphaCode: '' };
+            return saved ? JSON.parse(saved) : { token: '', alphaCode: '' };
         };
 
         const fetchFromCloud = async () => {
-            const { token, owner, repo, alphaCode } = getCloudSettings();
+            const { token, alphaCode } = getCloudSettings();
             if (!token) throw new Error("No Cloud Token Configured");
             if (!alphaCode || alphaCode.length !== 6) throw new Error("Invalid Branch Alpha Code");
             
             const filepath = `GodownCsv/Godown_${alphaCode.toLowerCase()}.csv`;
-            const url = `https://api.github.com/repos/${owner}/${repo}/contents/${filepath}`;
+            const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${filepath}`;
             const res = await fetch(url, { headers: { Authorization: `token ${token}` } });
             
             if (res.status === 404) return { data: [], sha: null }; 
@@ -169,7 +174,7 @@
         };
 
         const pushToCloud = async (dataArray, currentSha) => {
-            const { token, owner, repo, alphaCode } = getCloudSettings();
+            const { token, alphaCode } = getCloudSettings();
             if (!token) throw new Error("No Cloud Token Configured");
             if (!alphaCode || alphaCode.length !== 6) throw new Error("Invalid Branch Alpha Code");
 
@@ -177,7 +182,7 @@
             const csvContent = Papa.unparse(dataArray);
             const encodedContent = utf8ToBase64(csvContent);
 
-            const url = `https://api.github.com/repos/${owner}/${repo}/contents/${filepath}`;
+            const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${filepath}`;
             const body = {
                 message: "Update godown inspections data via App",
                 content: encodedContent,
@@ -684,10 +689,7 @@
                                     <div><label className="block text-xs font-bold text-slate-600 mb-1">Cloud Access Token (PAT)</label>
                                         <input type="password" placeholder="Enter your access token" className="w-full border-slate-300 rounded px-3 py-2 border shadow-sm" value={settingsInput.token} onChange={e => setSettingsInput({...settingsInput, token: e.target.value})} />
                                     </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div><label className="block text-xs font-bold text-slate-600 mb-1">Account / Username</label><input type="text" className="w-full border-slate-300 rounded px-3 py-2 border shadow-sm bg-slate-50" value={settingsInput.owner} onChange={e => setSettingsInput({...settingsInput, owner: e.target.value})} /></div>
-                                        <div><label className="block text-xs font-bold text-slate-600 mb-1">Repository Name</label><input type="text" className="w-full border-slate-300 rounded px-3 py-2 border shadow-sm bg-slate-50" value={settingsInput.repo} onChange={e => setSettingsInput({...settingsInput, repo: e.target.value})} /></div>
-                                    </div>
+                                    
                                     <div>
                                         <label className="block text-xs font-bold text-slate-600 mb-1">Branch Alpha Code (6 Letters)</label>
                                         <input 
