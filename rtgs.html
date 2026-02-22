@@ -604,8 +604,6 @@
 
         // Fetch IFSC data from Razorpay API
         async function handleIfscInput() {
-            update(); // First update the typed character to the slip display
-            
             const ifscInput = document.getElementById('i_beneIfsc').value.trim().toUpperCase();
             
             // Check if exactly 11 chars and 5th character is '0'
@@ -618,14 +616,22 @@
                         // Auto-fill the bank and branch fields
                         document.getElementById('i_beneBank').value = data.BANK || '';
                         document.getElementById('i_beneBranch').value = data.BRANCH || '';
-                        
-                        // Update the slip with the newly fetched details
-                        update();
+                    } else {
+                        // Clear if API returns an error (invalid IFSC)
+                        document.getElementById('i_beneBank').value = '';
+                        document.getElementById('i_beneBranch').value = '';
                     }
                 } catch (error) {
                     console.error("API failed to fetch IFSC details", error);
                 }
+            } else {
+                // Clear fields if IFSC is incomplete or altered (e.g. user deleted a character)
+                document.getElementById('i_beneBank').value = '';
+                document.getElementById('i_beneBranch').value = '';
             }
+            
+            // Update the slip display after fetching or clearing
+            update();
         }
 
         // Auto-switch Dropdown based on Amount logic
