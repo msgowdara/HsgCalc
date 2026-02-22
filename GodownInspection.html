@@ -286,6 +286,10 @@
             };
 
             const handleSave = async () => {
+                // Manually trigger form validation
+                const form = document.getElementById('inspectionForm');
+                if (form && !form.reportValidity()) return;
+
                 if (!getCloudSettings().token) return setShowSettings(true);
                 
                 setIsSaving(true);
@@ -322,6 +326,12 @@
                 } finally {
                     setIsSaving(false);
                 }
+            };
+
+            const handlePreview = () => {
+                const form = document.getElementById('inspectionForm');
+                if (form && !form.reportValidity()) return; // Native HTML5 Validation check
+                setView('preview');
             };
 
             const handleDuplicate = (insp) => {
@@ -452,14 +462,14 @@
                 return (
                     <div className="flex flex-col mb-4">
                         <label className="block text-xs font-bold text-slate-600 mb-1">{label}</label>
-                        <select className={`w-full border-slate-300 rounded px-3 py-2 border text-sm ${isNegative ? 'bg-amber-50 border-amber-300 font-bold text-amber-900' : 'bg-white'}`} 
+                        <select required className={`w-full border-slate-300 rounded px-3 py-2 border text-sm ${isNegative ? 'bg-amber-50 border-amber-300 font-bold text-amber-900' : 'bg-white'}`} 
                                 value={formData[field]} onChange={e => handleSelectChange(field, e.target.value)}>
                             {DROPDOWNS[type].map(opt => <option key={opt} value={opt}>{opt}</option>)}
                         </select>
                         {isNegative && (
                             <div className="mt-2 animate-fade-in">
                                 <label className="flex items-center gap-1 text-[11px] font-bold text-amber-700 mb-1"><Icons.AlertCircle/> Suggested reply (Edit if needed):</label>
-                                <input type="text" className="w-full border-amber-300 rounded px-3 py-1.5 border bg-amber-50 text-sm focus:ring-amber-500 font-medium text-amber-900" 
+                                <input required type="text" className="w-full border-amber-300 rounded px-3 py-1.5 border bg-amber-50 text-sm focus:ring-amber-500 font-medium text-amber-900" 
                                        value={formData[remarkField]} onChange={e => setFormData({...formData, [remarkField]: e.target.value})} placeholder="Enter justification/remark..." />
                             </div>
                         )}
@@ -486,20 +496,51 @@
             });
 
             // --- Analyze Remarks for Dynamic Letters ---
-            const adverseFindings = Object.keys(SUGGESTED_REMARKS).map(key => {
+            const branchCritical = [];
+            const branchOther = [];
+            const borrowerFindings = [];
+
+            // 1. Analyze Core Financial Metrics (DP vs OS)
+            const dpVal = calculateDP();
+            const osVal = parseFloat(formData.outstandingBalance) || 0;
+            const isDPLessThanOS = dpVal < osVal;
+
+            if (isDPLessThanOS) {
+                branchCritical.push({
+                    label: "Drawing Power Shortfall (DP < OS)",
+                    userRemark: `Drawing Power (₹${formatCurrency(dpVal).replace('₹. ', '')}) is less than Outstanding Balance (₹${formatCurrency(osVal).replace('₹. ', '')}).`,
+                    suggestion: "Possible diversion of funds. Credit department to closely monitor, seek immediate justification, and ensure regularization."
+                });
+                borrowerFindings.push({
+                    label: "Drawing Power Shortfall",
+                    userRemark: `The account outstanding exceeds the eligible drawing power based on the declared stocks.`,
+                    suggestion: "Please submit a detailed clarification for the shortfall and arrange to regularize the account immediately."
+                });
+            }
+
+            // 2. Map and categorize other dropdown findings
+            Object.keys(SUGGESTED_REMARKS).forEach(key => {
                 const config = SUGGESTED_REMARKS[key];
                 if (formData[key] === config.trigger) {
-                    return {
+                    const finding = {
                         label: config.label,
-                        resp: config.resp,
                         userRemark: formData[config.field] || config.text,
                         suggestion: config.text
                     };
-                }
-                return null;
-            }).filter(Boolean);
 
-            const borrowerFindings = adverseFindings.filter(f => f.resp === 'Borrower' || f.resp === 'Both');
+                    if (config.resp === 'Borrower' || config.resp === 'Both') {
+                        borrowerFindings.push(finding);
+                    }
+
+                    if (config.resp === 'Branch' || config.resp === 'Both') {
+                        if (key === 'insuranceAdequate') {
+                            branchCritical.push(finding); // Force as Critical
+                        } else {
+                            branchOther.push(finding);
+                        }
+                    }
+                }
+            });
 
             return (
                 <div className="min-h-screen flex flex-col font-sans print:block print:min-h-0">
@@ -513,24 +554,24 @@
                             </div>
                             
                             <div className="flex items-center gap-2">
-                                <button onClick={() => setShowSettings(true)} className="p-2 rounded text-slate-300 hover:bg-slate-800 transition mr-2 flex items-center gap-1" title="Settings">
+                                <button type="button" onClick={() => setShowSettings(true)} className="p-2 rounded text-slate-300 hover:bg-slate-800 transition mr-2 flex items-center gap-1" title="Settings">
                                     <Icons.Settings />
                                 </button>
-                                <button onClick={() => setView('dashboard')} className={`p-2 rounded hover:bg-slate-800 transition ${view === 'dashboard' ? 'bg-slate-800 text-indigo-400' : 'text-slate-300'}`}>
+                                <button type="button" onClick={() => setView('dashboard')} className={`p-2 rounded hover:bg-slate-800 transition ${view === 'dashboard' ? 'bg-slate-800 text-indigo-400' : 'text-slate-300'}`}>
                                     <Icons.Home />
                                 </button>
                                 {view === 'dashboard' && (
-                                    <button onClick={() => { setFormData(defaultFormState); setView('form'); }} className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded text-sm font-medium transition-colors">
+                                    <button type="button" onClick={() => { setFormData(defaultFormState); setView('form'); }} className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded text-sm font-medium transition-colors">
                                         <Icons.Plus /> New Report
                                     </button>
                                 )}
                                 {(view === 'form' || view === 'preview') && (
-                                    <button onClick={handleSave} disabled={isSaving} className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded text-sm font-medium transition-colors disabled:opacity-50">
+                                    <button type="button" onClick={handleSave} disabled={isSaving} className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded text-sm font-medium transition-colors disabled:opacity-50">
                                         <Icons.Save /> {isSaving ? 'Syncing...' : 'Save to Cloud'}
                                     </button>
                                 )}
                                 {view === 'preview' && (
-                                    <button onClick={() => window.print()} className="flex items-center gap-2 bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded text-sm font-medium transition-colors ml-2">
+                                    <button type="button" onClick={() => window.print()} className="flex items-center gap-2 bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded text-sm font-medium transition-colors ml-2">
                                         <Icons.Print /> Print Document
                                     </button>
                                 )}
@@ -576,8 +617,8 @@
                                     </div>
                                     
                                     <div className="flex justify-end gap-3 mt-6 pt-4 border-t">
-                                        <button onClick={() => setShowSettings(false)} className="px-4 py-2 text-slate-600 font-medium hover:bg-slate-100 rounded">Cancel</button>
-                                        <button onClick={handleSaveSettings} className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded font-bold shadow">Save Settings & Link</button>
+                                        <button type="button" onClick={() => setShowSettings(false)} className="px-4 py-2 text-slate-600 font-medium hover:bg-slate-100 rounded">Cancel</button>
+                                        <button type="button" onClick={handleSaveSettings} className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded font-bold shadow">Save Settings & Link</button>
                                     </div>
                                 </div>
                             </div>
@@ -615,7 +656,7 @@
                                         <div className="text-center py-12 text-slate-500 bg-slate-50 rounded-lg border border-dashed border-slate-300">
                                             <p className="mb-4 font-bold text-slate-700">Setup Required</p>
                                             <p className="text-sm mb-4">Please connect your Cloud repository in settings to start saving and retrieving data.</p>
-                                            <button onClick={() => setShowSettings(true)} className="bg-indigo-600 text-white px-6 py-2 rounded shadow hover:bg-indigo-700">Open Settings</button>
+                                            <button type="button" onClick={() => setShowSettings(true)} className="bg-indigo-600 text-white px-6 py-2 rounded shadow hover:bg-indigo-700">Open Settings</button>
                                         </div>
                                     ) : isFetching ? (
                                         <div className="text-center py-12 text-slate-500">
@@ -624,7 +665,7 @@
                                     ) : inspections.length === 0 ? (
                                         <div className="text-center py-12 text-slate-500 bg-slate-50 rounded-lg border border-dashed border-slate-300">
                                             <p className="mb-4">No inspection records found in cloud CSV.</p>
-                                            <button onClick={() => { setFormData(defaultFormState); setView('form'); }} className="bg-indigo-600 text-white px-6 py-2 rounded shadow hover:bg-indigo-700">Start First Inspection</button>
+                                            <button type="button" onClick={() => { setFormData(defaultFormState); setView('form'); }} className="bg-indigo-600 text-white px-6 py-2 rounded shadow hover:bg-indigo-700">Start First Inspection</button>
                                         </div>
                                     ) : (
                                         <div className="overflow-x-auto">
@@ -651,13 +692,13 @@
                                                                     <td className="p-3 text-right font-medium">{formatCurrency(dp > 0 ? dp : 0)}</td>
                                                                     <td className="p-3 text-center">
                                                                         <div className="flex justify-center gap-2 text-xs font-semibold">
-                                                                            <button onClick={() => { setFormData(insp); setView('form'); }} className="text-blue-600 hover:text-blue-800 hover:underline px-2 py-1 rounded hover:bg-blue-100">Edit</button>
+                                                                            <button type="button" onClick={() => { setFormData(insp); setView('form'); }} className="text-blue-600 hover:text-blue-800 hover:underline px-2 py-1 rounded hover:bg-blue-100">Edit</button>
                                                                             <span className="text-slate-300 mt-1">|</span>
-                                                                            <button onClick={() => handleDuplicate(insp)} className="text-indigo-600 hover:text-indigo-800 hover:underline px-2 py-1 rounded hover:bg-indigo-100" title="Copy for next month">Copy</button>
+                                                                            <button type="button" onClick={() => handleDuplicate(insp)} className="text-indigo-600 hover:text-indigo-800 hover:underline px-2 py-1 rounded hover:bg-indigo-100" title="Copy for next month">Copy</button>
                                                                             <span className="text-slate-300 mt-1">|</span>
-                                                                            <button onClick={() => { setFormData(insp); setView('preview'); }} className="text-emerald-600 hover:text-emerald-800 hover:underline px-2 py-1 rounded hover:bg-emerald-100">Print</button>
+                                                                            <button type="button" onClick={() => { setFormData(insp); setView('preview'); }} className="text-emerald-600 hover:text-emerald-800 hover:underline px-2 py-1 rounded hover:bg-emerald-100">Print</button>
                                                                             <span className="text-slate-300 mt-1">|</span>
-                                                                            <button onClick={() => handleDelete(insp.id)} disabled={isSaving} className="text-red-600 hover:text-red-800 hover:underline px-2 py-1 rounded hover:bg-red-100 disabled:opacity-50">Delete</button>
+                                                                            <button type="button" onClick={() => handleDelete(insp.id)} disabled={isSaving} className="text-red-600 hover:text-red-800 hover:underline px-2 py-1 rounded hover:bg-red-100 disabled:opacity-50">Delete</button>
                                                                         </div>
                                                                     </td>
                                                                 </tr>
@@ -673,27 +714,34 @@
 
                             {/* FORM ENTRY */}
                             {view === 'form' && (
-                                <div className="space-y-6 pb-12">
+                                <form id="inspectionForm" className="space-y-6 pb-12" onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
                                     <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
                                         <div className="bg-slate-50 border-b border-slate-200 px-6 py-4"><h3 className="font-bold text-slate-800">1. Basic Details & Godown</h3></div>
                                         <div className="p-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                                            <div><label className="block text-xs font-bold text-slate-600 mb-1">Account No *</label><input type="text" className="w-full border-slate-300 rounded px-3 py-2 border bg-indigo-50 font-bold focus:ring-indigo-500" value={formData.accountNo} onChange={e => handleSelectChange('accountNo', e.target.value)} onBlur={handleAccountBlur} /></div>
-                                            <div><label className="block text-xs font-bold text-slate-600 mb-1">Name of Account</label><input type="text" className="w-full border-slate-300 rounded px-3 py-2 border" value={formData.name} onChange={e => handleSelectChange('name', e.target.value)} /></div>
-                                            <div><label className="block text-xs font-bold text-slate-600 mb-1">Nature of Business</label><input type="text" className="w-full border-slate-300 rounded px-3 py-2 border" value={formData.nature} onChange={e => handleSelectChange('nature', e.target.value)} placeholder="e.g. RETAIL SELLING" /></div>
-                                            <div><label className="block text-xs font-bold text-slate-600 mb-1">Sanc. Authority</label><select className="w-full border-slate-300 rounded px-3 py-2 border bg-white" value={formData.sanctioningAuthority} onChange={e => handleSelectChange('sanctioningAuthority', e.target.value)}>{DROPDOWNS.authorities.map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></div>
-                                            <div className="md:col-span-2"><label className="block text-xs font-bold text-slate-600 mb-1">Office Address</label><input type="text" className="w-full border-slate-300 rounded px-3 py-2 border" value={formData.officeAddress} onChange={e => handleSelectChange('officeAddress', e.target.value)} /></div>
-                                            <div className="md:col-span-2"><label className="block text-xs font-bold text-slate-600 mb-1">Godown Address</label><input type="text" className="w-full border-slate-300 rounded px-3 py-2 border" value={formData.godownAddress} onChange={e => handleSelectChange('godownAddress', e.target.value)} /></div>
-                                            <div><label className="block text-xs font-bold text-slate-600 mb-1">Limit (₹)</label><input type="number" className="w-full border-slate-300 rounded px-3 py-2 border" value={formData.limit} onChange={e => handleSelectChange('limit', e.target.value)} /></div>
-                                            <div><label className="block text-xs font-bold text-slate-600 mb-1">Date of Reporting</label><input type="date" className="w-full border-slate-300 rounded px-3 py-2 border" value={formData.dateOfReporting} onChange={e => handleSelectChange('dateOfReporting', e.target.value)} /></div>
-                                            <div><label className="block text-xs font-bold text-slate-600 mb-1">Date of Verification</label><input type="date" className="w-full border-slate-300 rounded px-3 py-2 border" value={formData.dateOfVerification} onChange={e => handleSelectChange('dateOfVerification', e.target.value)} /></div>
+                                            <div><label className="block text-xs font-bold text-slate-600 mb-1">Account No *</label><input required type="text" className="w-full border-slate-300 rounded px-3 py-2 border bg-indigo-50 font-bold focus:ring-indigo-500" value={formData.accountNo} onChange={e => handleSelectChange('accountNo', e.target.value)} onBlur={handleAccountBlur} /></div>
+                                            <div><label className="block text-xs font-bold text-slate-600 mb-1">Name of Account</label><input required type="text" className="w-full border-slate-300 rounded px-3 py-2 border" value={formData.name} onChange={e => handleSelectChange('name', e.target.value)} /></div>
+                                            <div><label className="block text-xs font-bold text-slate-600 mb-1">Nature of Business</label><input required type="text" className="w-full border-slate-300 rounded px-3 py-2 border" value={formData.nature} onChange={e => handleSelectChange('nature', e.target.value)} placeholder="e.g. RETAIL SELLING" /></div>
+                                            <div><label className="block text-xs font-bold text-slate-600 mb-1">Sanc. Authority</label><select required className="w-full border-slate-300 rounded px-3 py-2 border bg-white" value={formData.sanctioningAuthority} onChange={e => handleSelectChange('sanctioningAuthority', e.target.value)}>{DROPDOWNS.authorities.map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></div>
+                                            <div className="md:col-span-2"><label className="block text-xs font-bold text-slate-600 mb-1">Office Address</label><input required type="text" className="w-full border-slate-300 rounded px-3 py-2 border" value={formData.officeAddress} onChange={e => handleSelectChange('officeAddress', e.target.value)} /></div>
+                                            <div className="md:col-span-2"><label className="block text-xs font-bold text-slate-600 mb-1">Godown Address</label><input required type="text" className="w-full border-slate-300 rounded px-3 py-2 border" value={formData.godownAddress} onChange={e => handleSelectChange('godownAddress', e.target.value)} /></div>
+                                            <div><label className="block text-xs font-bold text-slate-600 mb-1">Limit (₹)</label><input required type="number" className="w-full border-slate-300 rounded px-3 py-2 border" value={formData.limit} onChange={e => handleSelectChange('limit', e.target.value)} /></div>
+                                            <div><label className="block text-xs font-bold text-slate-600 mb-1">Date of Reporting</label><input required type="date" className="w-full border-slate-300 rounded px-3 py-2 border" value={formData.dateOfReporting} onChange={e => handleSelectChange('dateOfReporting', e.target.value)} /></div>
+                                            <div><label className="block text-xs font-bold text-slate-600 mb-1">Date of Verification</label><input required type="date" className="w-full border-slate-300 rounded px-3 py-2 border" value={formData.dateOfVerification} onChange={e => handleSelectChange('dateOfVerification', e.target.value)} /></div>
                                             <div>
                                                 <label className="block text-xs font-bold text-slate-600 mb-1">Inspecting Officer</label>
-                                                <input list="officers-list" className="w-full border-slate-300 rounded px-3 py-2 border bg-white" value={formData.inspectingOfficer} onChange={e => handleSelectChange('inspectingOfficer', e.target.value)} placeholder="Select or Type New" />
+                                                <input 
+                                                    required
+                                                    list="officers-list" 
+                                                    className="w-full border-slate-300 rounded px-3 py-2 border bg-white" 
+                                                    value={formData.inspectingOfficer} 
+                                                    onChange={e => handleSelectChange('inspectingOfficer', e.target.value)} 
+                                                    placeholder="Select or Type New" 
+                                                />
                                                 <datalist id="officers-list">{officers.map(opt => <option key={opt} value={opt} />)}</datalist>
                                             </div>
-                                            <div><label className="block text-xs font-bold text-slate-600 mb-1">Branch</label><input type="text" className="w-full border-slate-300 rounded px-3 py-2 border" value={formData.branch} onChange={e => handleSelectChange('branch', e.target.value)} /></div>
-                                            <div><label className="block text-xs font-bold text-slate-600 mb-1">Region</label><input type="text" className="w-full border-slate-300 rounded px-3 py-2 border" value={formData.region} onChange={e => handleSelectChange('region', e.target.value)} /></div>
-                                            <div><label className="block text-xs font-bold text-slate-600 mb-1">Distance</label><input type="text" className="w-full border-slate-300 rounded px-3 py-2 border" value={formData.distance} onChange={e => handleSelectChange('distance', e.target.value)} /></div>
+                                            <div><label className="block text-xs font-bold text-slate-600 mb-1">Branch</label><input required type="text" className="w-full border-slate-300 rounded px-3 py-2 border" value={formData.branch} onChange={e => handleSelectChange('branch', e.target.value)} /></div>
+                                            <div><label className="block text-xs font-bold text-slate-600 mb-1">Region</label><input required type="text" className="w-full border-slate-300 rounded px-3 py-2 border" value={formData.region} onChange={e => handleSelectChange('region', e.target.value)} /></div>
+                                            <div><label className="block text-xs font-bold text-slate-600 mb-1">Distance</label><input required type="text" className="w-full border-slate-300 rounded px-3 py-2 border" value={formData.distance} onChange={e => handleSelectChange('distance', e.target.value)} /></div>
                                             <div>{renderFieldWithRemark('Condition of Godown', 'conditionOfGodown', 'conditions', 'godownRemark', 'Not Satisfactory')}</div>
                                         </div>
                                     </div>
@@ -707,23 +755,23 @@
                                         <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                                             <div className="bg-slate-50 p-4 rounded border border-slate-200">
                                                 <div className="grid grid-cols-3 gap-3 mb-3">
-                                                    <div className="col-span-2"><label className="block text-xs font-bold text-slate-600 mb-1">Stock Value (₹)</label><input type="number" className="w-full border-slate-300 rounded px-3 py-2 border font-mono text-right" value={formData.stockValue} onChange={e => handleNumberChange('stockValue', e.target.value)} /></div>
-                                                    <div><label className="block text-xs font-bold text-slate-600 mb-1">Margin %</label><select className="w-full border-slate-300 rounded px-3 py-2 border bg-white font-mono" value={formData.stockMarginPercent} onChange={e => handleNumberChange('stockMarginPercent', e.target.value)}>{DROPDOWNS.margins.map(opt => <option key={opt} value={opt}>{opt}%</option>)}</select></div>
+                                                    <div className="col-span-2"><label className="block text-xs font-bold text-slate-600 mb-1">Stock Value (₹)</label><input required type="number" className="w-full border-slate-300 rounded px-3 py-2 border font-mono text-right" value={formData.stockValue} onChange={e => handleNumberChange('stockValue', e.target.value)} /></div>
+                                                    <div><label className="block text-xs font-bold text-slate-600 mb-1">Margin %</label><select required className="w-full border-slate-300 rounded px-3 py-2 border bg-white font-mono" value={formData.stockMarginPercent} onChange={e => handleNumberChange('stockMarginPercent', e.target.value)}>{DROPDOWNS.margins.map(opt => <option key={opt} value={opt}>{opt}%</option>)}</select></div>
                                                 </div>
                                                 <div className="flex justify-between items-center bg-white p-2 rounded border border-red-100"><span className="text-sm font-semibold text-slate-600">Auto Deduct (Stock):</span><span className="font-mono font-bold text-red-600">{formatCurrency(formData.stockMargin)}</span></div>
                                             </div>
 
                                             <div className="bg-slate-50 p-4 rounded border border-slate-200">
                                                 <div className="grid grid-cols-3 gap-3 mb-3">
-                                                    <div className="col-span-2"><label className="block text-xs font-bold text-slate-600 mb-1">Book Debts (₹)</label><input type="number" className="w-full border-slate-300 rounded px-3 py-2 border font-mono text-right" value={formData.bookDebts} onChange={e => handleNumberChange('bookDebts', e.target.value)} /></div>
-                                                    <div><label className="block text-xs font-bold text-slate-600 mb-1">Margin %</label><select className="w-full border-slate-300 rounded px-3 py-2 border bg-white font-mono" value={formData.bdMarginPercent} onChange={e => handleNumberChange('bdMarginPercent', e.target.value)}>{DROPDOWNS.margins.map(opt => <option key={opt} value={opt}>{opt}%</option>)}</select></div>
+                                                    <div className="col-span-2"><label className="block text-xs font-bold text-slate-600 mb-1">Book Debts (₹)</label><input required type="number" className="w-full border-slate-300 rounded px-3 py-2 border font-mono text-right" value={formData.bookDebts} onChange={e => handleNumberChange('bookDebts', e.target.value)} /></div>
+                                                    <div><label className="block text-xs font-bold text-slate-600 mb-1">Margin %</label><select required className="w-full border-slate-300 rounded px-3 py-2 border bg-white font-mono" value={formData.bdMarginPercent} onChange={e => handleNumberChange('bdMarginPercent', e.target.value)}>{DROPDOWNS.margins.map(opt => <option key={opt} value={opt}>{opt}%</option>)}</select></div>
                                                 </div>
                                                 <div className="flex justify-between items-center bg-white p-2 rounded border border-red-100"><span className="text-sm font-semibold text-slate-600">Auto Deduct (BD):</span><span className="font-mono font-bold text-red-600">{formatCurrency(formData.bookDebtsMargin)}</span></div>
                                             </div>
 
                                             <div className="grid grid-cols-2 gap-4">
-                                                <div><label className="block text-xs font-bold text-slate-600 mb-1">Creditors (₹)</label><input type="number" className="w-full border-slate-300 rounded px-3 py-2 border font-mono text-right text-red-600" value={formData.creditors} onChange={e => handleNumberChange('creditors', e.target.value)} /></div>
-                                                <div><label className="block text-xs font-bold text-slate-600 mb-1">O/S Balance (₹)</label><input type="number" className="w-full border-blue-400 rounded px-3 py-2 border font-mono font-bold text-right bg-blue-50" value={formData.outstandingBalance} onChange={e => handleSelectChange('outstandingBalance', e.target.value)} /></div>
+                                                <div><label className="block text-xs font-bold text-slate-600 mb-1">Creditors (₹)</label><input required type="number" className="w-full border-slate-300 rounded px-3 py-2 border font-mono text-right text-red-600" value={formData.creditors} onChange={e => handleNumberChange('creditors', e.target.value)} /></div>
+                                                <div><label className="block text-xs font-bold text-slate-600 mb-1">O/S Balance (₹)</label><input required type="number" className="w-full border-blue-400 rounded px-3 py-2 border font-mono font-bold text-right bg-blue-50" value={formData.outstandingBalance} onChange={e => handleSelectChange('outstandingBalance', e.target.value)} /></div>
                                             </div>
                                         </div>
                                     </div>
@@ -739,12 +787,14 @@
                                                     {renderFieldWithRemark('Condition of stocks', 'conditionOfStocks', 'conditions', 'conditionOfStocksRemark', 'Not Satisfactory')}
                                                     {renderFieldWithRemark('Mode of storage', 'modeOfStorage', 'storage', 'modeOfStorageRemark', 'Haphazard')}
                                                 </div>
-                                                <div className="mt-4 grid grid-cols-1 md:grid-cols-4 gap-4 border-t border-slate-200 pt-3">
-                                                    <div><label className="block text-xs font-bold text-slate-600 mb-1">Season/Year of purchase</label><input type="number" className="w-full border-slate-300 rounded px-2 py-1.5 border bg-white text-sm" value={formData.seasonYear} onChange={e => setFormData({...formData, seasonYear: e.target.value})} /></div>
-                                                    <div><label className="block text-xs font-bold text-slate-600 mb-1">Age of old stock (Days)</label><input type="number" className="w-full border-slate-300 rounded px-2 py-1.5 border bg-white text-sm" value={formData.ageOfOldStockDays} onChange={e => setFormData({...formData, ageOfOldStockDays: e.target.value})} /></div>
-                                                    <div><label className="block text-xs font-bold text-slate-600 mb-1">Amount of old stock (₹)</label><input type="number" className="w-full border-slate-300 rounded px-2 py-1.5 border bg-white text-sm" value={formData.amountOfOldStockRupees} onChange={e => setFormData({...formData, amountOfOldStockRupees: e.target.value})} /></div>
-                                                    <div><label className="block text-xs font-bold text-slate-600 mb-1">% of old stocks to total</label><input type="text" className="w-full border-slate-300 rounded px-2 py-1.5 border bg-slate-100 text-sm font-bold text-slate-600" value={calculateOldStockPercent()} readOnly /></div>
-                                                </div>
+                                                {formData.conditionOfStocks === 'Not Satisfactory' && (
+                                                    <div className="mt-4 grid grid-cols-1 md:grid-cols-4 gap-4 border-t border-slate-200 pt-3">
+                                                        <div><label className="block text-xs font-bold text-slate-600 mb-1">Season/Year of purchase</label><input required type="number" className="w-full border-slate-300 rounded px-2 py-1.5 border bg-white text-sm" value={formData.seasonYear} onChange={e => setFormData({...formData, seasonYear: e.target.value})} /></div>
+                                                        <div><label className="block text-xs font-bold text-slate-600 mb-1">Age of old stock (Days)</label><input required type="number" className="w-full border-slate-300 rounded px-2 py-1.5 border bg-white text-sm" value={formData.ageOfOldStockDays} onChange={e => setFormData({...formData, ageOfOldStockDays: e.target.value})} /></div>
+                                                        <div><label className="block text-xs font-bold text-slate-600 mb-1">Amount of old stock (₹)</label><input required type="number" className="w-full border-slate-300 rounded px-2 py-1.5 border bg-white text-sm" value={formData.amountOfOldStockRupees} onChange={e => setFormData({...formData, amountOfOldStockRupees: e.target.value})} /></div>
+                                                        <div><label className="block text-xs font-bold text-slate-600 mb-1">% of old stocks to total</label><input required type="text" className="w-full border-slate-300 rounded px-2 py-1.5 border bg-slate-100 text-sm font-bold text-slate-600" value={calculateOldStockPercent()} readOnly /></div>
+                                                    </div>
+                                                )}
                                             </div>
 
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -752,12 +802,12 @@
                                                     <h4 className="text-sm font-bold text-slate-800 mb-3 border-b pb-1">Valuation</h4>
                                                     {renderFieldWithRemark('Is the mode of Valuation Satisfactory', 'modeOfValuationSatisfactory', 'conditions', 'valuationRemark', 'Not Satisfactory')}
                                                     {renderFieldWithRemark('Whether trade discount, if any, deducted?', 'tradeDiscountDeducted', 'yesNo', 'tradeDiscountRemark', 'No')}
-                                                    <div className="mb-4"><label className="block text-xs font-bold text-slate-600 mb-1">Unpledged stocks, if any stored?</label><select className="w-full border-slate-300 rounded px-3 py-2 border bg-white text-sm" value={formData.unpledgedStocks} onChange={e => handleSelectChange('unpledgedStocks', e.target.value)}>{DROPDOWNS.yesNo.map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></div>
+                                                    <div className="mb-4"><label className="block text-xs font-bold text-slate-600 mb-1">Unpledged stocks, if any stored?</label><select required className="w-full border-slate-300 rounded px-3 py-2 border bg-white text-sm" value={formData.unpledgedStocks} onChange={e => handleSelectChange('unpledgedStocks', e.target.value)}>{DROPDOWNS.yesNo.map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></div>
                                                 </div>
 
                                                 <div className="bg-slate-50 p-4 rounded border border-slate-200">
                                                     <h4 className="text-sm font-bold text-slate-800 mb-3 border-b pb-1">Insurance</h4>
-                                                    <div className="mb-4"><label className="block text-xs font-bold text-slate-600 mb-1">Amount of Insurance (₹)</label><input type="number" className="w-full border-slate-300 rounded px-3 py-2 border text-sm" value={formData.insuranceAmount} onChange={e => handleSelectChange('insuranceAmount', e.target.value)} /></div>
+                                                    <div className="mb-4"><label className="block text-xs font-bold text-slate-600 mb-1">Amount of Insurance (₹)</label><input required type="number" className="w-full border-slate-300 rounded px-3 py-2 border text-sm" value={formData.insuranceAmount} onChange={e => handleSelectChange('insuranceAmount', e.target.value)} /></div>
                                                     {renderFieldWithRemark('Is Insurance cover adequate?', 'insuranceAdequate', 'yesNo', 'insuranceAdequateRemark', 'No')}
                                                     {renderFieldWithRemark('Is insurance cover all comprehensive?', 'insuranceComprehensive', 'yesNo', 'insuranceComprehensiveRemark', 'No')}
                                                     {formData.unpledgedStocks === 'Yes' && (
@@ -770,11 +820,11 @@
                                                 <h4 className="text-sm font-bold text-slate-800 mb-3 border-b pb-1">General Compliances & Records</h4>
                                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                                                     <div>{renderFieldWithRemark('Are bank’s signboards displayed?', 'signboardsDisplayed', 'yesNo', 'signboardsDisplayedRemark', 'No')}</div>
-                                                    <div><label className="block text-xs font-bold text-slate-600 mb-1">Inside / Outside</label><select className="w-full border-slate-300 rounded px-2 py-1.5 border bg-white text-sm disabled:bg-gray-200" disabled={formData.signboardsDisplayed === 'No'} value={formData.signboardsInsideOutside} onChange={e => handleSelectChange('signboardsInsideOutside', e.target.value)}>{DROPDOWNS.insideOutside.map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></div>
+                                                    <div><label className="block text-xs font-bold text-slate-600 mb-1">Inside / Outside</label><select required={formData.signboardsDisplayed === 'Yes'} className="w-full border-slate-300 rounded px-2 py-1.5 border bg-white text-sm disabled:bg-gray-200" disabled={formData.signboardsDisplayed === 'No'} value={formData.signboardsInsideOutside} onChange={e => handleSelectChange('signboardsInsideOutside', e.target.value)}>{DROPDOWNS.insideOutside.map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></div>
                                                     <div className="sm:col-span-2 md:col-span-1">{renderFieldWithRemark('Godown keeper/chokidar sanctioned?', 'godownKeeperSanctioned', 'yesNo', 'godownKeeperRemark', 'No')}</div>
                                                     
                                                     <div className="sm:col-span-2 md:col-span-1">{renderFieldWithRemark('Signed stock reports received?', 'stockReportsRegular', 'yesNo', 'stockReportsRemark', 'No')}</div>
-                                                    <div><label className="block text-xs font-bold text-slate-600 mb-1">Report Frequency</label><select className="w-full border-slate-300 rounded px-2 py-1.5 border bg-white text-sm" value={formData.stockReportsFrequency} onChange={e => handleSelectChange('stockReportsFrequency', e.target.value)}>{DROPDOWNS.frequency.map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></div>
+                                                    <div><label className="block text-xs font-bold text-slate-600 mb-1">Report Frequency</label><select required className="w-full border-slate-300 rounded px-2 py-1.5 border bg-white text-sm" value={formData.stockReportsFrequency} onChange={e => handleSelectChange('stockReportsFrequency', e.target.value)}>{DROPDOWNS.frequency.map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></div>
                                                     
                                                     <div className="sm:col-span-2 md:col-span-1">{renderFieldWithRemark('Bank possession fully effective?', 'bankPossessionEffective', 'yesNo', 'bankPossessionRemark', 'No')}</div>
                                                     <div className="sm:col-span-2 md:col-span-1">{renderFieldWithRemark('Registers/cards properly maintained?', 'registersMaintained', 'yesNo', 'registersMaintainedRemark', 'No')}</div>
@@ -786,7 +836,7 @@
                                                 <div className="bg-slate-50 p-4 rounded border border-slate-200">
                                                     <h4 className="text-sm font-bold text-slate-800 mb-3 border-b pb-1">Control</h4>
                                                     {renderFieldWithRemark('Are godown inspected periodically?', 'inspectedPeriodically', 'yesNo', 'inspectedPeriodicallyRemark', 'No')}
-                                                    <div className="mb-4"><label className="block text-xs font-bold text-slate-600 mb-1">How often and by whom?</label><input type="text" className="w-full border-slate-300 rounded px-3 py-2 border bg-white text-sm" value={formData.inspectedHowOften} onChange={e => handleSelectChange('inspectedHowOften', e.target.value)} /></div>
+                                                    <div className="mb-4"><label className="block text-xs font-bold text-slate-600 mb-1">How often and by whom?</label><input required type="text" className="w-full border-slate-300 rounded px-3 py-2 border bg-white text-sm" value={formData.inspectedHowOften} onChange={e => handleSelectChange('inspectedHowOften', e.target.value)} /></div>
                                                     {renderFieldWithRemark('Is record of inspection maintained?', 'recordMaintained', 'yesNo', 'recordMaintainedRemark', 'No')}
                                                 </div>
 
@@ -811,12 +861,12 @@
                                     </div>
 
                                     <div className="flex justify-end gap-4 mt-6">
-                                        <button onClick={() => setView('preview')} className="bg-slate-200 hover:bg-slate-300 text-slate-800 px-6 py-3 rounded shadow-sm font-bold transition">Preview</button>
-                                        <button onClick={handleSave} disabled={isSaving} className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded shadow font-bold text-lg transition flex items-center gap-2 disabled:opacity-50">
+                                        <button type="button" onClick={handlePreview} className="bg-slate-200 hover:bg-slate-300 text-slate-800 px-6 py-3 rounded shadow-sm font-bold transition">Preview</button>
+                                        <button type="submit" disabled={isSaving} className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded shadow font-bold text-lg transition flex items-center gap-2 disabled:opacity-50">
                                             <Icons.Save /> {isSaving ? 'Syncing...' : 'Save to Cloud'}
                                         </button>
                                     </div>
-                                </div>
+                                </form>
                             )}
 
                             {/* EXACT WORD DOCUMENT PRINT/PREVIEW VIEW */}
@@ -969,32 +1019,61 @@
                                         <p style={{ marginBottom: '15pt' }}>Dear Sir/Madam,</p>
                                         <p style={{ marginBottom: '15pt' }}>
                                             The regular godown inspection for the subject account was conducted on {formatDateStandard(formData.dateOfVerification)}. 
-                                            {adverseFindings.length === 0 
+                                            {branchCritical.length === 0 && branchOther.length === 0 
                                                 ? " We are pleased to report that no adverse observations were noted during the visit. The condition of stocks and maintenance of records are satisfactory." 
                                                 : " During the visit, the following irregularities/adverse findings were observed. We suggest the below rectification measures for monitoring by the Credit Department and follow-up action."}
                                         </p>
 
-                                        {adverseFindings.length > 0 && (
-                                            <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '15pt', marginBottom: '20pt', fontSize: '10pt' }} border="1">
-                                                <thead>
-                                                    <tr style={{ backgroundColor: '#f0f0f0' }}>
-                                                        <th style={{ padding: '8px' }}>Sl</th>
-                                                        <th style={{ padding: '8px' }}>Parameter</th>
-                                                        <th style={{ padding: '8px' }}>Adverse Observation</th>
-                                                        <th style={{ padding: '8px' }}>Suggested Rectification Measure</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {adverseFindings.map((item, idx) => (
-                                                        <tr key={idx}>
-                                                            <td style={{ padding: '8px', textAlign: 'center' }}>{idx + 1}</td>
-                                                            <td style={{ padding: '8px', fontWeight: 'bold' }}>{item.label}</td>
-                                                            <td style={{ padding: '8px' }}>{item.userRemark}</td>
-                                                            <td style={{ padding: '8px' }}>{item.suggestion}</td>
+                                        {branchCritical.length > 0 && (
+                                            <>
+                                                <h3 style={{ color: '#b91c1c', marginTop: '20pt', marginBottom: '8pt', fontSize: '11pt', fontWeight: 'bold' }}>Critical Deficiencies / Irregularities</h3>
+                                                <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '20pt', fontSize: '10pt' }} border="1">
+                                                    <thead>
+                                                        <tr style={{ backgroundColor: '#fee2e2', color: '#7f1d1d' }}>
+                                                            <th style={{ padding: '8px', border: '1px solid black' }}>Sl</th>
+                                                            <th style={{ padding: '8px', border: '1px solid black' }}>Parameter</th>
+                                                            <th style={{ padding: '8px', border: '1px solid black' }}>Adverse Observation</th>
+                                                            <th style={{ padding: '8px', border: '1px solid black' }}>Suggested Action</th>
                                                         </tr>
-                                                    ))}
-                                                </tbody>
-                                            </table>
+                                                    </thead>
+                                                    <tbody>
+                                                        {branchCritical.map((item, idx) => (
+                                                            <tr key={idx}>
+                                                                <td style={{ padding: '8px', textAlign: 'center', border: '1px solid black' }}>{idx + 1}</td>
+                                                                <td style={{ padding: '8px', fontWeight: 'bold', border: '1px solid black' }}>{item.label}</td>
+                                                                <td style={{ padding: '8px', border: '1px solid black' }}>{item.userRemark}</td>
+                                                                <td style={{ padding: '8px', border: '1px solid black' }}>{item.suggestion}</td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </>
+                                        )}
+
+                                        {branchOther.length > 0 && (
+                                            <>
+                                                <h3 style={{ marginTop: '15pt', marginBottom: '8pt', fontSize: '11pt', fontWeight: 'bold' }}>Other Observations</h3>
+                                                <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '20pt', fontSize: '10pt' }} border="1">
+                                                    <thead>
+                                                        <tr style={{ backgroundColor: '#f0f0f0' }}>
+                                                            <th style={{ padding: '8px', border: '1px solid black' }}>Sl</th>
+                                                            <th style={{ padding: '8px', border: '1px solid black' }}>Parameter</th>
+                                                            <th style={{ padding: '8px', border: '1px solid black' }}>Adverse Observation</th>
+                                                            <th style={{ padding: '8px', border: '1px solid black' }}>Suggested Rectification Measure</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {branchOther.map((item, idx) => (
+                                                            <tr key={idx}>
+                                                                <td style={{ padding: '8px', textAlign: 'center', border: '1px solid black' }}>{idx + 1}</td>
+                                                                <td style={{ padding: '8px', fontWeight: 'bold', border: '1px solid black' }}>{item.label}</td>
+                                                                <td style={{ padding: '8px', border: '1px solid black' }}>{item.userRemark}</td>
+                                                                <td style={{ padding: '8px', border: '1px solid black' }}>{item.suggestion}</td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </>
                                         )}
                                         
                                         <p>Submitted for your information and necessary action.</p>
