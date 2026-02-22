@@ -628,50 +628,10 @@
                                                     <div><label className="block text-xs font-bold text-slate-600 mb-1">Condition of stocks</label><select className="w-full border-slate-300 rounded px-3 py-2 border bg-white" value={formData.conditionOfStocks} onChange={e => handleSelectChange('conditionOfStocks', e.target.value)}>{DROPDOWNS.conditions.map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></div>
                                                     <div><label className="block text-xs font-bold text-slate-600 mb-1">Mode of storage</label><select className="w-full border-slate-300 rounded px-3 py-2 border bg-white" value={formData.modeOfStorage} onChange={e => handleSelectChange('modeOfStorage', e.target.value)}>{DROPDOWNS.storage.map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></div>
                                                 </div>
-                                                {formData.conditionOfStocks === 'Not Satisfactory' && (
-                                                    <div className="mt-4 bg-amber-50 border border-amber-200 p-4 rounded-md shadow-inner animate-fade-in">
-                                                        <h4 className="text-sm font-bold text-amber-800 mb-3 flex items-center gap-2"><Icons.AlertCircle /> Old Stock Analysis Required</h4>
-                                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                                            <div><label className="block text-xs font-bold text-amber-800 mb-1">Season/Year of purchase</label><input type="text" className="w-full border-amber-300 rounded px-2 py-1.5 border bg-white text-sm" value={formData.seasonYear} onChange={e => handleSelectChange('seasonYear', e.target.value)} /></div>
-                                                            <div><label className="block text-xs font-bold text-amber-800 mb-1">Age & amount of old stock</label><input type="text" className="w-full border-amber-300 rounded px-2 py-1.5 border bg-white text-sm" value={formData.ageOfOldStock} onChange={e => handleSelectChange('ageOfOldStock', e.target.value)} /></div>
-                                                            <div><label className="block text-xs font-bold text-amber-800 mb-1">% of old stocks to total</label><input type="text" className="w-full border-amber-300 rounded px-2 py-1.5 border bg-white text-sm" value={formData.percentOldStock} onChange={e => handleSelectChange('percentOldStock', e.target.value)} /></div>
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                                <div className="bg-slate-50 p-4 rounded border border-slate-200">
-                                                    <h4 className="text-sm font-bold text-slate-800 mb-3 border-b pb-1">Valuation</h4>
-                                                    {renderFieldWithRemark('Is the mode of Valuation Satisfactory', 'modeOfValuationSatisfactory', 'conditions', 'valuationRemark', 'Not Satisfactory')}
-                                                    {renderFieldWithRemark('Whether trade discount, if any, deducted?', 'tradeDiscountDeducted', 'yesNo', 'tradeDiscountRemark', 'No')}
-                                                    <div className="mb-4"><label className="block text-xs font-bold text-slate-600 mb-1">Unpledged stocks, if any stored?</label><select className="w-full border-slate-300 rounded px-3 py-2 border bg-white text-sm" value={formData.unpledgedStocks} onChange={e => handleSelectChange('unpledgedStocks', e.target.value)}>{DROPDOWNS.yesNo.map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></div>
-                                                </div>
-
-                                                <div className="bg-slate-50 p-4 rounded border border-slate-200">
-                                                    <h4 className="text-sm font-bold text-slate-800 mb-3 border-b pb-1">Insurance</h4>
-                                                    <div className="mb-4"><label className="block text-xs font-bold text-slate-600 mb-1">Amount of Insurance (₹)</label><input type="number" className="w-full border-slate-300 rounded px-3 py-2 border text-sm" value={formData.insuranceAmount} onChange={e => handleSelectChange('insuranceAmount', e.target.value)} /></div>
-                                                    {renderFieldWithRemark('Is Insurance cover adequate?', 'insuranceAdequate', 'yesNo', 'insuranceAdequateRemark', 'No')}
-                                                    {renderFieldWithRemark('Is insurance cover all comprehensive?', 'insuranceComprehensive', 'yesNo', 'insuranceComprehensiveRemark', 'No')}
-                                                    {formData.unpledgedStocks === 'Yes' && (
-                                                        renderFieldWithRemark('Are unpledged stocks adequately insured?', 'unpledgedInsured', 'yesNo', 'unpledgedInsuredRemark', 'No')
-                                                    )}
-                                                </div>
-                                            </div>
-
-                                            <div className="bg-slate-50 p-4 rounded border border-slate-200">
-                                                <h4 className="text-sm font-bold text-slate-800 mb-3 border-b pb-1">General Compliances & Records</h4>
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                                                    <div><label className="block text-xs font-bold text-slate-600 mb-1">Are bank’s signboards displayed?</label><select className="w-full border-slate-300 rounded px-2 py-1.5 border bg-white text-sm" value={formData.signboardsDisplayed} onChange={e => handleSelectChange('signboardsDisplayed', e.target.value)}>{DROPDOWNS.yesNo.map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></div>
-                                                    <div><label className="block text-xs font-bold text-slate-600 mb-1">Inside / Outside</label><select className="w-full border-slate-300 rounded px-2 py-1.5 border bg-white text-sm disabled:bg-gray-200" disabled={formData.signboardsDisplayed === 'No'} value={formData.signboardsInsideOutside} onChange={e => handleSelectChange('signboardsInsideOutside', e.target.value)}>{DROPDOWNS.insideOutside.map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></div>
-                                                    <div className="sm:col-span-2 md:col-span-1">{renderFieldWithRemark('Godown keeper/chokidar sanctioned?', 'godownKeeperSanctioned', 'yesNo', 'godownKeeperRemark', 'No')}</div>
-                                                    
-                                                    <div className="sm:col-span-2 md:col-span-1">{renderFieldWithRemark('Signed stock reports received?', 'stockReportsRegular', 'yesNo', 'stockReportsRemark', 'No')}</div>
-                                                    <div><label className="block text-xs font-bold text-slate-600 mb-1">Report Frequency</label><select className="w-full border-slate-300 rounded px-2 py-1.5 border bg-white text-sm" value={formData.stockReportsFrequency} onChange={e => handleSelectChange('stockReportsFrequency', e.target.value)}>{DROPDOWNS.frequency.map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></div>
-                                                    
-                                                    <div className="sm:col-span-2 md:col-span-1">{renderFieldWithRemark('Bank possession fully effective?', 'bankPossessionEffective', 'yesNo', 'bankPossessionRemark', 'No')}</div>
-                                                    <div className="sm:col-span-2 md:col-span-1">{renderFieldWithRemark('Registers/cards properly maintained?', 'registersMaintained', 'yesNo', 'registersMaintainedRemark', 'No')}</div>
-                                                    <div className="sm:col-span-2 md:col-span-1">{renderFieldWithRemark('Registers tally with godown cards?', 'registersTally', 'yesNo', 'registersTallyRemark', 'No')}</div>
+                                                <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-slate-200 pt-3">
+                                                    <div><label className="block text-xs font-bold text-slate-600 mb-1">Season/Year of purchase</label><input type="text" className="w-full border-slate-300 rounded px-2 py-1.5 border bg-white text-sm" value={formData.seasonYear} onChange={e => handleSelectChange('seasonYear', e.target.value)} /></div>
+                                                    <div><label className="block text-xs font-bold text-slate-600 mb-1">Age & amount of old stock</label><input type="text" className="w-full border-slate-300 rounded px-2 py-1.5 border bg-white text-sm" value={formData.ageOfOldStock} onChange={e => handleSelectChange('ageOfOldStock', e.target.value)} /></div>
+                                                    <div><label className="block text-xs font-bold text-slate-600 mb-1">% of old stocks to total</label><input type="text" className="w-full border-slate-300 rounded px-2 py-1.5 border bg-white text-sm" value={formData.percentOldStock} onChange={e => handleSelectChange('percentOldStock', e.target.value)} /></div>
                                                 </div>
                                             </div>
 
@@ -764,13 +724,9 @@
                                     <div className="doc-grid"><div>Outstanding balance</div><div>{formatCurrency(formData.outstandingBalance)}</div></div>
                                     <br/>
                                     
-                                    {formData.conditionOfStocks === 'Not Satisfactory' && (
-                                        <>
-                                            <div className="doc-grid"><div>Season/Year of purchase of manufactured goods</div><div>{formData.seasonYear || '-'}</div></div>
-                                            <div className="doc-grid"><div>Age & amount of old stock</div><div>{formData.ageOfOldStock || '-'}</div></div>
-                                            <div className="doc-grid"><div>Percentage of old stocks to total stocks</div><div>{formData.percentOldStock || '-'}</div></div>
-                                        </>
-                                    )}
+                                    <div className="doc-grid"><div>Season/Year of purchase of manufactured goods</div><div>{formData.seasonYear || '-'}</div></div>
+                                    <div className="doc-grid"><div>Age & amount of old stock</div><div>{formData.ageOfOldStock || '-'}</div></div>
+                                    <div className="doc-grid"><div>Percentage of old stocks to total stocks</div><div>{formData.percentOldStock || '-'}</div></div>
 
                                     <div className="doc-grid"><div>Condition of stocks</div><div>{formData.conditionOfStocks}</div></div>
                                     <div className="doc-grid"><div>Mode of storage (Proper/Haphazard)</div><div>{formData.modeOfStorage}</div></div>
