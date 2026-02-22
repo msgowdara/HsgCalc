@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Godown Inspector (Cloud Sync Version)</title>
+    <title>Godown Inspector (Branch Sync V3)</title>
     
     <!-- Standard React CDNs -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -95,7 +95,7 @@
             conditionOfStocks: { trigger: 'Not Satisfactory', field: 'conditionOfStocksRemark', label: 'Condition of Stocks', resp: 'Borrower', text: "Some stocks appear damaged/obsolete." },
             modeOfStorage: { trigger: 'Haphazard', field: 'modeOfStorageRemark', label: 'Mode of Storage', resp: 'Borrower', text: "Advised customer to arrange and stack goods properly." },
             modeOfValuationSatisfactory: { trigger: 'Not Satisfactory', field: 'valuationRemark', label: 'Valuation Mode', resp: 'Branch', text: "Valuation is not in line with current market rates." },
-            tradeDiscountDeducted: { trigger: 'No', field: 'tradeDiscountRemark', label: 'Trade Discount', resp: 'Branch', text: "Trade discount is not deducted from valuation." },
+            tradeDiscountDeducted: { trigger: 'No', field: 'tradeDiscountRemark', label: 'Trade Discount', resp: 'Borrower', text: "Trade discount is not deducted from valuation." },
             insuranceAdequate: { trigger: 'No', field: 'insuranceAdequateRemark', label: 'Insurance Adequacy', resp: 'Borrower', text: "Advised customer to increase insurance cover to match limit." },
             insuranceComprehensive: { trigger: 'No', field: 'insuranceComprehensiveRemark', label: 'Comprehensive Insurance', resp: 'Borrower', text: "Advised to obtain comprehensive insurance policy." },
             unpledgedInsured: { trigger: 'No', field: 'unpledgedInsuredRemark', label: 'Unpledged Stocks Insurance', resp: 'Borrower', text: "Unpledged stocks are currently uninsured." },
@@ -128,21 +128,23 @@
         };
 
         // --- CLOUD API INTEGRATION ---
-        const CLOUD_SETTINGS_KEY = 'godown_cloud_settings';
+        const CLOUD_SETTINGS_KEY = 'godown_cloud_settings_v3';
         
         const utf8ToBase64 = (str) => btoa(unescape(encodeURIComponent(str)));
         const base64ToUtf8 = (str) => decodeURIComponent(escape(atob(str)));
 
         const getCloudSettings = () => {
             const saved = localStorage.getItem(CLOUD_SETTINGS_KEY);
-            return saved ? JSON.parse(saved) : { token: '', owner: 'msgowdara', repo: 'HsgCalc', path: 'godownInspection.csv' };
+            return saved ? JSON.parse(saved) : { token: '', owner: 'msgowdara', repo: 'HsgCalc', alphaCode: '' };
         };
 
         const fetchFromCloud = async () => {
-            const { token, owner, repo, path } = getCloudSettings();
+            const { token, owner, repo, alphaCode } = getCloudSettings();
             if (!token) throw new Error("No Cloud Token Configured");
+            if (!alphaCode || alphaCode.length !== 6) throw new Error("Invalid Branch Alpha Code");
             
-            const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+            const filepath = `GodownCsv/Godown_${alphaCode.toLowerCase()}.csv`;
+            const url = `https://api.github.com/repos/${owner}/${repo}/contents/${filepath}`;
             const res = await fetch(url, { headers: { Authorization: `token ${token}` } });
             
             if (res.status === 404) return { data: [], sha: null }; 
@@ -156,13 +158,15 @@
         };
 
         const pushToCloud = async (dataArray, currentSha) => {
-            const { token, owner, repo, path } = getCloudSettings();
+            const { token, owner, repo, alphaCode } = getCloudSettings();
             if (!token) throw new Error("No Cloud Token Configured");
+            if (!alphaCode || alphaCode.length !== 6) throw new Error("Invalid Branch Alpha Code");
 
+            const filepath = `GodownCsv/Godown_${alphaCode.toLowerCase()}.csv`;
             const csvContent = Papa.unparse(dataArray);
             const encodedContent = utf8ToBase64(csvContent);
 
-            const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+            const url = `https://api.github.com/repos/${owner}/${repo}/contents/${filepath}`;
             const body = {
                 message: "Update godown inspections data via App",
                 content: encodedContent,
@@ -198,7 +202,7 @@
             seasonYear: '', ageOfOldStockDays: '', amountOfOldStockRupees: '', percentOldStock: '',
             
             modeOfValuationSatisfactory: 'Satisfactory', valuationRemark: '',
-            tradeDiscountDeducted: 'No', tradeDiscountRemark: '',
+            tradeDiscountDeducted: 'Yes', tradeDiscountRemark: '',
             unpledgedStocks: 'No', 
             
             insuranceAmount: '', 
@@ -271,6 +275,10 @@
             };
 
             const handleSaveSettings = () => {
+                if (!settingsInput.alphaCode || settingsInput.alphaCode.length !== 6) {
+                    alert("Please enter exactly 6 letters for the Branch Alpha Code.");
+                    return;
+                }
                 localStorage.setItem(CLOUD_SETTINGS_KEY, JSON.stringify(settingsInput));
                 setShowSettings(false);
                 showToast("⚙️ Cloud Settings Saved!");
@@ -501,7 +509,7 @@
                         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
                             <div className="flex items-center gap-3">
                                 <div className="bg-indigo-600 p-1.5 rounded"><Icons.Cloud /></div>
-                                <h1 className="font-bold text-lg tracking-wide hidden sm:block">Godown Inspector Pro <span className="text-xs text-indigo-300 font-normal ml-2">Cloud Sync V2</span></h1>
+                                <h1 className="font-bold text-lg tracking-wide hidden sm:block">Godown Inspector Pro <span className="text-xs text-indigo-300 font-normal ml-2">Branch Sync V3</span></h1>
                             </div>
                             
                             <div className="flex items-center gap-2">
@@ -554,7 +562,18 @@
                                         <div><label className="block text-xs font-bold text-slate-600 mb-1">Account / Username</label><input type="text" className="w-full border-slate-300 rounded px-3 py-2 border shadow-sm bg-slate-50" value={settingsInput.owner} onChange={e => setSettingsInput({...settingsInput, owner: e.target.value})} /></div>
                                         <div><label className="block text-xs font-bold text-slate-600 mb-1">Repository Name</label><input type="text" className="w-full border-slate-300 rounded px-3 py-2 border shadow-sm bg-slate-50" value={settingsInput.repo} onChange={e => setSettingsInput({...settingsInput, repo: e.target.value})} /></div>
                                     </div>
-                                    <div><label className="block text-xs font-bold text-slate-600 mb-1">CSV File Path (Root path)</label><input type="text" className="w-full border-slate-300 rounded px-3 py-2 border shadow-sm bg-slate-50 font-mono text-sm" value={settingsInput.path} onChange={e => setSettingsInput({...settingsInput, path: e.target.value})} /></div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-600 mb-1">Branch Alpha Code (6 Letters)</label>
+                                        <input 
+                                            type="text" 
+                                            maxLength="6" 
+                                            placeholder="e.g. dharwa" 
+                                            className="w-full border-slate-300 rounded px-3 py-2 border shadow-sm bg-slate-50 font-mono text-sm lowercase" 
+                                            value={settingsInput.alphaCode} 
+                                            onChange={e => setSettingsInput({...settingsInput, alphaCode: e.target.value.replace(/[^a-zA-Z]/g, '').toLowerCase()})} 
+                                        />
+                                        <p className="text-[10px] text-slate-500 mt-1">Data will be saved as: <strong>GodownCsv/Godown_{settingsInput.alphaCode ? settingsInput.alphaCode.toLowerCase() : 'xxxxxx'}.csv</strong></p>
+                                    </div>
                                     
                                     <div className="flex justify-end gap-3 mt-6 pt-4 border-t">
                                         <button onClick={() => setShowSettings(false)} className="px-4 py-2 text-slate-600 font-medium hover:bg-slate-100 rounded">Cancel</button>
