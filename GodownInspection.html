@@ -233,6 +233,7 @@
             const [searchQuery, setSearchQuery] = useState('');
             
             // App & API States
+            const [isFetching, setIsFetching] = useState(true);
             const [isSaving, setIsSaving] = useState(false);
             const [showSettings, setShowSettings] = useState(false);
             const [settingsInput, setSettingsInput] = useState(getCloudSettings());
