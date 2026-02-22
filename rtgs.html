@@ -224,11 +224,7 @@
                 <!-- Column 1: Sender Profile -->
                 <div class="space-y-3">
                     <p class="font-bold text-bob-vermillion border-b pb-1">Sender Profile</p>
-                    <div class="flex gap-2 relative">
-                        <input type="text" id="i_senderAcc" placeholder="Sender Account No. *" class="w-full border p-2 rounded focus:border-bob-vermillion focus:ring-1 focus:ring-bob-vermillion outline-none" maxlength="14" list="savedSenders" oninput="handleSenderSelect()">
-                        <button id="btn_saveSender" onclick="saveSenderProfile()" class="bg-bob-light text-bob-vermillion border border-bob-vermillion px-4 rounded hover:bg-bob-vermillion hover:text-white transition-colors text-sm font-bold whitespace-nowrap" title="Save this profile locally">Save</button>
-                        <button id="btn_clearSenders" onclick="clearSenderProfiles()" class="bg-red-50 text-red-500 border border-red-500 px-3 rounded hover:bg-red-500 hover:text-white transition-colors text-sm font-bold whitespace-nowrap" title="Clear all saved profiles">Clear</button>
-                    </div>
+                    <input type="text" id="i_senderAcc" placeholder="Sender Account No. *" class="w-full border p-2 rounded focus:border-bob-vermillion focus:ring-1 focus:ring-bob-vermillion outline-none" maxlength="14" list="savedSenders" oninput="handleSenderSelect()">
                     <datalist id="savedSenders"></datalist>
                     <input type="text" id="i_senderName" placeholder="Account Holder Name *" class="w-full border p-2 rounded focus:border-bob-vermillion focus:ring-1 focus:ring-bob-vermillion outline-none" oninput="update()">
                     <input type="text" id="i_branch" placeholder="Branch Name *" class="w-full border p-2 rounded focus:border-bob-vermillion focus:ring-1 focus:ring-bob-vermillion outline-none" oninput="update()">
@@ -236,6 +232,13 @@
                         <input type="text" id="i_pan" placeholder="PAN" class="w-full border p-2 rounded focus:border-bob-vermillion focus:ring-1 focus:ring-bob-vermillion outline-none" oninput="update()">
                         <input type="text" id="i_mobile" placeholder="Mobile" class="w-full border p-2 rounded focus:border-bob-vermillion focus:ring-1 focus:ring-bob-vermillion outline-none" oninput="update()">
                     </div>
+                    
+                    <!-- Moved and Enlarged Action Buttons -->
+                    <div class="flex flex-col gap-2 pt-1">
+                        <button id="btn_saveSender" onclick="saveSenderProfile()" class="w-full bg-bob-light text-bob-vermillion border border-bob-vermillion p-2.5 rounded hover:bg-bob-vermillion hover:text-white transition-colors text-sm font-bold" title="Save this profile locally">Save Sender Details</button>
+                        <button id="btn_clearSenders" onclick="clearSenderProfiles()" class="w-full bg-red-50 text-red-500 border border-red-500 p-2.5 rounded hover:bg-red-500 hover:text-white transition-colors text-sm font-bold" title="Clear all saved profiles">Clear Sender Details</button>
+                    </div>
+
                     <input type="text" id="i_chequeNo" placeholder="Cheque No." class="w-full border p-2 rounded focus:border-bob-vermillion focus:ring-1 focus:ring-bob-vermillion outline-none" maxlength="6" oninput="update()">
                 </div>
 
@@ -693,7 +696,7 @@
             btn.classList.remove('bg-red-50', 'text-red-500');
             
             setTimeout(() => {
-                btn.innerText = "Clear";
+                btn.innerText = "Clear Sender Details";
                 btn.classList.remove('bg-red-500', 'text-white');
                 btn.classList.add('bg-red-50', 'text-red-500');
             }, 2000);
@@ -706,8 +709,8 @@
             const pan = document.getElementById('i_pan').value.trim();
             const branch = document.getElementById('i_branch').value.trim();
 
-            if (!acc || !name || acc.length !== 14) {
-                document.getElementById('errorText').innerText = "Please enter a valid 14-digit Account Number and Account Holder Name to save a profile.";
+            if (!acc || acc.length !== 14 || !name || !mob || !pan || !branch) {
+                document.getElementById('errorText').innerText = "Please fill all Sender Profile fields (14-digit Account No, Name, Branch, PAN, and Mobile) to save a complete profile.";
                 document.getElementById('errorModal').classList.remove('hidden');
                 return;
             }
@@ -732,7 +735,7 @@
             btn.classList.add('bg-green-600', 'text-white', 'border-green-600');
             btn.classList.remove('bg-bob-light', 'text-bob-vermillion', 'border-bob-vermillion');
             setTimeout(() => {
-                btn.innerText = "Save";
+                btn.innerText = "Save Sender Details";
                 btn.classList.remove('bg-green-600', 'text-white', 'border-green-600');
                 btn.classList.add('bg-bob-light', 'text-bob-vermillion', 'border-bob-vermillion');
             }, 2000);
