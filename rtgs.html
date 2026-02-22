@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank of Baroda RTGS/NEFT Slip Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --bob-red: #d32f2f;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 0;
+            -webkit-print-color-adjust: exact;
+        }
+
+        @media print {
+            @page {
+                size: A4 landscape;
+                margin: 5mm;
+            }
+            body { background-color: white; padding: 0; margin: 0; }
+            .no-print { display: none !important; }
+            .print-container {
+                width: 287mm;
+                height: 195mm;
+                padding: 0;
+                margin: 0;
+                box-shadow: none;
+            }
+            .slip-outer {
+                border: 1px solid #000 !important;
+            }
+        }
+
+        .print-container {
+            width: 290mm;
+            margin: 20px auto;
+        }
+
+        .slip-outer {
+            background: white;
+            display: flex;
+            width: 100%;
+            height: 180mm;
+            border: 1px solid #999;
+            color: black;
+            overflow: hidden;
+        }
+
+        /* Side Borders */
+        .counterfoil {
+            width: 31%;
+            border-right: 1.5px dashed #000;
+            padding: 8px 10px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-slip {
+            width: 69%;
+            padding: 8px 14px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Specific Elements */
+        .form-row {
+            display: flex;
+            align-items: flex-end;
+            width: 100%;
+            margin-bottom: 2px;
+            white-space: nowrap;
+        }
+
+        .form-label {
+            margin-right: 4px;
+            font-size: 11px;
+        }
+
+        .input-line {
+            border-bottom: 1px solid #000;
+            flex: 1;
+            min-height: 1.2em;
+            font-weight: bold;
+            font-size: 12px;
+            padding: 0 4px;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        /* Box Grids for Account Numbers (Square, bigger font) */
+        .box-grid {
+            display: flex;
+            border: 1px solid #000;
+            border-right: none;
+            height: 24px;
+            margin-bottom: 2px;
+        }
+
+        .box-cell {
+            border-right: 1px solid #000;
+            width: 20px; 
+            height: 100%;
+            text-align: center;
+            line-height: 22px;
+            font-weight: bold;
+            font-size: 14px; /* Prominent Font */
+        }
+
+        .red-label {
+            color: var(--bob-red) !important;
+            font-weight: bold;
+            font-size: 11.5px;
+        }
+
+        .sig-box {
+            border: 1px solid #000;
+            height: 60px;
+            padding: 4px;
+            font-size: 9px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Logos exactly identical & bigger */
+        .logo-img { height: 75px; object-fit: contain; }
+        
+        /* Utility for prominence */
+        .prominent-text {
+            font-size: 14px !important;
+            font-weight: 900 !important;
+        }
+        
+        .main-prominent-text {
+            font-size: 16px !important;
+            font-weight: 900 !important;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- INPUT PANEL (HIDDEN ON PRINT) -->
+    <div class="max-w-6xl mx-auto no-print bg-white p-6 rounded-b-xl shadow-lg border-t-4 border-orange-500 mb-8">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">Bank of Baroda NEFT/RTGS Form</h1>
+            <div class="flex gap-2">
+                <button onclick="validateAndPrint()" class="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded font-bold shadow transition-all">Print Form</button>
+                <button onclick="location.reload()" class="bg-gray-200 px-4 py-2 rounded font-bold">Reset</button>
+            </div>
+        </div>
+        
+        <p class="text-xs text-red-500 mb-4 font-semibold">Fields marked with * are compulsory for printing.</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="space-y-3">
+                <p class="font-bold text-orange-600 border-b">Branch & Details</p>
+                <input type="text" id="i_branch" placeholder="Branch Name *" class="w-full border p-2 rounded" oninput="update()">
+                <input type="date" id="i_date" class="w-full border p-2 rounded" oninput="update()" title="Date *">
+            </div>
+            <div class="space-y-3">
+                <p class="font-bold text-orange-600 border-b">Sender Information</p>
+                <input type="text" id="i_senderName" placeholder="Account Holder Name *" class="w-full border p-2 rounded" oninput="update()">
+                <input type="text" id="i_senderAcc" placeholder="Sender Account No. *" class="w-full border p-2 rounded" maxlength="14" oninput="update()">
+                <input type="text" id="i_chequeNo" placeholder="Cheque No." class="w-full border p-2 rounded" maxlength="6" oninput="update()">
+                <div class="flex gap-2">
+                    <input type="text" id="i_mobile" placeholder="Mobile" class="w-full border p-2 rounded" oninput="update()">
+                    <input type="text" id="i_pan" placeholder="PAN" class="w-full border p-2 rounded" oninput="update()">
+                </div>
+            </div>
+            <div class="space-y-3">
+                <p class="font-bold text-orange-600 border-b">Beneficiary Information</p>
+                <input type="text" id="i_beneName" placeholder="Beneficiary Name *" class="w-full border p-2 rounded" oninput="update()">
+                <div class="flex gap-2">
+                    <input type="password" id="i_beneAcc" placeholder="Beneficiary Account No *" class="w-1/2 border p-2 rounded" maxlength="25" oninput="update()">
+                    <input type="text" id="i_beneAccConfirm" placeholder="Confirm Account No *" class="w-1/2 border p-2 rounded" maxlength="25" oninput="update()">
+                </div>
+                
+                <div class="flex gap-2">
+                    <select id="i_beneType" class="w-1/2 border p-2 rounded" onchange="update()">
+                        <option value="">A/C Type</option>
+                        <option value="SB">SB</option>
+                        <option value="CA">CA</option>
+                        <option value="OD">OD</option>
+                        <option value="CC">CC</option>
+                        <option value="NRE">NRE</option>
+                        <option value="Credit Card">Credit Card</option>
+                        <option value="Remittance to Indo Nepal">Remittance to Indo Nepal</option>
+                    </select>
+                    <input type="text" id="i_beneIfsc" placeholder="IFSC Code *" class="w-1/2 border p-2 rounded" maxlength="11" oninput="update()">
+                </div>
+
+                <div class="flex gap-2">
+                    <input type="text" id="i_beneBank" placeholder="Receiving Bank" class="w-1/2 border p-2 rounded" oninput="update()">
+                    <input type="text" id="i_beneBranch" placeholder="Receiving Branch" class="w-1/2 border p-2 rounded" oninput="update()">
+                </div>
+                
+                <div class="flex gap-2">
+                    <input type="number" id="i_amount" placeholder="Amount (Rs.) *" class="w-2/3 border p-2 rounded" oninput="handleAmountInput()">
+                    <select id="i_type" class="w-1/3 border p-2 rounded" onchange="handleTypeChange()">
+                        <option value="NEFT">NEFT</option>
+                        <option value="RTGS">RTGS</option>
+                    </select>
+                </div>
+                
+                <input type="text" id="i_message" placeholder="Message for Beneficiary (RTGS Only)" class="w-full border p-2 rounded" oninput="update()">
+            </div>
+        </div>
+    </div>
+
+    <!-- THE PRINTABLE SLIP -->
+    <div class="print-container">
+        <div class="slip-outer">
+            
+            <!-- LEFT: COUNTER FOIL -->
+            <div class="counterfoil">
+                <!-- Counterfoil Logo (Bigger) -->
+                <div class="mb-2">
+                    <img src="BOB Logo.png" alt="Bank of Baroda" class="logo-img" onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Bank_of_Baroda_Logo.svg/512px-Bank_of_Baroda_Logo.svg.png';">
+                </div>
+
+                <div class="form-row mt-2">
+                    <span class="form-label">Branch:</span>
+                    <span id="v_branch1" class="input-line"></span>
+                </div>
+                <div class="form-row">
+                    <span class="form-label">Date:</span>
+                    <span id="v_date1" class="input-line"></span>
+                </div>
+
+                <div class="text-center font-bold text-xs mt-2 border-b border-black pb-1 mb-2">COUNTER FOIL</div>
+
+                <div class="form-row">
+                    <span class="form-label">Sender's a/c no.:</span>
+                    <span id="v_senderAcc1" class="input-line"></span>
+                </div>
+                <div class="form-row">
+                    <span class="form-label">Name of a/c holder:</span>
+                    <span id="v_senderName1" class="input-line"></span>
+                </div>
+                
+                <!-- Left aligned NEFT/RTGS -->
+                <div class="form-row font-bold text-[11px] my-2">
+                    <span class="form-label">NEFT / RTGS:</span>
+                    <span id="v_type1" class="input-line underline"></span>
+                </div>
+                
+                <div class="form-row">
+                    <span class="form-label">Favouring(payee) Name:</span>
+                    <span id="v_beneName1" class="input-line prominent-text"></span>
+                </div>
+                <div class="flex gap-2 w-full mb-1">
+                    <div class="form-row w-1/2 !mb-0">
+                        <span class="form-label">Bank:</span>
+                        <span id="v_beneBank1" class="input-line"></span>
+                    </div>
+                    <div class="form-row w-1/2 !mb-0">
+                        <span class="form-label">Branch:</span>
+                        <span id="v_beneBranch1" class="input-line"></span>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <span class="form-label">IFS Code:</span>
+                    <span id="v_ifsc1" class="input-line font-mono"></span>
+                </div>
+                <div class="form-row">
+                    <span class="form-label red-label !text-[11px]">Beneficiary a/c no:</span>
+                    <span id="v_beneAcc1" class="input-line prominent-text"></span>
+                </div>
+                <div class="form-row">
+                    <span class="form-label">Beneficiary a/c type:</span>
+                    <span id="v_beneType1" class="input-line font-bold"></span>
+                </div>
+
+                <!-- Amounts as continuous fields (No Table) -->
+                <div class="form-row mt-2">
+                    <span class="form-label">Amount:</span>
+                    <span id="v_amt1" class="input-line font-bold"></span>
+                </div>
+                <div class="form-row">
+                    <span class="form-label">Exchange:</span>
+                    <span class="input-line"></span>
+                </div>
+                <div class="form-row">
+                    <span class="form-label font-bold">Total amount:</span>
+                    <span id="v_total1" class="input-line font-bold"></span>
+                </div>
+                
+                <div class="text-[10px] mt-1 italic flex items-start w-full">
+                    <span class="whitespace-nowrap mr-1 pt-[2px]">Total amount in words:</span> 
+                    <span id="v_words1" class="font-bold flex-1 border-b border-black pb-[2px]" style="white-space: normal; line-height: 1.2;"></span>
+                </div>
+
+                <!-- Vertical stacked layout per precise instruction -->
+                <div class="mt-3 text-[10px] leading-relaxed flex-none">
+                    Signature of Customer<br>
+                    Tel/Mob No: <span id="v_mob1" class="font-bold"></span><br>
+                    PAN: <span id="v_pan1" class="font-bold"></span>
+                </div>
+
+                <div class="mt-4 text-[11px] font-bold">
+                    Bank's Seal
+                </div>
+
+                <div class="mt-4 text-[10px]">
+                    Sign. of Clerk/Cashier/Teller
+                </div>
+
+                <div class="mt-2 text-[11px] font-bold pb-1 flex items-end">
+                    <span>UTR No: </span>
+                    <span class="flex-1 border-b border-black ml-2 inline-block min-h-[1.2em]"></span>
+                </div>
+
+            </div>
+
+            <!-- RIGHT: MAIN SLIP -->
+            <div class="main-slip">
+                <!-- Header Layering -->
+                <div class="relative flex justify-center items-start mb-2">
+                    <!-- Left: Logo (Same bigger size) -->
+                    <div class="absolute left-0 top-0">
+                        <img src="BOB Logo.png" alt="Bank of Baroda" class="logo-img" onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Bank_of_Baroda_Logo.svg/512px-Bank_of_Baroda_Logo.svg.png';">
+                    </div>
+                    
+                    <!-- Center: Text -->
+                    <div class="text-center pt-2">
+                        <div class="font-bold text-[18px]">BANK OF BARODA</div>
+                        <div class="flex items-center justify-center gap-3 mt-1">
+                            <div class="font-bold text-[14px]">ANNEXURE - II</div>
+                            <div class="font-bold text-[16px] underline">PAYING - IN-SLIP FOR NEFT/RTGS</div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Form Number -->
+                    <div class="absolute right-0 top-0 text-right text-[11px]">
+                        <div class="font-bold mt-2">Form No. 404</div>
+                    </div>
+                </div>
+
+                <!-- Branch, Date, Time of Receipt in ONE LINE -->
+                <div class="flex gap-4 border-b border-black pb-1 mb-1 mt-2">
+                    <div class="form-row w-5/12 !mb-0">
+                        <span class="form-label">Branch:</span>
+                        <span id="v_branch2" class="input-line"></span>
+                    </div>
+                    <div class="form-row w-3/12 !mb-0">
+                        <span class="form-label">Date:</span>
+                        <span id="v_date2" class="input-line"></span>
+                    </div>
+                    <div class="form-row w-4/12 !mb-0">
+                        <span class="form-label">Time of Receipt:</span>
+                        <span class="input-line"></span>
+                    </div>
+                </div>
+
+                <!-- Left aligned instruction -->
+                <div class="text-[10px] text-left font-bold mb-1">(FOR RTGS - AMOUNT MUST BE FOR ₹ 2 LACS OR MORE)</div>
+                <div class="text-[10px] font-bold mb-1">Application for Electronic Funds Transfer to a customer of another Bank through RTGS/NEFT. (to be filled in by customer)</div>
+
+                <!-- Sender Info -->
+                <div class="form-row">
+                    <span class="form-label">Sender's a/c no of base branch:</span>
+                    <span id="v_senderAcc2" class="input-line max-w-[250px] font-bold"></span>
+                </div>
+                <div class="form-row">
+                    <span class="form-label">Name of a/c holder (sender):</span>
+                    <span id="v_senderName2" class="input-line"></span>
+                    <span class="form-label ml-6 font-bold text-[12px]">NEFT/RTGS:</span>
+                    <span id="v_type2" class="bg-black text-white px-3 py-0.5 ml-1 text-[11px] font-bold"></span>
+                </div>
+
+                <!-- Beneficiary Info -->
+                <div class="form-row mt-2">
+                    <span class="form-label">Favouring/beneficiary (Name):</span>
+                    <span id="v_beneName2" class="input-line main-prominent-text"></span>
+                </div>
+                
+                <div class="flex gap-4 w-full mb-1">
+                    <div class="form-row w-1/2 !mb-0">
+                        <span class="form-label">Receiving Bank Name:</span>
+                        <span id="v_beneBank2" class="input-line"></span>
+                    </div>
+                    <div class="form-row w-1/2 !mb-0">
+                        <span class="form-label">Receiving Branch Name:</span>
+                        <span id="v_beneBranch2" class="input-line"></span>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <span class="form-label">Receiving Branch IFS Code:</span>
+                    <span id="v_ifsc2" class="input-line max-w-[300px] font-mono main-prominent-text"></span>
+                </div>
+                
+                <!-- Red Label Account Grid in SAME LINE -->
+                <div class="flex items-end mt-2 mb-1">
+                    <div class="red-label mr-2 mb-[2px]">Beneficiary a/c no:</div>
+                    <div id="grid1" class="box-grid"></div>
+                </div>
+                
+                <!-- Beneficiary a/c type stretches to the end of the page -->
+                <div class="form-row mt-2">
+                    <span class="form-label whitespace-nowrap">Beneficiary a/c type: (SB/CA/OD/CC/NRE/Credit Card)/Remittance to Indo Nepal:</span>
+                    <span id="v_beneType2" class="input-line flex-1 font-bold"></span>
+                </div>
+
+                <!-- Message for Beneficiary -->
+                <div class="form-row">
+                    <span class="form-label whitespace-nowrap">Message for beneficiary (applicable for RTGS only):</span>
+                    <span id="v_message2" class="input-line"></span>
+                </div>
+
+                <!-- Amounts as continuous fields (No Table) -->
+                <div class="flex gap-6 w-full mt-1">
+                    <div class="form-row w-1/3 !mb-0">
+                        <span class="form-label">Amount:</span>
+                        <span id="v_amt2" class="input-line main-prominent-text text-left pl-1"></span>
+                    </div>
+                    <div class="form-row w-1/3 !mb-0">
+                        <span class="form-label">Exchange:</span>
+                        <span class="input-line text-left pl-1"></span>
+                    </div>
+                    <div class="form-row w-1/3 !mb-0">
+                        <span class="form-label font-bold">Total amount:</span>
+                        <span id="v_total2" class="input-line main-prominent-text text-left pl-1"></span>
+                    </div>
+                </div>
+
+                <div class="flex items-start w-full mt-1 italic text-[11px]">
+                    <span class="form-label !font-normal whitespace-nowrap pt-[2px]">Total amount in words:</span>
+                    <span id="v_words2" class="flex-1 border-b border-black font-bold pb-[2px]" style="white-space: normal; line-height: 1.2;"></span>
+                </div>
+                
+                <!-- Repeated Grid below total in words -->
+                <div class="mt-1">
+                    <div class="flex items-end">
+                        <div class="red-label mr-2 mb-[2px]">Beneficiary a/c no:</div>
+                        <div id="grid2" class="box-grid"></div>
+                    </div>
+                    <!-- Left aligned and Red RBI declaration -->
+                    <div class="text-[10px] font-bold italic mt-1 text-left red-label">
+                        (to be written 2nd time as per RBI guidelines)
+                    </div>
+                </div>
+
+                <!-- Terms & Conditions Block -->
+                <div class="text-[9.5px] leading-snug text-justify mt-1 border-t border-dashed border-gray-400 pt-1">
+                    I/We request you to make the above remittance. It is being understood that the remittance is to be sent at my/our own risk and my/our responsibility and on the distinct understanding that no liability whatsoever is to attach to the Bank for any loss or damage arising or resulting from delay in transmission, delivery or non delivery of the message or for any mistake, exchange or error in transmission or delivery thereof or in deciphering the message from whatsoever cause or from its misinterpretation when received or from failure to properly identity the persons name. I/We also hereby undertake to refund to bank any over remittance, which is made as per RBI RTGS/NEFT scheme.
+                </div>
+
+                <div class="text-[10px] mt-1 leading-relaxed">
+                    Please remit the amount as per above details by (i) debiting my/our SB/CA/OD/CC/NRE/a/c No. <span id="v_declAcc" class="input-line inline-block w-40 mb-[-3px] font-bold text-center"></span> with <span id="v_declBranch" class="input-line inline-block w-32 mb-[-3px] font-bold text-center"></span> branch (ii) I/We herewith tender cheque No. <span id="v_declCheque" class="input-line inline-block w-24 mb-[-3px] font-bold text-center"></span> drawn on our a/c towards its cost including Bank charge.
+                </div>
+
+                <!-- Signature Footer -->
+                <div class="grid grid-cols-4 gap-2 mt-auto pt-1">
+                    <div class="flex flex-col justify-end items-center text-center pb-1 h-[50px]">
+                        <div class="font-bold text-[11px]">Signature of Customer</div>
+                        <div class="text-[9px] mt-1">Mob: <span id="v_mob2" class="font-bold"></span> | PAN: <span id="v_pan2" class="font-bold"></span></div>
+                    </div>
+                    <div class="flex flex-col justify-end items-center text-center pb-1 h-[50px] text-[9px]">
+                        Sign. of operator<br>(who created mesg.)
+                    </div>
+                    <div class="flex flex-col justify-end items-center text-center pb-1 h-[50px] text-[9px]">
+                        sign. of officer<br>(who authorized)
+                    </div>
+                    <div class="flex flex-col justify-end items-center text-center pb-1 h-[50px] text-[9px]">
+                        Sign. of officer<br>(who verified)
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Error Message Modal -->
+    <div id="errorModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 no-print">
+        <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm text-center">
+            <h2 class="text-xl font-bold text-red-600 mb-2">Validation Error</h2>
+            <p id="errorText" class="text-gray-700 mb-4 font-semibold"></p>
+            <button onclick="closeErrorModal()" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded font-bold transition-all">OK</button>
+        </div>
+    </div>
+
+    <script>
+        let userHasLockedType = false;
+
+        function numberToWords(number) {
+            const units = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
+            const teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+            const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+            
+            function convert(n) {
+                if (n < 10) return units[n];
+                if (n < 20) return teens[n - 10];
+                if (n < 100) return tens[Math.floor(n / 10)] + (n % 10 !== 0 ? ' ' + units[n % 10] : '');
+                if (n < 1000) return units[Math.floor(n / 100)] + ' Hundred' + (n % 100 !== 0 ? ' and ' + convert(n % 100) : '');
+                if (n < 100000) return convert(Math.floor(n / 1000)) + ' Thousand' + (n % 1000 !== 0 ? ' ' + convert(n % 1000) : '');
+                if (n < 10000000) return convert(Math.floor(n / 100000)) + ' Lakh' + (n % 100000 !== 0 ? ' ' + convert(n % 100000) : '');
+                return convert(Math.floor(n / 10000000)) + ' Crore' + (n % 10000000 !== 0 ? ' ' + convert(n % 10000000) : '');
+            }
+            if (!number || number === 0) return '';
+            return 'Rupees ' + convert(Math.floor(number)) + ' Only';
+        }
+
+        // Auto-switch Dropdown based on Amount logic
+        function handleAmountInput() {
+            const amountField = document.getElementById('i_amount');
+            const typeField = document.getElementById('i_type');
+            const amt = parseFloat(amountField.value) || 0;
+
+            if (!userHasLockedType) {
+                if (amt >= 200000) {
+                    typeField.value = 'RTGS';
+                } else if (amt > 0) {
+                    typeField.value = 'NEFT';
+                }
+            }
+            update();
+        }
+
+        function handleTypeChange() {
+            userHasLockedType = true; // User manually overrides, stop auto-switching
+            update();
+        }
+
+        function validateAndPrint() {
+            const branch = document.getElementById('i_branch').value.trim();
+            const date = document.getElementById('i_date').value;
+            const senderName = document.getElementById('i_senderName').value.trim();
+            const senderAcc = document.getElementById('i_senderAcc').value.trim();
+            const beneName = document.getElementById('i_beneName').value.trim();
+            const acc1 = document.getElementById('i_beneAcc').value.trim();
+            const acc2 = document.getElementById('i_beneAccConfirm').value.trim();
+            const ifsc = document.getElementById('i_beneIfsc').value.trim().toUpperCase();
+            const amount = parseFloat(document.getElementById('i_amount').value) || 0;
+            const cheque = document.getElementById('i_chequeNo').value.trim();
+            
+            // Check for empty compulsory fields
+            if (!branch || !date || !senderName || !senderAcc || !beneName || !acc1 || !acc2 || !ifsc || amount <= 0) {
+                document.getElementById('errorText').innerText = "Please fill in all compulsory fields marked with an asterisk (*).";
+                document.getElementById('errorModal').classList.remove('hidden');
+                return;
+            }
+
+            // Sender Account Validation (BOB accounts are 14 digits)
+            if (!/^\d{14}$/.test(senderAcc)) {
+                document.getElementById('errorText').innerText = "Sender Account Number must be exactly 14 digits.";
+                document.getElementById('errorModal').classList.remove('hidden');
+                return;
+            }
+
+            // Cheque Number Validation (up to 6 digits, must be numeric)
+            if (cheque && !/^\d{1,6}$/.test(cheque)) {
+                document.getElementById('errorText').innerText = "Cheque Number must be a number with up to 6 digits.";
+                document.getElementById('errorModal').classList.remove('hidden');
+                return;
+            }
+
+            // IFSC Validation (11 chars, 5th char must be '0')
+            if (ifsc.length !== 11 || ifsc.charAt(4) !== '0') {
+                document.getElementById('errorText').innerText = "Invalid IFSC Code. It must be exactly 11 characters long and the 5th character must be '0'.";
+                document.getElementById('errorModal').classList.remove('hidden');
+                return;
+            }
+
+            if (acc1 !== acc2) {
+                document.getElementById('errorText').innerText = "Beneficiary Account Numbers do not match! Please check and try again.";
+                document.getElementById('errorModal').classList.remove('hidden');
+                return;
+            }
+            
+            window.print();
+        }
+
+        function closeErrorModal() {
+            document.getElementById('errorModal').classList.add('hidden');
+        }
+
+        function formatIndianDate(dateStr) {
+            if (!dateStr) return '';
+            const parts = dateStr.split('-');
+            if (parts.length !== 3) return dateStr;
+            return `${parts[2]}-${parts[1]}-${parts[0]}`; // DD-MM-YYYY
+        }
+
+        function update() {
+            // Function to grab value and force ALL CAPS
+            const get = id => (document.getElementById(id).value || '').toUpperCase();
+            const getRaw = id => document.getElementById(id).value; // Use raw for Date
+            
+            const rawType = getRaw('i_type');
+
+            const data = {
+                branch: get('i_branch'),
+                date: formatIndianDate(getRaw('i_date')),
+                senderName: get('i_senderName'),
+                senderAcc: get('i_senderAcc'),
+                mobile: get('i_mobile'),
+                pan: get('i_pan'),
+                beneName: get('i_beneName'),
+                beneAcc: get('i_beneAccConfirm') || get('i_beneAcc'),
+                beneType: get('i_beneType'),
+                beneBank: get('i_beneBank'),
+                beneBranch: get('i_beneBranch'),
+                beneIfsc: get('i_beneIfsc'),
+                amount: parseFloat(getRaw('i_amount')) || 0,
+                type: get('i_type'),
+                message: get('i_message'),
+                cheque: get('i_chequeNo')
+            };
+
+            // Conditionally process message
+            const finalMessage = rawType === 'RTGS' ? data.message : '';
+
+            // Update main shared values across Counterfoil (1) and Main Slip (2)
+            ['1', '2'].forEach(id => {
+                document.getElementById('v_branch'+id).innerText = data.branch;
+                document.getElementById('v_date'+id).innerText = data.date;
+                document.getElementById('v_senderName'+id).innerText = data.senderName;
+                document.getElementById('v_senderAcc'+id).innerText = data.senderAcc;
+                document.getElementById('v_beneName'+id).innerText = data.beneName;
+                document.getElementById('v_beneType'+id).innerText = data.beneType;
+                document.getElementById('v_beneBank'+id).innerText = data.beneBank;
+                document.getElementById('v_beneBranch'+id).innerText = data.beneBranch;
+                document.getElementById('v_ifsc'+id).innerText = data.beneIfsc;
+                document.getElementById('v_type'+id).innerText = data.type;
+                
+                const formattedAmt = data.amount > 0 ? data.amount.toLocaleString('en-IN', {minimumFractionDigits: 2}) : '';
+                document.getElementById('v_amt'+id).innerText = formattedAmt;
+                document.getElementById('v_total'+id).innerText = formattedAmt;
+                document.getElementById('v_words'+id).innerText = numberToWords(data.amount).toUpperCase();
+                
+                document.getElementById('v_mob'+id).innerText = data.mobile;
+                document.getElementById('v_pan'+id).innerText = data.pan;
+            });
+            
+            // Apply single elements
+            document.getElementById('v_message2').innerText = finalMessage;
+            document.getElementById('v_beneAcc1').innerText = data.beneAcc;
+            document.getElementById('v_declAcc').innerText = data.senderAcc;
+            document.getElementById('v_declBranch').innerText = data.branch;
+            document.getElementById('v_declCheque').innerText = data.cheque;
+
+            // Fill Box Grids Safely
+            const fillGrid = (el, val) => {
+                el.innerHTML = '';
+                const clean = (val || '').replace(/\s/g, '').padEnd(25, ' ');
+                for(let i=0; i<25; i++) {
+                    const div = document.createElement('div');
+                    div.className = 'box-cell main-prominent-text';
+                    div.innerText = clean[i] === ' ' ? '' : clean[i];
+                    el.appendChild(div);
+                }
+            };
+            fillGrid(document.getElementById('grid1'), data.beneAcc);
+            fillGrid(document.getElementById('grid2'), data.beneAcc);
+        }
+
+        window.onload = () => {
+            // Setup default date to user's local timezone securely
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            
+            document.getElementById('i_date').value = `${year}-${month}-${day}`;
+            update();
+        };
+    </script>
+</body>
+</html>
