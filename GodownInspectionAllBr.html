@@ -593,10 +593,12 @@
             }
 
             // 2. Insurance Expiry Check (Critical)
+            let isInsuranceExpired = false;
             if (formData.insuranceValidityDate && formData.dateOfVerification) {
                 const insDate = new Date(formData.insuranceValidityDate);
                 const verDate = new Date(formData.dateOfVerification);
                 if (insDate < verDate) {
+                    isInsuranceExpired = true;
                     branchCritical.push({
                         label: "Insurance Policy Expired",
                         userRemark: `The stock insurance policy expired on ${formatDateStandard(formData.insuranceValidityDate)}, prior to the date of verification.`,
@@ -1028,7 +1030,13 @@
 
                                         <h2>5. INSURANCE</h2>
                                         <div className="doc-grid"><div>a) Amount of Insurance</div><div>{formatCurrency(formData.insuranceAmount)}</div></div>
-                                        <div className="doc-grid"><div>b) Insurance Validity Date</div><div>{formatDateStandard(formData.insuranceValidityDate)}</div></div>
+                                        <div className="doc-grid">
+                                            <div>b) Insurance Validity Date</div>
+                                            <div>
+                                                {formatDateStandard(formData.insuranceValidityDate)}
+                                                {isInsuranceExpired && <strong> (Insurance Expired)</strong>}
+                                            </div>
+                                        </div>
                                         <div className="doc-grid"><div>c) Is Insurance cover adequate as to the amount</div><div>{formatPrintValue(formData.insuranceAdequate, formData.insuranceAdequateRemark)}</div></div>
                                         <div className="doc-grid"><div>d) Is insurance cover all comprehensive, state if any fire or R.R.C burglary etc</div><div>{formatPrintValue(formData.insuranceComprehensive, formData.insuranceComprehensiveRemark)}</div></div>
                                         {formData.unpledgedStocks === 'Yes' && (
