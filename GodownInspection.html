@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Godown Inspector (GitHub Cloud Sync Version)</title>
+    <title>Godown Inspector (Cloud Sync Version)</title>
     
     <!-- Standard React CDNs -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -83,27 +83,27 @@
             Loader: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-spin"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg>
         };
 
-        // --- GITHUB API INTEGRATION (Option B) ---
-        const GITHUB_SETTINGS_KEY = 'godown_github_settings';
+        // --- CLOUD API INTEGRATION ---
+        const CLOUD_SETTINGS_KEY = 'godown_cloud_settings';
         
         // UTF-8 Safe Base64 Encoding/Decoding
         const utf8ToBase64 = (str) => btoa(unescape(encodeURIComponent(str)));
         const base64ToUtf8 = (str) => decodeURIComponent(escape(atob(str)));
 
-        const getGithubSettings = () => {
-            const saved = localStorage.getItem(GITHUB_SETTINGS_KEY);
+        const getCloudSettings = () => {
+            const saved = localStorage.getItem(CLOUD_SETTINGS_KEY);
             return saved ? JSON.parse(saved) : { token: '', owner: 'msgowdara', repo: 'HsgCalc', path: 'godownInspection.csv' };
         };
 
-        const fetchFromGitHub = async () => {
-            const { token, owner, repo, path } = getGithubSettings();
-            if (!token) throw new Error("No GitHub Token Configured");
+        const fetchFromCloud = async () => {
+            const { token, owner, repo, path } = getCloudSettings();
+            if (!token) throw new Error("No Cloud Token Configured");
             
             const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
             const res = await fetch(url, { headers: { Authorization: `token ${token}` } });
             
             if (res.status === 404) return { data: [], sha: null }; // File doesn't exist yet, that's fine
-            if (!res.ok) throw new Error(`GitHub API Error: ${res.statusText}`);
+            if (!res.ok) throw new Error(`Cloud API Error: ${res.statusText}`);
             
             const json = await res.json();
             const csvContent = base64ToUtf8(json.content);
@@ -112,9 +112,9 @@
             return { data: parsed.data, sha: json.sha };
         };
 
-        const pushToGitHub = async (dataArray, currentSha) => {
-            const { token, owner, repo, path } = getGithubSettings();
-            if (!token) throw new Error("No GitHub Token Configured");
+        const pushToCloud = async (dataArray, currentSha) => {
+            const { token, owner, repo, path } = getCloudSettings();
+            if (!token) throw new Error("No Cloud Token Configured");
 
             const csvContent = Papa.unparse(dataArray);
             const encodedContent = utf8ToBase64(csvContent);
@@ -134,7 +134,7 @@
 
             if (!res.ok) {
                 const errJson = await res.json();
-                throw new Error(`GitHub Save Failed: ${errJson.message}`);
+                throw new Error(`Cloud Save Failed: ${errJson.message}`);
             }
         };
 
@@ -188,10 +188,10 @@
             const [isFetching, setIsFetching] = useState(true);
             const [isSaving, setIsSaving] = useState(false);
             const [showSettings, setShowSettings] = useState(false);
-            const [settingsInput, setSettingsInput] = useState(getGithubSettings());
+            const [settingsInput, setSettingsInput] = useState(getCloudSettings());
 
             useEffect(() => {
-                if(getGithubSettings().token) {
+                if(getCloudSettings().token) {
                     refreshDataFromCloud();
                 } else {
                     setIsFetching(false);
@@ -202,7 +202,7 @@
             const refreshDataFromCloud = async () => {
                 setIsFetching(true);
                 try {
-                    const { data } = await fetchFromGitHub();
+                    const { data } = await fetchFromCloud();
                     data.sort((a, b) => new Date(b.dateOfReporting) - new Date(a.dateOfReporting));
                     setInspections(data);
                     
@@ -223,20 +223,20 @@
             };
 
             const handleSaveSettings = () => {
-                localStorage.setItem(GITHUB_SETTINGS_KEY, JSON.stringify(settingsInput));
+                localStorage.setItem(CLOUD_SETTINGS_KEY, JSON.stringify(settingsInput));
                 setShowSettings(false);
                 showToast("⚙️ Cloud Settings Saved!");
                 refreshDataFromCloud();
             };
 
             const handleSave = async () => {
-                if (!getGithubSettings().token) return setShowSettings(true);
+                if (!getCloudSettings().token) return setShowSettings(true);
                 
                 setIsSaving(true);
-                showToast("⏳ Syncing with GitHub Cloud...");
+                showToast("⏳ Syncing with Cloud...");
                 try {
                     // Always pull latest before push to avoid overwriting changes
-                    const cloudData = await fetchFromGitHub();
+                    const cloudData = await fetchFromCloud();
                     let latestArray = cloudData.data || [];
                     
                     const reportId = formData.id || Date.now().toString();
@@ -249,16 +249,16 @@
                         latestArray.push(recordToSave);
                     }
                     
-                    await pushToGitHub(latestArray, cloudData.sha);
+                    await pushToCloud(latestArray, cloudData.sha);
                     
                     latestArray.sort((a, b) => new Date(b.dateOfReporting) - new Date(a.dateOfReporting));
                     setInspections(latestArray);
                     setFormData(recordToSave);
                     
-                    showToast("☁️✅ Synced Successfully to CSV on GitHub!");
+                    showToast("☁️✅ Synced Successfully to CSV on Cloud!");
                     setView('preview');
                 } catch (e) {
-                    alert("Error syncing to GitHub. " + e.message);
+                    alert("Error syncing to Cloud. " + e.message);
                 } finally {
                     setIsSaving(false);
                 }
@@ -277,13 +277,13 @@
             };
 
             const handleDelete = async (id) => {
-                if (window.confirm("Delete this report permanently from GitHub?")) {
+                if (window.confirm("Delete this report permanently from Cloud?")) {
                     setIsSaving(true);
                     showToast("🗑️ Deleting from Cloud...");
                     try {
-                        const cloudData = await fetchFromGitHub();
+                        const cloudData = await fetchFromCloud();
                         const newArray = (cloudData.data || []).filter(item => item.id !== id);
-                        await pushToGitHub(newArray, cloudData.sha);
+                        await pushToCloud(newArray, cloudData.sha);
                         setInspections(newArray.sort((a, b) => new Date(b.dateOfReporting) - new Date(a.dateOfReporting)));
                         showToast("🗑️ Report successfully deleted from Cloud.");
                     } catch (e) {
@@ -431,7 +431,7 @@
                         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
                             <div className="flex items-center gap-3">
                                 <div className="bg-indigo-600 p-1.5 rounded"><Icons.Cloud /></div>
-                                <h1 className="font-bold text-lg tracking-wide hidden sm:block">Godown Inspector Pro <span className="text-xs text-indigo-300 font-normal ml-2">GitHub Sync V2</span></h1>
+                                <h1 className="font-bold text-lg tracking-wide hidden sm:block">Godown Inspector Pro <span className="text-xs text-indigo-300 font-normal ml-2">Cloud Sync V2</span></h1>
                             </div>
                             
                             <div className="flex items-center gap-2">
@@ -448,7 +448,7 @@
                                 )}
                                 {(view === 'form' || view === 'preview') && (
                                     <button onClick={handleSave} disabled={isSaving} className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded text-sm font-medium transition-colors disabled:opacity-50">
-                                        <Icons.Save /> {isSaving ? 'Syncing...' : 'Save & Sync'}
+                                        <Icons.Save /> {isSaving ? 'Syncing...' : 'Save to Cloud'}
                                     </button>
                                 )}
                                 {view === 'preview' && (
@@ -467,7 +467,7 @@
                         </div>
                     )}
 
-                    {/* GitHub Settings Modal */}
+                    {/* Generic Cloud Settings Modal */}
                     {showSettings && (
                         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
                             <div className="bg-white rounded-lg shadow-xl max-w-md w-full overflow-hidden">
@@ -475,13 +475,13 @@
                                     <h3 className="font-bold text-slate-800 flex items-center gap-2"><Icons.Cloud /> Cloud Database Settings</h3>
                                 </div>
                                 <div className="p-6 space-y-4">
-                                    <p className="text-sm text-slate-600 mb-4 bg-indigo-50 p-3 rounded">This app saves data securely to your own GitHub Repository as a CSV file. A Personal Access Token (PAT) is required.</p>
+                                    <p className="text-sm text-slate-600 mb-4 bg-indigo-50 p-3 rounded">This app saves data securely to your connected Cloud Repository. An Access Token is required to enable remote sync.</p>
                                     
-                                    <div><label className="block text-xs font-bold text-slate-600 mb-1">GitHub Personal Access Token (PAT)</label>
-                                        <input type="password" placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxx" className="w-full border-slate-300 rounded px-3 py-2 border shadow-sm" value={settingsInput.token} onChange={e => setSettingsInput({...settingsInput, token: e.target.value})} />
+                                    <div><label className="block text-xs font-bold text-slate-600 mb-1">Cloud Access Token (PAT)</label>
+                                        <input type="password" placeholder="Enter your access token" className="w-full border-slate-300 rounded px-3 py-2 border shadow-sm" value={settingsInput.token} onChange={e => setSettingsInput({...settingsInput, token: e.target.value})} />
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
-                                        <div><label className="block text-xs font-bold text-slate-600 mb-1">Owner / Username</label><input type="text" className="w-full border-slate-300 rounded px-3 py-2 border shadow-sm bg-slate-50" value={settingsInput.owner} onChange={e => setSettingsInput({...settingsInput, owner: e.target.value})} /></div>
+                                        <div><label className="block text-xs font-bold text-slate-600 mb-1">Account / Username</label><input type="text" className="w-full border-slate-300 rounded px-3 py-2 border shadow-sm bg-slate-50" value={settingsInput.owner} onChange={e => setSettingsInput({...settingsInput, owner: e.target.value})} /></div>
                                         <div><label className="block text-xs font-bold text-slate-600 mb-1">Repository Name</label><input type="text" className="w-full border-slate-300 rounded px-3 py-2 border shadow-sm bg-slate-50" value={settingsInput.repo} onChange={e => setSettingsInput({...settingsInput, repo: e.target.value})} /></div>
                                     </div>
                                     <div><label className="block text-xs font-bold text-slate-600 mb-1">CSV File Path (Root path)</label><input type="text" className="w-full border-slate-300 rounded px-3 py-2 border shadow-sm bg-slate-50 font-mono text-sm" value={settingsInput.path} onChange={e => setSettingsInput({...settingsInput, path: e.target.value})} /></div>
@@ -502,19 +502,19 @@
                             {view === 'dashboard' && (
                                 <div className="bg-white rounded-lg shadow border border-slate-200 p-6">
                                     <div className="flex justify-between items-center mb-6 border-b pb-2">
-                                        <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">Cloud Database (GitHub) {isFetching && <span className="text-indigo-600"><Icons.Loader/></span>}</h2>
+                                        <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">Cloud Database {isFetching && <span className="text-indigo-600"><Icons.Loader/></span>}</h2>
                                         <span className="bg-indigo-100 text-indigo-800 font-bold text-xs px-3 py-1.5 rounded-full border border-indigo-200 shadow-inner">Total Records: {inspections.length}</span>
                                     </div>
                                     
-                                    {!getGithubSettings().token ? (
+                                    {!getCloudSettings().token ? (
                                         <div className="text-center py-12 text-slate-500 bg-slate-50 rounded-lg border border-dashed border-slate-300">
                                             <p className="mb-4 font-bold text-slate-700">Setup Required</p>
-                                            <p className="text-sm mb-4">Please connect your GitHub repository in settings to start saving and retrieving data.</p>
+                                            <p className="text-sm mb-4">Please connect your Cloud repository in settings to start saving and retrieving data.</p>
                                             <button onClick={() => setShowSettings(true)} className="bg-indigo-600 text-white px-6 py-2 rounded shadow hover:bg-indigo-700">Open Settings</button>
                                         </div>
                                     ) : isFetching ? (
                                         <div className="text-center py-12 text-slate-500">
-                                            <p>Pulling latest data from GitHub...</p>
+                                            <p>Pulling latest data from Cloud...</p>
                                         </div>
                                     ) : inspections.length === 0 ? (
                                         <div className="text-center py-12 text-slate-500 bg-slate-50 rounded-lg border border-dashed border-slate-300">
@@ -702,7 +702,7 @@
                                     <div className="flex justify-end gap-4 mt-6">
                                         <button onClick={() => setView('preview')} className="bg-slate-200 hover:bg-slate-300 text-slate-800 px-6 py-3 rounded shadow-sm font-bold transition">Preview</button>
                                         <button onClick={handleSave} disabled={isSaving} className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded shadow font-bold text-lg transition flex items-center gap-2 disabled:opacity-50">
-                                            <Icons.Save /> {isSaving ? 'Syncing...' : 'Save to GitHub Cloud'}
+                                            <Icons.Save /> {isSaving ? 'Syncing...' : 'Save to Cloud'}
                                         </button>
                                     </div>
                                 </div>
