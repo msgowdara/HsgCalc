@@ -22,7 +22,8 @@
             #report-container { box-shadow: none !important; margin: 0 !important; padding: 0 0 50px 0 !important; width: 100% !important; max-width: none !important; }
             ::-webkit-scrollbar { display: none; }
             .page-break-avoid { page-break-inside: avoid; }
-            .page-break-before { page-break-before: always; }
+            /* Force break and attempt to force to next right/odd page for duplex printing */
+            .page-break-before { page-break-before: always; break-before: right; }
             
             .print-only-footer { 
                 display: block; position: fixed; bottom: 0; left: 0; width: 100%;
@@ -86,30 +87,30 @@
             margins: ["0", "10", "15", "20", "25", "30", "40", "50"]
         };
 
-        // --- Auto-Suggested Remarks Dictionary ---
+        // --- Auto-Suggested Remarks Dictionary & Letter Mapping ---
         const SUGGESTED_REMARKS = {
-            conditionOfGodown: { trigger: 'Not Satisfactory', field: 'godownRemark', text: "Godown requires maintenance/cleaning." },
-            conditionOfStocks: { trigger: 'Not Satisfactory', field: 'conditionOfStocksRemark', text: "Some stocks appear damaged/obsolete." },
-            modeOfStorage: { trigger: 'Haphazard', field: 'modeOfStorageRemark', text: "Advised customer to arrange and stack goods properly." },
-            modeOfValuationSatisfactory: { trigger: 'Not Satisfactory', field: 'valuationRemark', text: "Valuation is not in line with current market rates." },
-            tradeDiscountDeducted: { trigger: 'No', field: 'tradeDiscountRemark', text: "Trade discount is not deducted from valuation." },
-            insuranceAdequate: { trigger: 'No', field: 'insuranceAdequateRemark', text: "Advised customer to increase insurance cover to match limit." },
-            insuranceComprehensive: { trigger: 'No', field: 'insuranceComprehensiveRemark', text: "Advised to obtain comprehensive insurance policy." },
-            unpledgedInsured: { trigger: 'No', field: 'unpledgedInsuredRemark', text: "Unpledged stocks are currently uninsured." },
-            signboardsDisplayed: { trigger: 'No', field: 'signboardsDisplayedRemark', text: "Advised customer to display Bank's signboard immediately." },
-            godownKeeperSanctioned: { trigger: 'No', field: 'godownKeeperRemark', text: "Godown keeper not sanctioned/required for this account." },
-            stockReportsRegular: { trigger: 'No', field: 'stockReportsRemark', text: "Advised customer to submit stock statements promptly." },
-            bankPossessionEffective: { trigger: 'No', field: 'bankPossessionRemark', text: "Advised branch to ensure strict possession of godown." },
-            registersMaintained: { trigger: 'No', field: 'registersMaintainedRemark', text: "Advised customer to maintain proper stock registers." },
-            registersTally: { trigger: 'No', field: 'registersTallyRemark', text: "Discrepancy observed between physical stock and records." },
-            inspectedPeriodically: { trigger: 'No', field: 'inspectedPeriodicallyRemark', text: "Advised branch to strictly follow inspection schedule." },
-            recordMaintained: { trigger: 'No', field: 'recordMaintainedRemark', text: "Advised branch to update inspection records." },
-            turnoverSatisfactory: { trigger: 'No', field: 'turnoverSatisfactoryRemark', text: "Turnover is not commensurate with the limit." },
-            accountTurnoverSatisfactory: { trigger: 'No', field: 'accountTurnoverSatisfactoryRemark', text: "Advised the customer to route all sales proceeds through Cash Credit Account only." },
-            movementChecked: { trigger: 'No', field: 'movementRemark', text: "Movement of stocks needs closer monitoring." },
-            oldStockMoving: { trigger: 'No', field: 'oldStockRemark', text: "Old stocks are slow-moving; advised early liquidation." },
-            deliveriesNotNew: { trigger: 'No', field: 'deliveriesRemark', text: "Deliveries are mostly from newly arrived stocks." },
-            statementsOnRecord: { trigger: 'No', field: 'statementsRemark', text: "Stock statements are pending at branch." }
+            conditionOfGodown: { trigger: 'Not Satisfactory', field: 'godownRemark', label: 'Condition of Godown', resp: 'Borrower', text: "Godown requires maintenance/cleaning." },
+            conditionOfStocks: { trigger: 'Not Satisfactory', field: 'conditionOfStocksRemark', label: 'Condition of Stocks', resp: 'Borrower', text: "Some stocks appear damaged/obsolete." },
+            modeOfStorage: { trigger: 'Haphazard', field: 'modeOfStorageRemark', label: 'Mode of Storage', resp: 'Borrower', text: "Advised customer to arrange and stack goods properly." },
+            modeOfValuationSatisfactory: { trigger: 'Not Satisfactory', field: 'valuationRemark', label: 'Valuation Mode', resp: 'Branch', text: "Valuation is not in line with current market rates." },
+            tradeDiscountDeducted: { trigger: 'No', field: 'tradeDiscountRemark', label: 'Trade Discount', resp: 'Branch', text: "Trade discount is not deducted from valuation." },
+            insuranceAdequate: { trigger: 'No', field: 'insuranceAdequateRemark', label: 'Insurance Adequacy', resp: 'Borrower', text: "Advised customer to increase insurance cover to match limit." },
+            insuranceComprehensive: { trigger: 'No', field: 'insuranceComprehensiveRemark', label: 'Comprehensive Insurance', resp: 'Borrower', text: "Advised to obtain comprehensive insurance policy." },
+            unpledgedInsured: { trigger: 'No', field: 'unpledgedInsuredRemark', label: 'Unpledged Stocks Insurance', resp: 'Borrower', text: "Unpledged stocks are currently uninsured." },
+            signboardsDisplayed: { trigger: 'No', field: 'signboardsDisplayedRemark', label: 'Bank Signboards', resp: 'Borrower', text: "Advised customer to display Bank's signboard immediately." },
+            godownKeeperSanctioned: { trigger: 'No', field: 'godownKeeperRemark', label: 'Godown Keeper', resp: 'Branch', text: "Godown keeper not sanctioned/required for this account." },
+            stockReportsRegular: { trigger: 'No', field: 'stockReportsRemark', label: 'Stock Reports Submission', resp: 'Borrower', text: "Advised customer to submit stock statements promptly." },
+            bankPossessionEffective: { trigger: 'No', field: 'bankPossessionRemark', label: 'Bank Possession', resp: 'Branch', text: "Advised branch to ensure strict possession of godown." },
+            registersMaintained: { trigger: 'No', field: 'registersMaintainedRemark', label: 'Stock Registers', resp: 'Borrower', text: "Advised customer to maintain proper stock registers." },
+            registersTally: { trigger: 'No', field: 'registersTallyRemark', label: 'Registers Tally', resp: 'Both', text: "Discrepancy observed between physical stock and records." },
+            inspectedPeriodically: { trigger: 'No', field: 'inspectedPeriodicallyRemark', label: 'Periodical Inspection', resp: 'Branch', text: "Advised branch to strictly follow inspection schedule." },
+            recordMaintained: { trigger: 'No', field: 'recordMaintainedRemark', label: 'Inspection Records', resp: 'Branch', text: "Advised branch to update inspection records." },
+            turnoverSatisfactory: { trigger: 'No', field: 'turnoverSatisfactoryRemark', label: 'Stock Turnover', resp: 'Borrower', text: "Turnover is not commensurate with the limit." },
+            accountTurnoverSatisfactory: { trigger: 'No', field: 'accountTurnoverSatisfactoryRemark', label: 'Account Turnover', resp: 'Borrower', text: "Advised the customer to route all sales proceeds through Cash Credit Account only." },
+            movementChecked: { trigger: 'No', field: 'movementRemark', label: 'Stock Movement', resp: 'Branch', text: "Movement of stocks needs closer monitoring." },
+            oldStockMoving: { trigger: 'No', field: 'oldStockRemark', label: 'Old Stock Movement', resp: 'Borrower', text: "Old stocks are slow-moving; advised early liquidation." },
+            deliveriesNotNew: { trigger: 'No', field: 'deliveriesRemark', label: 'Deliveries Preponderance', resp: 'Both', text: "Deliveries are mostly from newly arrived stocks." },
+            statementsOnRecord: { trigger: 'No', field: 'statementsRemark', label: 'Statements on Record', resp: 'Branch', text: "Stock statements are pending at branch." }
         };
 
         const Icons = {
@@ -126,7 +127,6 @@
         // --- CLOUD API INTEGRATION ---
         const CLOUD_SETTINGS_KEY = 'godown_cloud_settings';
         
-        // UTF-8 Safe Base64 Encoding/Decoding
         const utf8ToBase64 = (str) => btoa(unescape(encodeURIComponent(str)));
         const base64ToUtf8 = (str) => decodeURIComponent(escape(atob(str)));
 
@@ -285,7 +285,7 @@
                     const reportId = formData.id || Date.now().toString();
                     const recordToSave = { 
                         ...formData, 
-                        percentOldStock: calculateOldStockPercent(), // Save computed value to CSV
+                        percentOldStock: calculateOldStockPercent(),
                         id: reportId, 
                         lastUpdated: new Date().toISOString() 
                     };
@@ -403,34 +403,6 @@
                     }
                 }
                 
-                // Extra safety: Clear remarks if changed to positive logic
-                const clearMap = {
-                    conditionOfGodown: { trigger: 'Satisfactory', clear: 'godownRemark' },
-                    conditionOfStocks: { trigger: 'Satisfactory', clear: 'conditionOfStocksRemark' },
-                    modeOfStorage: { trigger: 'Proper', clear: 'modeOfStorageRemark' },
-                    modeOfValuationSatisfactory: { trigger: 'Satisfactory', clear: 'valuationRemark' },
-                    tradeDiscountDeducted: { trigger: 'Yes', clear: 'tradeDiscountRemark' },
-                    insuranceAdequate: { trigger: 'Yes', clear: 'insuranceAdequateRemark' },
-                    insuranceComprehensive: { trigger: 'Yes', clear: 'insuranceComprehensiveRemark' },
-                    unpledgedInsured: { trigger: 'Yes', clear: 'unpledgedInsuredRemark' },
-                    signboardsDisplayed: { trigger: 'Yes', clear: 'signboardsDisplayedRemark' },
-                    bankPossessionEffective: { trigger: 'Yes', clear: 'bankPossessionRemark' },
-                    godownKeeperSanctioned: { trigger: 'Yes', clear: 'godownKeeperRemark' },
-                    stockReportsRegular: { trigger: 'Yes', clear: 'stockReportsRemark' },
-                    registersMaintained: { trigger: 'Yes', clear: 'registersMaintainedRemark' },
-                    registersTally: { trigger: 'Yes', clear: 'registersTallyRemark' },
-                    inspectedPeriodically: { trigger: 'Yes', clear: 'inspectedPeriodicallyRemark' },
-                    recordMaintained: { trigger: 'Yes', clear: 'recordMaintainedRemark' },
-                    turnoverSatisfactory: { trigger: 'Yes', clear: 'turnoverSatisfactoryRemark' },
-                    accountTurnoverSatisfactory: { trigger: 'Yes', clear: 'accountTurnoverSatisfactoryRemark' },
-                    movementChecked: { trigger: 'Yes', clear: 'movementRemark' },
-                    oldStockMoving: { trigger: 'Yes', clear: 'oldStockRemark' },
-                    deliveriesNotNew: { trigger: 'Yes', clear: 'deliveriesRemark' },
-                    statementsOnRecord: { trigger: 'Yes', clear: 'statementsRemark' }
-                };
-                if (clearMap[field] && value === clearMap[field].trigger) {
-                    newData[clearMap[field].clear] = '';
-                }
                 setFormData(newData);
             };
 
@@ -489,6 +461,22 @@
                 if (remark && remark.trim() !== '') return `${mainValue}. ${remark}`;
                 return mainValue;
             };
+
+            // --- Analyze Remarks for Dynamic Letters ---
+            const adverseFindings = Object.keys(SUGGESTED_REMARKS).map(key => {
+                const config = SUGGESTED_REMARKS[key];
+                if (formData[key] === config.trigger) {
+                    return {
+                        label: config.label,
+                        resp: config.resp,
+                        userRemark: formData[config.field] || config.text,
+                        suggestion: config.text
+                    };
+                }
+                return null;
+            }).filter(Boolean);
+
+            const borrowerFindings = adverseFindings.filter(f => f.resp === 'Borrower' || f.resp === 'Both');
 
             return (
                 <div className="min-h-screen flex flex-col font-sans">
@@ -776,120 +764,224 @@
 
                             {/* EXACT WORD DOCUMENT PRINT/PREVIEW VIEW */}
                             {view === 'preview' && (
-                                <div id="report-container" className="a4-page word-doc relative">
+                                <div id="report-container" className="relative">
                                     
                                     {/* PRINT ONLY REPEATING FOOTER */}
                                     <div className="print-only-footer">
                                         Godown Inspection Report - {formData.accountNo || '__________'} - {formData.name || '__________'}
                                     </div>
 
-                                    {/* NEW BANK HEADER */}
-                                    <div className="text-center border-b-2 border-black pb-3 mb-6">
-                                        <h1 style={{fontSize: '18pt', fontWeight: 'bold', textTransform: 'uppercase'}}>BANK OF BARODA</h1>
-                                        <h2 style={{fontSize: '12pt', fontWeight: 'bold', textTransform: 'uppercase', marginTop: '4pt'}}>
-                                            {formData.branch ? `${formData.branch} BRANCH` : '______________ BRANCH'}, {formData.region ? `${formData.region} REGION` : '______________ REGION'}
-                                        </h2>
-                                    </div>
-
-                                    <div className="text-right font-bold mb-4">
-                                        {formatDateCompact(formData.dateOfReporting)} {formData.name} {formData.accountNo}
-                                    </div>
-
-                                    <h1 className="text-center font-bold" style={{fontSize: '13pt', textDecoration: 'underline'}}>GODOWN INSPECTION REPORT</h1>
-                                    <br/>
-
-                                    <div className="doc-grid"><div>Date of Reporting</div><div>{formatDateStandard(formData.dateOfReporting)}</div></div>
-                                    <div className="doc-grid"><div>Branch- </div><div>{formData.branch}</div></div>
-                                    <div className="doc-grid"><div> Region-</div><div>{formData.region}</div></div>
-                                    <div className="doc-grid"><div>Date of Stock Verification</div><div>{formatDateStandard(formData.dateOfVerification)}</div></div>
-                                    <div className="doc-grid"><div>Inspecting Officer</div><div>{formData.inspectingOfficer}</div></div>
-                                    <br/>
-                                    <div className="doc-grid"><div>Name of account & its nature</div><div>{formData.name} {formData.nature ? `- ${formData.nature}` : ''} - {formData.accountNo}</div></div>
-                                    <div className="doc-grid"><div>Limit</div><div>{formatCurrency(formData.limit)}</div></div>
-                                    <div className="doc-grid"><div>Sanctioning Authority</div><div>{formData.sanctioningAuthority}</div></div>
-                                    
-                                    <h2>PARTICULARS OF THE GODOWN</h2>
-                                    <div className="doc-grid"><div>Location</div><div>Office Address : {formData.officeAddress}<br/>Godown Address : {formData.godownAddress}</div></div>
-                                    <div className="doc-grid"><div>Distance</div><div>{formData.distance}</div></div>
-                                    <div className="doc-grid"><div>Condition of Godown</div><div>{formatPrintValue(formData.conditionOfGodown, formData.godownRemark)}</div></div>
-
-                                    <h2>STOCKS</h2>
-                                    <div className="doc-grid"><div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a) Value of stock pledged/Hypothecated </div><div>{formatCurrency(formData.stockValue)}</div></div>
-                                    <div className="doc-grid"><div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Less margin(Stock) @ {formData.stockMarginPercent}%</div><div>{formatCurrency(formData.stockMargin)}</div></div>
-                                    <div className="doc-grid"><div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Book Debts                                         </div><div>{formatCurrency(formData.bookDebts)}</div></div>
-                                    <div className="doc-grid"><div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Creditors                                             </div><div>{formatCurrency(formData.creditors)}</div></div>
-                                    <div className="doc-grid"><div>Less Margin (BD) @ {formData.bdMarginPercent}%</div><div>{formatCurrency(formData.bookDebtsMargin)}</div></div>
-                                    <div className="doc-grid"><div>Drawing Power</div><div>{formatCurrency(calculateDP())}</div></div>
-                                    <div className="doc-grid"><div>Outstanding balance</div><div>{formatCurrency(formData.outstandingBalance)}</div></div>
-                                    <br/>
-                                    
-                                    <div className="doc-grid"><div>Season/Year of purchase of manufactured goods</div><div>{formData.seasonYear || '-'}</div></div>
-                                    <div className="doc-grid"><div>Age & amount of old stock</div><div>{(formData.ageOfOldStockDays || '0')} Days & {formatCurrency(formData.amountOfOldStockRupees || '0')}</div></div>
-                                    <div className="doc-grid"><div>Percentage of old stocks to total stocks</div><div>{calculateOldStockPercent()}</div></div>
-
-                                    <div className="doc-grid"><div>Condition of stocks</div><div>{formatPrintValue(formData.conditionOfStocks, formData.conditionOfStocksRemark)}</div></div>
-                                    <div className="doc-grid"><div>Mode of storage (Proper/Haphazard)</div><div>{formatPrintValue(formData.modeOfStorage, formData.modeOfStorageRemark)}</div></div>
-
-                                    <h2>VALUATION</h2>
-                                    <div className="doc-grid"><div>Is the mode of Valuation Satisfactory</div><div>{formatPrintValue(formData.modeOfValuationSatisfactory, formData.valuationRemark)}</div></div>
-                                    <div className="doc-grid"><div>Whether trade discount, if any, allowed is deducted while arriving at the value      of stocks</div><div>{formatPrintValue(formData.tradeDiscountDeducted, formData.tradeDiscountRemark)}</div></div>
-                                    <div className="doc-grid"><div>Unpledged stocks, if any stored in the godown</div><div>{formData.unpledgedStocks}</div></div>
-
-                                    <h2>INSURANCE</h2>
-                                    <div className="doc-grid"><div>Amount of Insurance</div><div>{formatCurrency(formData.insuranceAmount)}</div></div>
-                                    <div className="doc-grid"><div>Is Insurance cover adequate as to the amount</div><div>{formatPrintValue(formData.insuranceAdequate, formData.insuranceAdequateRemark)}</div></div>
-                                    <div className="doc-grid"><div>Is insurance cover all comprehensive, state if any fire or R.R.C burglary etc</div><div>{formatPrintValue(formData.insuranceComprehensive, formData.insuranceComprehensiveRemark)}</div></div>
-                                    {formData.unpledgedStocks === 'Yes' && (
-                                        <div className="doc-grid"><div>Are unpledged stocks, if any adequately insured</div><div>{formatPrintValue(formData.unpledgedInsured, formData.unpledgedInsuredRemark)}</div></div>
-                                    )}
-
-                                    <h2>IN ALL CASES</h2>
-                                    <div className="doc-grid"><div>Are bank’s signboards displayed? </div><div>{formatPrintValue(formData.signboardsDisplayed, formData.signboardsDisplayedRemark)}</div></div>
-                                    {formData.signboardsDisplayed === 'Yes' && (
-                                        <div className="doc-grid"><div>"(State whether inside or outside, if not outside, state authority)	"</div><div>{formData.signboardsInsideOutside}</div></div>
-                                    )}
-                                    <div className="doc-grid"><div>If godown keeper/ godown chokidar sanctioned? 		</div><div>{formatPrintValue(formData.godownKeeperSanctioned, formData.godownKeeperRemark)}</div></div>
-                                    <div className="doc-grid"><div>Are duly signed stock reports received regularly?		</div><div>{formatPrintValue(formData.stockReportsRegular, formData.stockReportsRemark)}</div></div>
-                                    <div className="doc-grid"><div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(State frequency)</div><div>{formData.stockReportsFrequency}</div></div>
-                                    <div className="doc-grid"><div>Is bank’s possession fully effective and secured? 		</div><div>{formatPrintValue(formData.bankPossessionEffective, formData.bankPossessionRemark)}</div></div>
-
-                                    <h2>7. BOOKS AND RECORDS</h2>
-                                    <div className="doc-grid"><div>Are godown registers/ cards properly maintained?</div><div>{formatPrintValue(formData.registersMaintained, formData.registersMaintainedRemark)}</div></div>
-                                    <div className="doc-grid"><div>Do godown registers tally with godown cards?</div><div>{formatPrintValue(formData.registersTally, formData.registersTallyRemark)}</div></div>
-
-                                    <h2>8. CONTROL</h2>
-                                    <div className="doc-grid"><div>Are godown inspected periodically? </div><div>{formatPrintValue(formData.inspectedPeriodically, formData.inspectedPeriodicallyRemark)}</div></div>
-                                    <div className="doc-grid"><div>How often and by whom? </div><div>{formData.inspectedHowOften}</div></div>
-                                    <div className="doc-grid"><div>Is record of inspection maintained?</div><div>{formatPrintValue(formData.recordMaintained, formData.recordMaintainedRemark)}</div></div>
-
-                                    <h2>9. MOVEMENT OF STOCKS</h2>
-                                    <div className="doc-grid"><div>Is turnover in stocks satisfactory? </div><div>{formatPrintValue(formData.turnoverSatisfactory, formData.turnoverSatisfactoryRemark)}</div></div>
-                                    <div className="doc-grid" style={{alignItems: 'start'}}><div>Is turnover in account satisfactory? 	</div><div>{formatPrintValue(formData.accountTurnoverSatisfactory, formData.accountTurnoverSatisfactoryRemark)}</div></div>
-
-                                    <h2>10. CERTIFICATE TO BE GIVEN BY THE INSPECTING OFFICER CERTIFYING THAT</h2>
-                                    <div className="doc-grid"><div>The movement of stocks in the account has been carefully checked. </div><div>{formatPrintValue(formData.movementChecked, formData.movementRemark)}</div></div>
-                                    <div className="doc-grid"><div>Stock older that three months are also moving out satisfactorily. </div><div>{formatPrintValue(formData.oldStockMoving, formData.oldStockRemark)}</div></div>
-                                    <div className="doc-grid"><div>Deliveries effected since last inspection have not been preponderating from new stocks.</div><div>{formatPrintValue(formData.deliveriesNotNew, formData.deliveriesRemark)}</div></div>
-                                    <div className="doc-grid"><div>All the stocks statements of the borrower are on branch record.</div><div>{formatPrintValue(formData.statementsOnRecord, formData.statementsRemark)}</div></div>
-
-                                    <div style={{fontSize: '9pt', fontStyle: 'italic', marginTop: '30pt', marginBottom: '50pt'}}>
-                                        Note: Please refer Guidelines in the reverse	      
-                                    </div>
-
-                                    <div style={{display: 'flex', justifyContent: 'space-between', padding: '0 40pt'}}>
-                                        <div style={{textAlign: 'center', fontWeight: 'bold'}}>
-                                            <div style={{minHeight: '1.5em', marginBottom: '4pt'}}>{formData.inspectingOfficer ? formData.inspectingOfficer.toUpperCase() : ''}</div>
-                                            <div>INSPECTING OFFICER</div>
+                                    {/* MAIN REPORT PAGE */}
+                                    <div className="a4-page word-doc">
+                                        <div className="text-center border-b-2 border-black pb-3 mb-6">
+                                            <h1 style={{fontSize: '18pt', fontWeight: 'bold', textTransform: 'uppercase'}}>BANK OF BARODA</h1>
+                                            <h2 style={{fontSize: '12pt', fontWeight: 'bold', textTransform: 'uppercase', marginTop: '4pt'}}>
+                                                {formData.branch ? `${formData.branch} BRANCH` : '______________ BRANCH'}, {formData.region ? `${formData.region} REGION` : '______________ REGION'}
+                                            </h2>
                                         </div>
-                                        <div style={{textAlign: 'center', fontWeight: 'bold', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end'}}>
-                                            <div>MANAGER</div>
+
+                                        <div className="text-right font-bold mb-4">
+                                            {formatDateCompact(formData.dateOfReporting)} {formData.name} {formData.accountNo}
+                                        </div>
+
+                                        <h1 className="text-center font-bold" style={{fontSize: '13pt', textDecoration: 'underline'}}>GODOWN INSPECTION REPORT</h1>
+                                        <br/>
+
+                                        <div className="doc-grid"><div>Date of Reporting</div><div>{formatDateStandard(formData.dateOfReporting)}</div></div>
+                                        <div className="doc-grid"><div>Branch- </div><div>{formData.branch}</div></div>
+                                        <div className="doc-grid"><div> Region-</div><div>{formData.region}</div></div>
+                                        <div className="doc-grid"><div>Date of Stock Verification</div><div>{formatDateStandard(formData.dateOfVerification)}</div></div>
+                                        <div className="doc-grid"><div>Inspecting Officer</div><div>{formData.inspectingOfficer}</div></div>
+                                        <br/>
+                                        <div className="doc-grid"><div>Name of account & its nature</div><div>{formData.name} {formData.nature ? `- ${formData.nature}` : ''} - {formData.accountNo}</div></div>
+                                        <div className="doc-grid"><div>Limit</div><div>{formatCurrency(formData.limit)}</div></div>
+                                        <div className="doc-grid"><div>Sanctioning Authority</div><div>{formData.sanctioningAuthority}</div></div>
+                                        
+                                        <h2>PARTICULARS OF THE GODOWN</h2>
+                                        <div className="doc-grid"><div>Location</div><div>Office Address : {formData.officeAddress}<br/>Godown Address : {formData.godownAddress}</div></div>
+                                        <div className="doc-grid"><div>Distance</div><div>{formData.distance}</div></div>
+                                        <div className="doc-grid"><div>Condition of Godown</div><div>{formatPrintValue(formData.conditionOfGodown, formData.godownRemark)}</div></div>
+
+                                        <h2>STOCKS</h2>
+                                        <div className="doc-grid"><div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a) Value of stock pledged/Hypothecated </div><div>{formatCurrency(formData.stockValue)}</div></div>
+                                        <div className="doc-grid"><div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Less margin(Stock) @ {formData.stockMarginPercent}%</div><div>{formatCurrency(formData.stockMargin)}</div></div>
+                                        <div className="doc-grid"><div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Book Debts                                         </div><div>{formatCurrency(formData.bookDebts)}</div></div>
+                                        <div className="doc-grid"><div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Creditors                                             </div><div>{formatCurrency(formData.creditors)}</div></div>
+                                        <div className="doc-grid"><div>Less Margin (BD) @ {formData.bdMarginPercent}%</div><div>{formatCurrency(formData.bookDebtsMargin)}</div></div>
+                                        <div className="doc-grid"><div>Drawing Power</div><div>{formatCurrency(calculateDP())}</div></div>
+                                        <div className="doc-grid"><div>Outstanding balance</div><div>{formatCurrency(formData.outstandingBalance)}</div></div>
+                                        <br/>
+                                        
+                                        <div className="doc-grid"><div>Season/Year of purchase of manufactured goods</div><div>{formData.seasonYear || '-'}</div></div>
+                                        <div className="doc-grid"><div>Age & amount of old stock</div><div>{(formData.ageOfOldStockDays || '0')} Days & {formatCurrency(formData.amountOfOldStockRupees || '0')}</div></div>
+                                        <div className="doc-grid"><div>Percentage of old stocks to total stocks</div><div>{calculateOldStockPercent()}</div></div>
+
+                                        <div className="doc-grid"><div>Condition of stocks</div><div>{formatPrintValue(formData.conditionOfStocks, formData.conditionOfStocksRemark)}</div></div>
+                                        <div className="doc-grid"><div>Mode of storage (Proper/Haphazard)</div><div>{formatPrintValue(formData.modeOfStorage, formData.modeOfStorageRemark)}</div></div>
+
+                                        <h2>VALUATION</h2>
+                                        <div className="doc-grid"><div>Is the mode of Valuation Satisfactory</div><div>{formatPrintValue(formData.modeOfValuationSatisfactory, formData.valuationRemark)}</div></div>
+                                        <div className="doc-grid"><div>Whether trade discount, if any, allowed is deducted while arriving at the value      of stocks</div><div>{formatPrintValue(formData.tradeDiscountDeducted, formData.tradeDiscountRemark)}</div></div>
+                                        <div className="doc-grid"><div>Unpledged stocks, if any stored in the godown</div><div>{formData.unpledgedStocks}</div></div>
+
+                                        <h2>INSURANCE</h2>
+                                        <div className="doc-grid"><div>Amount of Insurance</div><div>{formatCurrency(formData.insuranceAmount)}</div></div>
+                                        <div className="doc-grid"><div>Is Insurance cover adequate as to the amount</div><div>{formatPrintValue(formData.insuranceAdequate, formData.insuranceAdequateRemark)}</div></div>
+                                        <div className="doc-grid"><div>Is insurance cover all comprehensive, state if any fire or R.R.C burglary etc</div><div>{formatPrintValue(formData.insuranceComprehensive, formData.insuranceComprehensiveRemark)}</div></div>
+                                        {formData.unpledgedStocks === 'Yes' && (
+                                            <div className="doc-grid"><div>Are unpledged stocks, if any adequately insured</div><div>{formatPrintValue(formData.unpledgedInsured, formData.unpledgedInsuredRemark)}</div></div>
+                                        )}
+
+                                        <h2>IN ALL CASES</h2>
+                                        <div className="doc-grid"><div>Are bank’s signboards displayed? </div><div>{formatPrintValue(formData.signboardsDisplayed, formData.signboardsDisplayedRemark)}</div></div>
+                                        {formData.signboardsDisplayed === 'Yes' && (
+                                            <div className="doc-grid"><div>"(State whether inside or outside, if not outside, state authority)	"</div><div>{formData.signboardsInsideOutside}</div></div>
+                                        )}
+                                        <div className="doc-grid"><div>If godown keeper/ godown chokidar sanctioned? 		</div><div>{formatPrintValue(formData.godownKeeperSanctioned, formData.godownKeeperRemark)}</div></div>
+                                        <div className="doc-grid"><div>Are duly signed stock reports received regularly?		</div><div>{formatPrintValue(formData.stockReportsRegular, formData.stockReportsRemark)}</div></div>
+                                        <div className="doc-grid"><div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(State frequency)</div><div>{formData.stockReportsFrequency}</div></div>
+                                        <div className="doc-grid"><div>Is bank’s possession fully effective and secured? 		</div><div>{formatPrintValue(formData.bankPossessionEffective, formData.bankPossessionRemark)}</div></div>
+
+                                        <h2>7. BOOKS AND RECORDS</h2>
+                                        <div className="doc-grid"><div>Are godown registers/ cards properly maintained?</div><div>{formatPrintValue(formData.registersMaintained, formData.registersMaintainedRemark)}</div></div>
+                                        <div className="doc-grid"><div>Do godown registers tally with godown cards?</div><div>{formatPrintValue(formData.registersTally, formData.registersTallyRemark)}</div></div>
+
+                                        <h2>8. CONTROL</h2>
+                                        <div className="doc-grid"><div>Are godown inspected periodically? </div><div>{formatPrintValue(formData.inspectedPeriodically, formData.inspectedPeriodicallyRemark)}</div></div>
+                                        <div className="doc-grid"><div>How often and by whom? </div><div>{formData.inspectedHowOften}</div></div>
+                                        <div className="doc-grid"><div>Is record of inspection maintained?</div><div>{formatPrintValue(formData.recordMaintained, formData.recordMaintainedRemark)}</div></div>
+
+                                        <h2>9. MOVEMENT OF STOCKS</h2>
+                                        <div className="doc-grid"><div>Is turnover in stocks satisfactory? </div><div>{formatPrintValue(formData.turnoverSatisfactory, formData.turnoverSatisfactoryRemark)}</div></div>
+                                        <div className="doc-grid" style={{alignItems: 'start'}}><div>Is turnover in account satisfactory? 	</div><div>{formatPrintValue(formData.accountTurnoverSatisfactory, formData.accountTurnoverSatisfactoryRemark)}</div></div>
+
+                                        <h2>10. CERTIFICATE TO BE GIVEN BY THE INSPECTING OFFICER CERTIFYING THAT</h2>
+                                        <div className="doc-grid"><div>The movement of stocks in the account has been carefully checked. </div><div>{formatPrintValue(formData.movementChecked, formData.movementRemark)}</div></div>
+                                        <div className="doc-grid"><div>Stock older that three months are also moving out satisfactorily. </div><div>{formatPrintValue(formData.oldStockMoving, formData.oldStockRemark)}</div></div>
+                                        <div className="doc-grid"><div>Deliveries effected since last inspection have not been preponderating from new stocks.</div><div>{formatPrintValue(formData.deliveriesNotNew, formData.deliveriesRemark)}</div></div>
+                                        <div className="doc-grid"><div>All the stocks statements of the borrower are on branch record.</div><div>{formatPrintValue(formData.statementsOnRecord, formData.statementsRemark)}</div></div>
+
+                                        <div style={{fontSize: '9pt', fontStyle: 'italic', marginTop: '30pt', marginBottom: '50pt'}}>
+                                            Note: Please refer Guidelines in the reverse	      
+                                        </div>
+
+                                        <div style={{display: 'flex', justifyContent: 'space-between', padding: '0 40pt'}}>
+                                            <div style={{textAlign: 'center', fontWeight: 'bold'}}>
+                                                <div style={{minHeight: '1.5em', marginBottom: '4pt'}}>{formData.inspectingOfficer ? formData.inspectingOfficer.toUpperCase() : ''}</div>
+                                                <div>INSPECTING OFFICER</div>
+                                            </div>
+                                            <div style={{textAlign: 'center', fontWeight: 'bold', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end'}}>
+                                                <div>MANAGER</div>
+                                            </div>
+                                        </div>
+
+                                        {/* SCREEN ONLY FOOTER FOR PREVIEW */}
+                                        <div className="screen-only-footer mt-12 pt-4 border-t border-black text-center font-bold text-[11pt]">
+                                            Godown Inspection Report - {formData.accountNo || '__________'} - {formData.name || '__________'}
                                         </div>
                                     </div>
 
-                                    {/* SCREEN ONLY FOOTER FOR PREVIEW */}
-                                    <div className="screen-only-footer mt-12 pt-4 border-t border-black text-center font-bold text-[11pt]">
-                                        Godown Inspection Report - {formData.accountNo || '__________'} - {formData.name || '__________'}
+                                    {/* BRANCH HEAD COVERING LETTER (NEW PAGE) */}
+                                    <div className="a4-page word-doc page-break-before">
+                                        <h2 style={{ textAlign: 'center', textDecoration: 'underline', marginBottom: '30pt' }}>INTERNAL MEMO</h2>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20pt' }}>
+                                            <div>
+                                                <strong>To:</strong><br/>
+                                                The Branch Head,<br/>
+                                                Bank of Baroda, {formData.branch} Branch
+                                            </div>
+                                            <div><strong>Date:</strong> {formatDateStandard(formData.dateOfReporting) || new Date().toLocaleDateString('en-GB')}</div>
+                                        </div>
+                                        <div style={{ marginBottom: '20pt' }}>
+                                            <strong>Subject:</strong> Outcome of Godown Inspection - {formData.name} (A/c: {formData.accountNo})
+                                        </div>
+                                        <p style={{ marginBottom: '15pt' }}>Dear Sir/Madam,</p>
+                                        <p style={{ marginBottom: '15pt' }}>
+                                            The regular godown inspection for the subject account was conducted on {formatDateStandard(formData.dateOfVerification)}. 
+                                            {adverseFindings.length === 0 
+                                                ? " We are pleased to report that no adverse observations were noted during the visit. The condition of stocks and maintenance of records are satisfactory." 
+                                                : " During the visit, the following irregularities/adverse findings were observed. We suggest the below rectification measures for monitoring by the Credit Department and follow-up action."}
+                                        </p>
+
+                                        {adverseFindings.length > 0 && (
+                                            <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '15pt', marginBottom: '20pt', fontSize: '10pt' }} border="1">
+                                                <thead>
+                                                    <tr style={{ backgroundColor: '#f0f0f0' }}>
+                                                        <th style={{ padding: '8px' }}>Sl</th>
+                                                        <th style={{ padding: '8px' }}>Parameter</th>
+                                                        <th style={{ padding: '8px' }}>Adverse Observation</th>
+                                                        <th style={{ padding: '8px' }}>Suggested Rectification Measure</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {adverseFindings.map((item, idx) => (
+                                                        <tr key={idx}>
+                                                            <td style={{ padding: '8px', textAlign: 'center' }}>{idx + 1}</td>
+                                                            <td style={{ padding: '8px', fontWeight: 'bold' }}>{item.label}</td>
+                                                            <td style={{ padding: '8px' }}>{item.userRemark}</td>
+                                                            <td style={{ padding: '8px' }}>{item.suggestion}</td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        )}
+                                        
+                                        <p>Submitted for your information and necessary action.</p>
+                                        <div style={{ marginTop: '50pt' }}>
+                                            <strong>{formData.inspectingOfficer ? formData.inspectingOfficer.toUpperCase() : 'INSPECTING OFFICER'}</strong><br/>
+                                            Inspecting Official
+                                        </div>
                                     </div>
+
+                                    {/* BORROWER RECTIFICATION LETTER (NEW PAGE - CONDITIONAL) */}
+                                    {borrowerFindings.length > 0 && (
+                                        <div className="a4-page word-doc page-break-before">
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20pt' }}>
+                                                <div>
+                                                    <strong>To:</strong><br/>
+                                                    {formData.name}<br/>
+                                                    {formData.officeAddress}
+                                                </div>
+                                                <div><strong>Date:</strong> {formatDateStandard(formData.dateOfReporting) || new Date().toLocaleDateString('en-GB')}</div>
+                                            </div>
+                                            <div style={{ marginBottom: '20pt' }}>
+                                                <strong>Subject:</strong> Rectification of irregularities observed during Godown Inspection dated {formatDateStandard(formData.dateOfVerification)}
+                                            </div>
+                                            <p style={{ marginBottom: '15pt' }}>Dear Sir/Madam,</p>
+                                            <p style={{ marginBottom: '15pt' }}>
+                                                During the routine godown inspection of your premises located at <em>{formData.godownAddress}</em> on {formatDateStandard(formData.dateOfVerification)}, the following irregularities were observed.
+                                            </p>
+                                            <p style={{ marginBottom: '15pt' }}>You are advised to take immediate corrective actions as suggested below:</p>
+                                            
+                                            <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '15pt', marginBottom: '20pt', fontSize: '10pt' }} border="1">
+                                                <thead>
+                                                    <tr style={{ backgroundColor: '#f0f0f0' }}>
+                                                        <th style={{ padding: '8px' }}>Sl</th>
+                                                        <th style={{ padding: '8px' }}>Area of Concern</th>
+                                                        <th style={{ padding: '8px' }}>Observation Details</th>
+                                                        <th style={{ padding: '8px' }}>Required Action by You</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {borrowerFindings.map((item, idx) => (
+                                                        <tr key={idx}>
+                                                            <td style={{ padding: '8px', textAlign: 'center' }}>{idx + 1}</td>
+                                                            <td style={{ padding: '8px', fontWeight: 'bold' }}>{item.label}</td>
+                                                            <td style={{ padding: '8px' }}>{item.userRemark}</td>
+                                                            <td style={{ padding: '8px' }}>{item.suggestion}</td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                            
+                                            <p>Please confirm compliance of the above points at the earliest to ensure smooth continuation of your credit facilities.</p>
+                                            <div style={{ marginTop: '50pt' }}>
+                                                Yours faithfully,<br/><br/><br/>
+                                                <strong>Manager / Branch Head</strong><br/>
+                                                Bank of Baroda, {formData.branch} Branch
+                                            </div>
+                                        </div>
+                                    )}
 
                                 </div>
                             )}
