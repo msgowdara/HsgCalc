@@ -384,16 +384,16 @@
                         <span class="flex-1 border-b border-black ml-2 inline-block min-h-[1.2em]"></span>
                     </div>
 
+                    <!-- Dynamic Advertisement Box -->
+                    <div id="ad_box" class="mt-auto pt-2 border-t border-dashed border-gray-400 hidden flex-col items-center justify-center w-full bg-bob-light rounded-md p-1">
+                        <img id="ad_img" src="" alt="Offer" class="h-10 object-contain mb-1 hidden">
+                        <div id="ad_tagline" class="text-[9px] font-bold text-bob-vermillion text-center leading-tight hidden"></div>
+                    </div>
+
                 </div>
 
                 <!-- RIGHT: MAIN SLIP -->
-            <div class="main-slip">
-                <!-- Header Layering -->
-                <div class="relative flex justify-center items-start mb-2">
-                    <!-- Left: Logo (Same bigger size) -->
-                    <div class="absolute left-0 top-0">
-                        <img src="https://msgowdara.github.io/HsgCalc/GodownCsv/BOB%20Logo.png" alt="Bank of Baroda" class="logo-img" onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Bank_of_Baroda_Logo.svg/512px-Bank_of_Baroda_Logo.svg.png';">
-                    </div>
+                <div class="main-slip">
                     
                     <!-- Center: Text -->
                     <div class="text-center pt-2">
@@ -749,6 +749,51 @@
             fillGrid(document.getElementById('grid2'), data.beneAcc);
         }
 
+        async function fetchAdvertisement() {
+            // Google Sheets CSV export URL
+            const sheetUrl = 'https://docs.google.com/spreadsheets/d/14FcSYfZSXb7WEe8ZkOvlYuXYEoXFkU2ET2A_3-dG5cw/gviz/tq?tqx=out:csv&sheet=Sheet1';
+            try {
+                const response = await fetch(sheetUrl);
+                const csvText = await response.text();
+                
+                // Parse standard Google Sheets CSV output
+                const rows = csvText.trim().split('\n').map(row => {
+                    // Removes the wrapping double quotes and splits by ","
+                    return row.substring(1, row.length - 1).split('","');
+                });
+
+                // Skip header (row 0) and ensure valid data length
+                const dataRows = rows.slice(1).filter(r => r.length >= 3);
+                
+                if (dataRows.length > 0) {
+                    // Pick a random row
+                    const randomRow = dataRows[Math.floor(Math.random() * dataRows.length)];
+                    const imgUrl = randomRow[1];
+                    const tagline = randomRow[2];
+
+                    const adBox = document.getElementById('ad_box');
+                    const adImg = document.getElementById('ad_img');
+                    const adTag = document.getElementById('ad_tagline');
+                    
+                    if (imgUrl && imgUrl.trim() !== "") {
+                        adImg.src = imgUrl.trim();
+                        adImg.classList.remove('hidden');
+                    }
+                    
+                    if (tagline && tagline.trim() !== "") {
+                        adTag.innerText = tagline.trim();
+                        adTag.classList.remove('hidden');
+                    }
+                    
+                    // Show the ad box by switching from hidden to flex
+                    adBox.classList.remove('hidden');
+                    adBox.classList.add('flex');
+                }
+            } catch (error) {
+                console.error("Failed to load advertisement:", error);
+            }
+        }
+
         window.onload = () => {
             // Setup default date to user's local timezone securely
             const today = new Date();
@@ -758,6 +803,9 @@
             
             document.getElementById('i_date').value = `${year}-${month}-${day}`;
             update();
+            
+            // Fetch the random advertisement
+            fetchAdvertisement();
         };
     </script>
 </body>
