@@ -19,18 +19,11 @@
             body, html { background-color: white !important; margin: 0; padding: 0; height: auto !important; overflow: visible !important; }
             .no-print { display: none !important; }
             .print-only { display: block !important; }
-            #report-container { box-shadow: none !important; margin: 0 !important; padding: 0 0 50px 0 !important; width: 100% !important; max-width: none !important; }
+            #report-container { box-shadow: none !important; margin: 0 !important; padding: 0 !important; width: 100% !important; max-width: none !important; }
             ::-webkit-scrollbar { display: none; }
             .page-break-avoid { page-break-inside: avoid; }
             /* Force break and attempt to force to next right/odd page for duplex printing */
             .page-break-before { page-break-before: always; break-before: right; padding-top: 10mm !important; }
-            
-            .print-only-footer { 
-                display: block; position: fixed; bottom: 0; left: 0; width: 100%;
-                text-align: center; font-size: 11pt; font-family: "Times New Roman", Times, serif; font-weight: bold;
-                background: white; border-top: 1px solid black; padding-top: 5px; padding-bottom: 5px; z-index: 1000;
-            }
-            .screen-only-footer { display: none !important; }
 
             /* FIX: Ensure a4-page stays inside printer margins and does not cause horizontal overflow */
             .a4-page {
@@ -57,7 +50,6 @@
         .word-doc h2 {
             font-size: 11pt; font-weight: bold; margin-top: 14pt; margin-bottom: 4pt; text-transform: uppercase; page-break-after: avoid;
         }
-        .print-only-footer { display: none; }
         body { background-color: #f8fafc; }
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
@@ -773,11 +765,6 @@
                             {/* EXACT WORD DOCUMENT PRINT/PREVIEW VIEW */}
                             {view === 'preview' && (
                                 <div id="report-container" className="relative">
-                                    
-                                    {/* PRINT ONLY REPEATING FOOTER */}
-                                    <div className="print-only-footer">
-                                        Godown Inspection Report - {formData.accountNo || '__________'} - {formData.name || '__________'}
-                                    </div>
 
                                     {/* MAIN REPORT PAGE */}
                                     <div className="a4-page word-doc">
@@ -881,11 +868,6 @@
                                             <div style={{textAlign: 'center', fontWeight: 'bold', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end'}}>
                                                 <div>MANAGER</div>
                                             </div>
-                                        </div>
-
-                                        {/* SCREEN ONLY FOOTER FOR PREVIEW */}
-                                        <div className="screen-only-footer mt-12 pt-4 border-t border-black text-center font-bold text-[11pt]">
-                                            Godown Inspection Report - {formData.accountNo || '__________'} - {formData.name || '__________'}
                                         </div>
                                     </div>
 
