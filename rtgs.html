@@ -221,25 +221,25 @@
             <p class="text-xs text-red-500 mb-4 font-semibold">Fields marked with * are compulsory for printing.</p>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Column 1: Sender Profile -->
                 <div class="space-y-3">
-                    <p class="font-bold text-bob-vermillion border-b pb-1">Branch & Details</p>
-                    <input type="text" id="i_branch" placeholder="Branch Name *" class="w-full border p-2 rounded focus:border-bob-vermillion focus:ring-1 focus:ring-bob-vermillion outline-none" oninput="update()">
-                    <input type="date" id="i_date" class="w-full border p-2 rounded focus:border-bob-vermillion focus:ring-1 focus:ring-bob-vermillion outline-none" oninput="update()" title="Date *">
-                </div>
-                <div class="space-y-3">
-                    <p class="font-bold text-bob-vermillion border-b pb-1">Sender Information</p>
-                    <input type="text" id="i_senderName" placeholder="Account Holder Name *" class="w-full border p-2 rounded focus:border-bob-vermillion focus:ring-1 focus:ring-bob-vermillion outline-none" oninput="update()">
+                    <p class="font-bold text-bob-vermillion border-b pb-1">Sender Profile</p>
                     <div class="flex gap-2 relative">
                         <input type="text" id="i_senderAcc" placeholder="Sender Account No. *" class="w-full border p-2 rounded focus:border-bob-vermillion focus:ring-1 focus:ring-bob-vermillion outline-none" maxlength="14" list="savedSenders" oninput="handleSenderSelect()">
                         <button id="btn_saveSender" onclick="saveSenderProfile()" class="bg-bob-light text-bob-vermillion border border-bob-vermillion px-4 rounded hover:bg-bob-vermillion hover:text-white transition-colors text-sm font-bold whitespace-nowrap" title="Save this profile locally">Save</button>
+                        <button id="btn_clearSenders" onclick="clearSenderProfiles()" class="bg-red-50 text-red-500 border border-red-500 px-3 rounded hover:bg-red-500 hover:text-white transition-colors text-sm font-bold whitespace-nowrap" title="Clear all saved profiles">Clear</button>
                     </div>
                     <datalist id="savedSenders"></datalist>
-                    <input type="text" id="i_chequeNo" placeholder="Cheque No." class="w-full border p-2 rounded focus:border-bob-vermillion focus:ring-1 focus:ring-bob-vermillion outline-none" maxlength="6" oninput="update()">
+                    <input type="text" id="i_senderName" placeholder="Account Holder Name *" class="w-full border p-2 rounded focus:border-bob-vermillion focus:ring-1 focus:ring-bob-vermillion outline-none" oninput="update()">
+                    <input type="text" id="i_branch" placeholder="Branch Name *" class="w-full border p-2 rounded focus:border-bob-vermillion focus:ring-1 focus:ring-bob-vermillion outline-none" oninput="update()">
                     <div class="flex gap-2">
-                        <input type="text" id="i_mobile" placeholder="Mobile" class="w-full border p-2 rounded focus:border-bob-vermillion focus:ring-1 focus:ring-bob-vermillion outline-none" oninput="update()">
                         <input type="text" id="i_pan" placeholder="PAN" class="w-full border p-2 rounded focus:border-bob-vermillion focus:ring-1 focus:ring-bob-vermillion outline-none" oninput="update()">
+                        <input type="text" id="i_mobile" placeholder="Mobile" class="w-full border p-2 rounded focus:border-bob-vermillion focus:ring-1 focus:ring-bob-vermillion outline-none" oninput="update()">
                     </div>
+                    <input type="text" id="i_chequeNo" placeholder="Cheque No." class="w-full border p-2 rounded focus:border-bob-vermillion focus:ring-1 focus:ring-bob-vermillion outline-none" maxlength="6" oninput="update()">
                 </div>
+
+                <!-- Column 2: Beneficiary Information -->
                 <div class="space-y-3">
                     <p class="font-bold text-bob-vermillion border-b pb-1">Beneficiary Information</p>
                     <input type="text" id="i_beneName" placeholder="Beneficiary Name *" class="w-full border p-2 rounded focus:border-bob-vermillion focus:ring-1 focus:ring-bob-vermillion outline-none" oninput="update()">
@@ -266,7 +266,12 @@
                         <input type="text" id="i_beneBank" placeholder="Receiving Bank (Auto-filled)" class="w-1/2 border p-2 rounded bg-gray-100 text-gray-600 cursor-not-allowed outline-none" readonly tabindex="-1">
                         <input type="text" id="i_beneBranch" placeholder="Receiving Branch (Auto-filled)" class="w-1/2 border p-2 rounded bg-gray-100 text-gray-600 cursor-not-allowed outline-none" readonly tabindex="-1">
                     </div>
-                    
+                </div>
+
+                <!-- Column 3: Transfer Details -->
+                <div class="space-y-3">
+                    <p class="font-bold text-bob-vermillion border-b pb-1">Transfer Details</p>
+                    <input type="date" id="i_date" class="w-full border p-2 rounded focus:border-bob-vermillion focus:ring-1 focus:ring-bob-vermillion outline-none" oninput="update()" title="Date *">
                     <div class="flex gap-2">
                         <input type="number" id="i_amount" placeholder="Amount (Rs.) *" class="w-2/3 border p-2 rounded focus:border-bob-vermillion focus:ring-1 focus:ring-bob-vermillion outline-none" oninput="handleAmountInput()">
                         <select id="i_type" class="w-1/3 border p-2 rounded focus:border-bob-vermillion focus:ring-1 focus:ring-bob-vermillion outline-none" onchange="handleTypeChange()">
@@ -274,7 +279,6 @@
                             <option value="RTGS">RTGS</option>
                         </select>
                     </div>
-                    
                     <input type="text" id="i_message" placeholder="Message for Beneficiary (RTGS Only)" class="w-full border p-2 rounded focus:border-bob-vermillion focus:ring-1 focus:ring-bob-vermillion outline-none" oninput="update()">
                 </div>
             </div>
@@ -675,6 +679,24 @@
                 option.text = `${s.name} - ${s.branch}`;
                 datalist.appendChild(option);
             });
+        }
+
+        function clearSenderProfiles() {
+            // Remove the specific local storage item
+            localStorage.removeItem('bob_senders');
+            loadSavedSenders(); // Refresh datalist (will be empty)
+
+            // Visual feedback on the button
+            const btn = document.getElementById('btn_clearSenders');
+            btn.innerText = "Cleared!";
+            btn.classList.add('bg-red-500', 'text-white');
+            btn.classList.remove('bg-red-50', 'text-red-500');
+            
+            setTimeout(() => {
+                btn.innerText = "Clear";
+                btn.classList.remove('bg-red-500', 'text-white');
+                btn.classList.add('bg-red-50', 'text-red-500');
+            }, 2000);
         }
 
         function saveSenderProfile() {
