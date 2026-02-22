@@ -24,6 +24,9 @@
             }
         }
     </script>
+    
+    <!-- QR Code Library for fast, offline generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <style>
         :root {
@@ -389,6 +392,8 @@
                     <div id="ad_box" class="mt-auto pt-2 border-t border-dashed border-gray-400 hidden flex-row items-center justify-start w-full bg-bob-light rounded-lg p-2 overflow-hidden gap-3" style="min-height: 100px; max-height: 120px;">
                         <img id="ad_img" src="" alt="Offer" class="h-20 max-w-[40%] object-contain hidden flex-shrink-0">
                         <div id="ad_tagline" class="text-[11.5px] font-bold text-bob-vermillion text-left leading-snug hidden flex-1"></div>
+                        <!-- QR Code Container -->
+                        <div id="ad_qrcode" class="ml-auto flex-shrink-0 hidden bg-white p-1 rounded shadow-sm"></div>
                     </div>
 
                 </div>
@@ -809,10 +814,12 @@
                     const randomRow = dataRows[Math.floor(Math.random() * dataRows.length)];
                     const imgUrl = randomRow[1];
                     const tagline = randomRow[2];
+                    const linkUrl = randomRow[3]; // The 4th column for URL
 
                     const adBox = document.getElementById('ad_box');
                     const adImg = document.getElementById('ad_img');
                     const adTag = document.getElementById('ad_tagline');
+                    const adQr = document.getElementById('ad_qrcode');
                     
                     if (imgUrl && imgUrl.trim() !== "") {
                         adImg.src = imgUrl.trim();
@@ -822,6 +829,21 @@
                     if (tagline && tagline.trim() !== "") {
                         adTag.innerText = tagline.trim();
                         adTag.classList.remove('hidden');
+                    }
+
+                    if (linkUrl && linkUrl.trim() !== "") {
+                        // Clear any previous QR code
+                        adQr.innerHTML = "";
+                        // Generate QR Code locally
+                        new QRCode(adQr, {
+                            text: linkUrl.trim(),
+                            width: 64, // Optimal size to fit within the box constraints
+                            height: 64,
+                            colorDark: "#000000",
+                            colorLight: "#ffffff", // White background for maximum scannability
+                            correctLevel: QRCode.CorrectLevel.L
+                        });
+                        adQr.classList.remove('hidden');
                     }
                     
                     // Show the ad box by switching from hidden to flex
