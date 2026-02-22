@@ -47,22 +47,36 @@
             -webkit-print-color-adjust: exact;
         }
 
+        /* STRONGER PRINT CONSTRAINTS */
         @media print {
             @page {
-                size: A4 landscape;
-                margin: 5mm;
+                size: A4 landscape; /* Forces landscape mode in the print dialog */
+                margin: 0 !important; /* Removes default browser margins that cause spilling */
             }
-            body { background-color: white; padding: 0; margin: 0; }
+            body { 
+                background-color: white; 
+                padding: 0; 
+                margin: 0; 
+                width: 297mm;
+                height: 210mm;
+                overflow: hidden !important; /* Silver bullet to kill empty 2nd pages */
+            }
             .no-print { display: none !important; }
+            
             .print-container {
-                width: 287mm;
-                height: 195mm;
-                padding: 0;
+                width: 297mm;
+                height: 210mm;
+                padding: 5mm 10mm; /* Safe print padding */
                 margin: 0;
                 box-shadow: none;
+                box-sizing: border-box;
+                overflow: hidden;
             }
+            
             .slip-outer {
                 border: 1px solid #000 !important;
+                height: 185mm; /* Mathematically constrained to fit inside A4 */
+                page-break-inside: avoid;
             }
         }
 
@@ -510,20 +524,26 @@
                         Please remit the amount as per above details by (i) debiting my/our SB/CA/OD/CC/NRE/a/c No. <span id="v_declAcc" class="input-line inline-block w-40 mb-[-3px] font-bold text-center"></span> with <span id="v_declBranch" class="input-line inline-block w-32 mb-[-3px] font-bold text-center"></span> branch (ii) I/We herewith tender cheque No. <span id="v_declCheque" class="input-line inline-block w-24 mb-[-3px] font-bold text-center"></span> drawn on our a/c towards its cost including Bank charge.
                     </div>
 
-                    <!-- Signature Footer -->
+                    <!-- RESTORED: Signature Footer with all 4 items -->
                     <div class="grid grid-cols-4 gap-2 mt-auto pt-1">
                         <div class="flex flex-col justify-end items-center text-center pb-1 h-[50px]">
                             <div class="font-bold text-[11px]">Signature of Customer</div>
                             <div class="text-[9px] mt-1">Mob: <span id="v_mob2" class="font-bold"></span> | PAN: <span id="v_pan2" class="font-bold"></span></div>
                         </div>
                         <div class="flex flex-col justify-end items-center text-center pb-1 h-[50px] text-[9px]">
-                        Sign. of officer<br>(who verified)
+                            Sign. of operator<br>(who created mesg.)
+                        </div>
+                        <div class="flex flex-col justify-end items-center text-center pb-1 h-[50px] text-[9px]">
+                            sign. of officer<br>(who authorized)
+                        </div>
+                        <div class="flex flex-col justify-end items-center text-center pb-1 h-[50px] text-[9px]">
+                            Sign. of officer<br>(who verified)
+                        </div>
                     </div>
                 </div>
-            </div>
 
+            </div>
         </div>
-    </div>
 
     <!-- BOTTOM PRINT BUTTON -->
     <div class="max-w-6xl mx-auto flex justify-center mt-8 no-print">
