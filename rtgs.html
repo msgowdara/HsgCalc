@@ -252,7 +252,7 @@
                             <option value="Credit Card">Credit Card</option>
                             <option value="Remittance to Indo Nepal">Remittance to Indo Nepal</option>
                         </select>
-                        <input type="text" id="i_beneIfsc" placeholder="IFSC Code *" class="w-1/2 border p-2 rounded focus:border-bob-vermillion focus:ring-1 focus:ring-bob-vermillion outline-none" maxlength="11" oninput="update()">
+                        <input type="text" id="i_beneIfsc" placeholder="IFSC Code *" class="w-1/2 border p-2 rounded focus:border-bob-vermillion focus:ring-1 focus:ring-bob-vermillion outline-none" maxlength="11" oninput="handleIfscInput()">
                     </div>
 
                     <div class="flex gap-2">
@@ -600,6 +600,32 @@
             }
             if (!number || number === 0) return '';
             return 'Rupees ' + convert(Math.floor(number)) + ' Only';
+        }
+
+        // Fetch IFSC data from Razorpay API
+        async function handleIfscInput() {
+            update(); // First update the typed character to the slip display
+            
+            const ifscInput = document.getElementById('i_beneIfsc').value.trim().toUpperCase();
+            
+            // Check if exactly 11 chars and 5th character is '0'
+            if (ifscInput.length === 11 && ifscInput.charAt(4) === '0') {
+                try {
+                    const response = await fetch(`https://ifsc.razorpay.com/${ifscInput}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        
+                        // Auto-fill the bank and branch fields
+                        document.getElementById('i_beneBank').value = data.BANK || '';
+                        document.getElementById('i_beneBranch').value = data.BRANCH || '';
+                        
+                        // Update the slip with the newly fetched details
+                        update();
+                    }
+                } catch (error) {
+                    console.error("API failed to fetch IFSC details", error);
+                }
+            }
         }
 
         // Auto-switch Dropdown based on Amount logic
