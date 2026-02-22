@@ -195,7 +195,7 @@
                     refreshDataFromCloud();
                 } else {
                     setIsFetching(false);
-                    setShowSettings(true); // Force open settings if no token
+                    setShowSettings(true); 
                 }
             }, []);
 
@@ -235,7 +235,7 @@
                 setIsSaving(true);
                 showToast("⏳ Syncing with GitHub Cloud...");
                 try {
-                    // Always pull latest before push to avoid overwriting changes made elsewhere
+                    // Always pull latest before push to avoid overwriting changes
                     const cloudData = await fetchFromGitHub();
                     let latestArray = cloudData.data || [];
                     
@@ -637,6 +637,39 @@
 
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                                 <div className="bg-slate-50 p-4 rounded border border-slate-200">
+                                                    <h4 className="text-sm font-bold text-slate-800 mb-3 border-b pb-1">Valuation</h4>
+                                                    {renderFieldWithRemark('Is the mode of Valuation Satisfactory', 'modeOfValuationSatisfactory', 'conditions', 'valuationRemark', 'Not Satisfactory')}
+                                                    {renderFieldWithRemark('Whether trade discount, if any, deducted?', 'tradeDiscountDeducted', 'yesNo', 'tradeDiscountRemark', 'No')}
+                                                    <div className="mb-4"><label className="block text-xs font-bold text-slate-600 mb-1">Unpledged stocks, if any stored?</label><select className="w-full border-slate-300 rounded px-3 py-2 border bg-white text-sm" value={formData.unpledgedStocks} onChange={e => handleSelectChange('unpledgedStocks', e.target.value)}>{DROPDOWNS.yesNo.map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></div>
+                                                </div>
+
+                                                <div className="bg-slate-50 p-4 rounded border border-slate-200">
+                                                    <h4 className="text-sm font-bold text-slate-800 mb-3 border-b pb-1">Insurance</h4>
+                                                    <div className="mb-4"><label className="block text-xs font-bold text-slate-600 mb-1">Amount of Insurance (₹)</label><input type="number" className="w-full border-slate-300 rounded px-3 py-2 border text-sm" value={formData.insuranceAmount} onChange={e => handleSelectChange('insuranceAmount', e.target.value)} /></div>
+                                                    {renderFieldWithRemark('Is Insurance cover adequate?', 'insuranceAdequate', 'yesNo', 'insuranceAdequateRemark', 'No')}
+                                                    {renderFieldWithRemark('Is insurance cover all comprehensive?', 'insuranceComprehensive', 'yesNo', 'insuranceComprehensiveRemark', 'No')}
+                                                    {renderFieldWithRemark('Are unpledged stocks adequately insured?', 'unpledgedInsured', 'yesNo', 'unpledgedInsuredRemark', 'No')}
+                                                </div>
+                                            </div>
+
+                                            <div className="bg-slate-50 p-4 rounded border border-slate-200">
+                                                <h4 className="text-sm font-bold text-slate-800 mb-3 border-b pb-1">General Compliances & Records</h4>
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                                                    <div><label className="block text-xs font-bold text-slate-600 mb-1">Are bank’s signboards displayed?</label><select className="w-full border-slate-300 rounded px-2 py-1.5 border bg-white text-sm" value={formData.signboardsDisplayed} onChange={e => handleSelectChange('signboardsDisplayed', e.target.value)}>{DROPDOWNS.yesNo.map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></div>
+                                                    <div><label className="block text-xs font-bold text-slate-600 mb-1">Inside / Outside</label><select className="w-full border-slate-300 rounded px-2 py-1.5 border bg-white text-sm disabled:bg-gray-200" disabled={formData.signboardsDisplayed === 'No'} value={formData.signboardsInsideOutside} onChange={e => handleSelectChange('signboardsInsideOutside', e.target.value)}>{DROPDOWNS.insideOutside.map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></div>
+                                                    <div className="sm:col-span-2 md:col-span-1">{renderFieldWithRemark('Godown keeper/chokidar sanctioned?', 'godownKeeperSanctioned', 'yesNo', 'godownKeeperRemark', 'No')}</div>
+                                                    
+                                                    <div className="sm:col-span-2 md:col-span-1">{renderFieldWithRemark('Signed stock reports received?', 'stockReportsRegular', 'yesNo', 'stockReportsRemark', 'No')}</div>
+                                                    <div><label className="block text-xs font-bold text-slate-600 mb-1">Report Frequency</label><select className="w-full border-slate-300 rounded px-2 py-1.5 border bg-white text-sm" value={formData.stockReportsFrequency} onChange={e => handleSelectChange('stockReportsFrequency', e.target.value)}>{DROPDOWNS.frequency.map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></div>
+                                                    
+                                                    <div className="sm:col-span-2 md:col-span-1">{renderFieldWithRemark('Bank possession fully effective?', 'bankPossessionEffective', 'yesNo', 'bankPossessionRemark', 'No')}</div>
+                                                    <div className="sm:col-span-2 md:col-span-1">{renderFieldWithRemark('Registers/cards properly maintained?', 'registersMaintained', 'yesNo', 'registersMaintainedRemark', 'No')}</div>
+                                                    <div className="sm:col-span-2 md:col-span-1">{renderFieldWithRemark('Registers tally with godown cards?', 'registersTally', 'yesNo', 'registersTallyRemark', 'No')}</div>
+                                                </div>
+                                            </div>
+
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                <div className="bg-slate-50 p-4 rounded border border-slate-200">
                                                     <h4 className="text-sm font-bold text-slate-800 mb-3 border-b pb-1">Control</h4>
                                                     {renderFieldWithRemark('Are godown inspected periodically?', 'inspectedPeriodically', 'yesNo', 'inspectedPeriodicallyRemark', 'No')}
                                                     <div className="mb-4"><label className="block text-xs font-bold text-slate-600 mb-1">How often and by whom?</label><input type="text" className="w-full border-slate-300 rounded px-3 py-2 border bg-white text-sm" value={formData.inspectedHowOften} onChange={e => handleSelectChange('inspectedHowOften', e.target.value)} /></div>
@@ -740,9 +773,7 @@
                                     <div className="doc-grid"><div>Amount of Insurance</div><div>{formatCurrency(formData.insuranceAmount)}</div></div>
                                     <div className="doc-grid"><div>Is Insurance cover adequate as to the amount</div><div>{formatPrintValue(formData.insuranceAdequate, formData.insuranceAdequateRemark)}</div></div>
                                     <div className="doc-grid"><div>Is insurance cover all comprehensive, state if any fire or R.R.C burglary etc</div><div>{formatPrintValue(formData.insuranceComprehensive, formData.insuranceComprehensiveRemark)}</div></div>
-                                    {formData.unpledgedStocks === 'Yes' && (
-                                        <div className="doc-grid"><div>Are unpledged stocks, if any adequately insured</div><div>{formatPrintValue(formData.unpledgedInsured, formData.unpledgedInsuredRemark)}</div></div>
-                                    )}
+                                    <div className="doc-grid"><div>Are unpledged stocks, if any adequately insured</div><div>{formatPrintValue(formData.unpledgedInsured, formData.unpledgedInsuredRemark)}</div></div>
 
                                     <h2>IN ALL CASES</h2>
                                     <div className="doc-grid"><div>Are bank’s signboards displayed? </div><div>{formData.signboardsDisplayed}</div></div>
@@ -778,8 +809,13 @@
                                     </div>
 
                                     <div style={{display: 'flex', justifyContent: 'space-between', padding: '0 40pt'}}>
-                                        <div style={{textAlign: 'center', fontWeight: 'bold'}}>INSPECTING OFFICER</div>
-                                        <div style={{textAlign: 'center', fontWeight: 'bold'}}>MANAGER</div>
+                                        <div style={{textAlign: 'center', fontWeight: 'bold'}}>
+                                            <div style={{minHeight: '1.5em', marginBottom: '4pt'}}>{formData.inspectingOfficer ? formData.inspectingOfficer.toUpperCase() : ''}</div>
+                                            <div>INSPECTING OFFICER</div>
+                                        </div>
+                                        <div style={{textAlign: 'center', fontWeight: 'bold', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end'}}>
+                                            <div>MANAGER</div>
+                                        </div>
                                     </div>
 
                                     {/* SCREEN ONLY FOOTER FOR PREVIEW */}
