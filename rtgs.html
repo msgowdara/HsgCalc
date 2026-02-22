@@ -238,8 +238,6 @@
                         <button id="btn_saveSender" onclick="saveSenderProfile()" class="w-full bg-bob-light text-bob-vermillion border border-bob-vermillion p-2.5 rounded hover:bg-bob-vermillion hover:text-white transition-colors text-sm font-bold" title="Save this profile locally">Save Sender Details</button>
                         <button id="btn_clearSenders" onclick="clearSenderProfiles()" class="w-full bg-red-50 text-red-500 border border-red-500 p-2.5 rounded hover:bg-red-500 hover:text-white transition-colors text-sm font-bold" title="Clear all saved profiles">Clear Sender Details</button>
                     </div>
-
-                    <input type="text" id="i_chequeNo" placeholder="Cheque No." class="w-full border p-2 rounded focus:border-bob-vermillion focus:ring-1 focus:ring-bob-vermillion outline-none" maxlength="6" oninput="update()">
                 </div>
 
                 <!-- Column 2: Beneficiary Information -->
@@ -282,6 +280,7 @@
                             <option value="RTGS">RTGS</option>
                         </select>
                     </div>
+                    <input type="text" id="i_chequeNo" placeholder="Cheque No." class="w-full border p-2 rounded focus:border-bob-vermillion focus:ring-1 focus:ring-bob-vermillion outline-none" maxlength="6" oninput="update()">
                     <input type="text" id="i_message" placeholder="Message for Beneficiary (RTGS Only)" class="w-full border p-2 rounded focus:border-bob-vermillion focus:ring-1 focus:ring-bob-vermillion outline-none" oninput="update()">
                 </div>
             </div>
