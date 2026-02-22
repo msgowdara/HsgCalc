@@ -238,7 +238,6 @@
             const [officers, setOfficers] = useState([]);
             const [toast, setToast] = useState('');
             
-            // App & API States
             const [isFetching, setIsFetching] = useState(true);
             const [isSaving, setIsSaving] = useState(false);
             const [showSettings, setShowSettings] = useState(false);
@@ -295,7 +294,7 @@
                     const reportId = formData.id || Date.now().toString();
                     const recordToSave = { 
                         ...formData, 
-                        percentOldStock: calculateOldStockPercent(),
+                        percentOldStock: calculateOldStockPercent(), 
                         id: reportId, 
                         lastUpdated: new Date().toISOString() 
                     };
@@ -391,7 +390,6 @@
             const handleSelectChange = (field, value) => {
                 let newData = { ...formData, [field]: value };
 
-                // Handle static dependencies
                 if (field === 'signboardsDisplayed') {
                     if (value === 'No') newData.signboardsInsideOutside = 'Not Applicable';
                     else if (value === 'Yes' && newData.signboardsInsideOutside === 'Not Applicable') newData.signboardsInsideOutside = 'Outside';
@@ -401,15 +399,14 @@
                     else if (value === 'Yes' && newData.unpledgedInsured === 'Not Applicable') newData.unpledgedInsured = 'Yes';
                 }
 
-                // Apply Auto-Suggested Remarks Logic
                 if (SUGGESTED_REMARKS[field]) {
                     const config = SUGGESTED_REMARKS[field];
                     if (value === config.trigger) {
                         if (!newData[config.field]) {
-                            newData[config.field] = config.text; // Auto-fill suggestion
+                            newData[config.field] = config.text; 
                         }
                     } else {
-                        newData[config.field] = ''; // Clear if changed back to positive
+                        newData[config.field] = ''; 
                     }
                 }
                 
@@ -490,9 +487,10 @@
 
             return (
                 <div className="min-h-screen flex flex-col font-sans print:block print:min-h-0">
-                    {/* BEGIN MAIN MENU RIBBON */}
-                    <nav className="no-print" style={{backgroundColor: '#1e3a8a', color: 'white', padding: '12px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontFamily: 'system-ui, -apple-system, sans-serif', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'}}>
-                        <div style={{fontSize: '1.25rem', fontWeight: '700', letterSpacing: '0.5px'}}>
+                    
+                    {/* Header */}
+                    <div className="no-print bg-slate-900 text-white shadow-md z-10 sticky top-0">
+                        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
                             <div className="flex items-center gap-3">
                                 <div className="bg-indigo-600 p-1.5 rounded"><Icons.Cloud /></div>
                                 <h1 className="font-bold text-lg tracking-wide hidden sm:block">Godown Inspector Pro <span className="text-xs text-indigo-300 font-normal ml-2">Cloud Sync V2</span></h1>
