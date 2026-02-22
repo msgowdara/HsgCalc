@@ -55,19 +55,6 @@
     </style>
 </head>
 <body>
-    <!-- BEGIN MAIN MENU RIBBON -->
-<nav style="background-color: #1e3a8a; color: white; padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; font-family: system-ui, -apple-system, sans-serif; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
-    <div style="font-size: 1.25rem; font-weight: 700; letter-spacing: 0.5px;">
-        Banking Tools
-    </div>
-    <a href="https://msgowdara.github.io/HsgCalc/" style="color: white; text-decoration: none; background-color: rgba(255, 255, 255, 0.15); padding: 8px 16px; border-radius: 6px; font-size: 0.9rem; font-weight: 500; transition: background-color 0.2s; display: inline-flex; align-items: center; gap: 6px;" onmouseover="this.style.backgroundColor='rgba(255, 255, 255, 0.25)'" onmouseout="this.style.backgroundColor='rgba(255, 255, 255, 0.15)'">
-        <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-        </svg>
-        Back to Main Menu
-    </a>
-</nav>
-<!-- END MAIN MENU RIBBON. -->
     <div id="root"></div>
 
     <script type="text/babel">
@@ -115,7 +102,7 @@
             const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
             const res = await fetch(url, { headers: { Authorization: `token ${token}` } });
             
-            if (res.status === 404) return { data: [], sha: null }; // File doesn't exist yet, that's fine
+            if (res.status === 404) return { data: [], sha: null }; 
             if (!res.ok) throw new Error(`Cloud API Error: ${res.statusText}`);
             
             const json = await res.json();
@@ -162,8 +149,10 @@
             stockValue: '', stockMarginPercent: '25', stockMargin: '',
             bookDebts: '', bdMarginPercent: '25', bookDebtsMargin: '', 
             creditors: '', outstandingBalance: '',
-            conditionOfStocks: 'Satisfactory', modeOfStorage: 'Proper',
-            seasonYear: '', ageOfOldStock: '', percentOldStock: '',
+            
+            conditionOfStocks: 'Satisfactory', conditionOfStocksRemark: '', 
+            modeOfStorage: 'Proper', modeOfStorageRemark: '',
+            seasonYear: '', ageOfOldStockDays: '', amountOfOldStockRupees: '', percentOldStock: '',
             
             modeOfValuationSatisfactory: 'Satisfactory', valuationRemark: '',
             tradeDiscountDeducted: 'No', tradeDiscountRemark: '',
@@ -174,7 +163,8 @@
             insuranceComprehensive: 'Yes', insuranceComprehensiveRemark: '',
             unpledgedInsured: 'Not Applicable', unpledgedInsuredRemark: '',
             
-            signboardsDisplayed: 'Yes', signboardsInsideOutside: 'Inside', 
+            signboardsDisplayed: 'Yes', signboardsDisplayedRemark: '', 
+            signboardsInsideOutside: 'Inside', 
             godownKeeperSanctioned: 'Yes', godownKeeperRemark: '',
             stockReportsRegular: 'Yes', stockReportsRemark: '', stockReportsFrequency: 'Monthly', 
             bankPossessionEffective: 'Yes', bankPossessionRemark: '',
@@ -183,7 +173,7 @@
             inspectedPeriodically: 'Yes', inspectedPeriodicallyRemark: '', inspectedHowOften: 'Quarterly by undersigned inspecting officer',
             recordMaintained: 'Yes', recordMaintainedRemark: '',
             
-            turnoverSatisfactory: 'Yes', accountTurnoverSatisfactory: 'Yes',
+            turnoverSatisfactory: 'Yes', turnoverSatisfactoryRemark: '', accountTurnoverSatisfactory: 'Yes',
             movementChecked: 'Yes', movementRemark: '',
             oldStockMoving: 'Yes', oldStockRemark: '',
             deliveriesNotNew: 'Yes', deliveriesRemark: '',
@@ -197,7 +187,6 @@
             const [officers, setOfficers] = useState([]);
             const [toast, setToast] = useState('');
             
-            // App & API States
             const [isFetching, setIsFetching] = useState(true);
             const [isSaving, setIsSaving] = useState(false);
             const [showSettings, setShowSettings] = useState(false);
@@ -248,12 +237,16 @@
                 setIsSaving(true);
                 showToast("⏳ Syncing with Cloud...");
                 try {
-                    // Always pull latest before push to avoid overwriting changes
                     const cloudData = await fetchFromCloud();
                     let latestArray = cloudData.data || [];
                     
                     const reportId = formData.id || Date.now().toString();
-                    const recordToSave = { ...formData, id: reportId, lastUpdated: new Date().toISOString() };
+                    const recordToSave = { 
+                        ...formData, 
+                        percentOldStock: calculateOldStockPercent(), // Save computed value to CSV
+                        id: reportId, 
+                        lastUpdated: new Date().toISOString() 
+                    };
                     
                     const existingIndex = latestArray.findIndex(item => item.id === reportId);
                     if (existingIndex >= 0) {
@@ -365,11 +358,14 @@
                 // Clear remarks if changed to positive logic
                 const clearMap = {
                     conditionOfGodown: { trigger: 'Satisfactory', clear: 'godownRemark' },
+                    conditionOfStocks: { trigger: 'Satisfactory', clear: 'conditionOfStocksRemark' },
+                    modeOfStorage: { trigger: 'Proper', clear: 'modeOfStorageRemark' },
                     modeOfValuationSatisfactory: { trigger: 'Satisfactory', clear: 'valuationRemark' },
                     tradeDiscountDeducted: { trigger: 'Yes', clear: 'tradeDiscountRemark' },
                     insuranceAdequate: { trigger: 'Yes', clear: 'insuranceAdequateRemark' },
                     insuranceComprehensive: { trigger: 'Yes', clear: 'insuranceComprehensiveRemark' },
                     unpledgedInsured: { trigger: 'Yes', clear: 'unpledgedInsuredRemark' },
+                    signboardsDisplayed: { trigger: 'Yes', clear: 'signboardsDisplayedRemark' },
                     bankPossessionEffective: { trigger: 'Yes', clear: 'bankPossessionRemark' },
                     godownKeeperSanctioned: { trigger: 'Yes', clear: 'godownKeeperRemark' },
                     stockReportsRegular: { trigger: 'Yes', clear: 'stockReportsRemark' },
@@ -377,6 +373,7 @@
                     registersTally: { trigger: 'Yes', clear: 'registersTallyRemark' },
                     inspectedPeriodically: { trigger: 'Yes', clear: 'inspectedPeriodicallyRemark' },
                     recordMaintained: { trigger: 'Yes', clear: 'recordMaintainedRemark' },
+                    turnoverSatisfactory: { trigger: 'Yes', clear: 'turnoverSatisfactoryRemark' },
                     movementChecked: { trigger: 'Yes', clear: 'movementRemark' },
                     oldStockMoving: { trigger: 'Yes', clear: 'oldStockRemark' },
                     deliveriesNotNew: { trigger: 'Yes', clear: 'deliveriesRemark' },
@@ -396,6 +393,13 @@
                 const cr = parseFloat(formData.creditors) || 0;
                 const dp = (s - sm) + (bd - bdm) - cr;
                 return dp > 0 ? dp : 0;
+            };
+
+            const calculateOldStockPercent = () => {
+                const amount = parseFloat(formData.amountOfOldStockRupees) || 0;
+                const stockVal = parseFloat(formData.stockValue) || 0;
+                if (stockVal === 0) return "0.00 %";
+                return ((amount / stockVal) * 100).toFixed(2) + " %";
             };
 
             const formatCurrency = (val) => {
@@ -638,13 +642,14 @@
                                             <div className="bg-slate-50 p-4 rounded border border-slate-200">
                                                 <h4 className="text-sm font-bold text-slate-800 mb-3 border-b pb-1">Stocks & Storage</h4>
                                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                                    <div><label className="block text-xs font-bold text-slate-600 mb-1">Condition of stocks</label><select className="w-full border-slate-300 rounded px-3 py-2 border bg-white" value={formData.conditionOfStocks} onChange={e => handleSelectChange('conditionOfStocks', e.target.value)}>{DROPDOWNS.conditions.map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></div>
-                                                    <div><label className="block text-xs font-bold text-slate-600 mb-1">Mode of storage</label><select className="w-full border-slate-300 rounded px-3 py-2 border bg-white" value={formData.modeOfStorage} onChange={e => handleSelectChange('modeOfStorage', e.target.value)}>{DROPDOWNS.storage.map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></div>
+                                                    {renderFieldWithRemark('Condition of stocks', 'conditionOfStocks', 'conditions', 'conditionOfStocksRemark', 'Not Satisfactory')}
+                                                    {renderFieldWithRemark('Mode of storage', 'modeOfStorage', 'storage', 'modeOfStorageRemark', 'Haphazard')}
                                                 </div>
-                                                <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-slate-200 pt-3">
-                                                    <div><label className="block text-xs font-bold text-slate-600 mb-1">Season/Year of purchase</label><input type="text" className="w-full border-slate-300 rounded px-2 py-1.5 border bg-white text-sm" value={formData.seasonYear} onChange={e => handleSelectChange('seasonYear', e.target.value)} /></div>
-                                                    <div><label className="block text-xs font-bold text-slate-600 mb-1">Age & amount of old stock</label><input type="text" className="w-full border-slate-300 rounded px-2 py-1.5 border bg-white text-sm" value={formData.ageOfOldStock} onChange={e => handleSelectChange('ageOfOldStock', e.target.value)} /></div>
-                                                    <div><label className="block text-xs font-bold text-slate-600 mb-1">% of old stocks to total</label><input type="text" className="w-full border-slate-300 rounded px-2 py-1.5 border bg-white text-sm" value={formData.percentOldStock} onChange={e => handleSelectChange('percentOldStock', e.target.value)} /></div>
+                                                <div className="mt-4 grid grid-cols-1 md:grid-cols-4 gap-4 border-t border-slate-200 pt-3">
+                                                    <div><label className="block text-xs font-bold text-slate-600 mb-1">Season/Year of purchase</label><input type="number" className="w-full border-slate-300 rounded px-2 py-1.5 border bg-white text-sm" value={formData.seasonYear} onChange={e => setFormData({...formData, seasonYear: e.target.value})} /></div>
+                                                    <div><label className="block text-xs font-bold text-slate-600 mb-1">Age of old stock (Days)</label><input type="number" className="w-full border-slate-300 rounded px-2 py-1.5 border bg-white text-sm" value={formData.ageOfOldStockDays} onChange={e => setFormData({...formData, ageOfOldStockDays: e.target.value})} /></div>
+                                                    <div><label className="block text-xs font-bold text-slate-600 mb-1">Amount of old stock (₹)</label><input type="number" className="w-full border-slate-300 rounded px-2 py-1.5 border bg-white text-sm" value={formData.amountOfOldStockRupees} onChange={e => setFormData({...formData, amountOfOldStockRupees: e.target.value})} /></div>
+                                                    <div><label className="block text-xs font-bold text-slate-600 mb-1">% of old stocks to total</label><input type="text" className="w-full border-slate-300 rounded px-2 py-1.5 border bg-slate-100 text-sm font-bold text-slate-600" value={calculateOldStockPercent()} readOnly /></div>
                                                 </div>
                                             </div>
 
@@ -661,14 +666,16 @@
                                                     <div className="mb-4"><label className="block text-xs font-bold text-slate-600 mb-1">Amount of Insurance (₹)</label><input type="number" className="w-full border-slate-300 rounded px-3 py-2 border text-sm" value={formData.insuranceAmount} onChange={e => handleSelectChange('insuranceAmount', e.target.value)} /></div>
                                                     {renderFieldWithRemark('Is Insurance cover adequate?', 'insuranceAdequate', 'yesNo', 'insuranceAdequateRemark', 'No')}
                                                     {renderFieldWithRemark('Is insurance cover all comprehensive?', 'insuranceComprehensive', 'yesNo', 'insuranceComprehensiveRemark', 'No')}
-                                                    {renderFieldWithRemark('Are unpledged stocks adequately insured?', 'unpledgedInsured', 'yesNo', 'unpledgedInsuredRemark', 'No')}
+                                                    {formData.unpledgedStocks === 'Yes' && (
+                                                        renderFieldWithRemark('Are unpledged stocks adequately insured?', 'unpledgedInsured', 'yesNo', 'unpledgedInsuredRemark', 'No')
+                                                    )}
                                                 </div>
                                             </div>
 
                                             <div className="bg-slate-50 p-4 rounded border border-slate-200">
                                                 <h4 className="text-sm font-bold text-slate-800 mb-3 border-b pb-1">General Compliances & Records</h4>
                                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                                                    <div><label className="block text-xs font-bold text-slate-600 mb-1">Are bank’s signboards displayed?</label><select className="w-full border-slate-300 rounded px-2 py-1.5 border bg-white text-sm" value={formData.signboardsDisplayed} onChange={e => handleSelectChange('signboardsDisplayed', e.target.value)}>{DROPDOWNS.yesNo.map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></div>
+                                                    <div>{renderFieldWithRemark('Are bank’s signboards displayed?', 'signboardsDisplayed', 'yesNo', 'signboardsDisplayedRemark', 'No')}</div>
                                                     <div><label className="block text-xs font-bold text-slate-600 mb-1">Inside / Outside</label><select className="w-full border-slate-300 rounded px-2 py-1.5 border bg-white text-sm disabled:bg-gray-200" disabled={formData.signboardsDisplayed === 'No'} value={formData.signboardsInsideOutside} onChange={e => handleSelectChange('signboardsInsideOutside', e.target.value)}>{DROPDOWNS.insideOutside.map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></div>
                                                     <div className="sm:col-span-2 md:col-span-1">{renderFieldWithRemark('Godown keeper/chokidar sanctioned?', 'godownKeeperSanctioned', 'yesNo', 'godownKeeperRemark', 'No')}</div>
                                                     
@@ -691,7 +698,7 @@
 
                                                 <div className="bg-slate-50 p-4 rounded border border-slate-200">
                                                     <h4 className="text-sm font-bold text-slate-800 mb-3 border-b pb-1">Movement of Stocks</h4>
-                                                    <div className="mb-4"><label className="block text-xs font-bold text-slate-600 mb-1">Is turnover in stocks satisfactory?</label><select className="w-full border-slate-300 rounded px-3 py-2 border bg-white text-sm" value={formData.turnoverSatisfactory} onChange={e => handleSelectChange('turnoverSatisfactory', e.target.value)}>{DROPDOWNS.yesNo.map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></div>
+                                                    <div>{renderFieldWithRemark('Is turnover in stocks satisfactory?', 'turnoverSatisfactory', 'yesNo', 'turnoverSatisfactoryRemark', 'No')}</div>
                                                     <div className="mb-4">
                                                         <label className="block text-xs font-bold text-slate-600 mb-1">Is turnover in account satisfactory?</label>
                                                         <textarea className={`w-full border-slate-300 rounded px-3 py-2 border text-sm ${formData.turnoverSatisfactory === 'No' ? 'bg-red-50 font-semibold' : 'bg-white'}`} rows="3" value={formData.accountTurnoverSatisfactory} onChange={e => handleSelectChange('accountTurnoverSatisfactory', e.target.value)}></textarea>
@@ -771,11 +778,11 @@
                                     <br/>
                                     
                                     <div className="doc-grid"><div>Season/Year of purchase of manufactured goods</div><div>{formData.seasonYear || '-'}</div></div>
-                                    <div className="doc-grid"><div>Age & amount of old stock</div><div>{formData.ageOfOldStock || '-'}</div></div>
-                                    <div className="doc-grid"><div>Percentage of old stocks to total stocks</div><div>{formData.percentOldStock || '-'}</div></div>
+                                    <div className="doc-grid"><div>Age & amount of old stock</div><div>{(formData.ageOfOldStockDays || '0')} Days & {formatCurrency(formData.amountOfOldStockRupees || '0')}</div></div>
+                                    <div className="doc-grid"><div>Percentage of old stocks to total stocks</div><div>{calculateOldStockPercent()}</div></div>
 
-                                    <div className="doc-grid"><div>Condition of stocks</div><div>{formData.conditionOfStocks}</div></div>
-                                    <div className="doc-grid"><div>Mode of storage (Proper/Haphazard)</div><div>{formData.modeOfStorage}</div></div>
+                                    <div className="doc-grid"><div>Condition of stocks</div><div>{formatPrintValue(formData.conditionOfStocks, formData.conditionOfStocksRemark)}</div></div>
+                                    <div className="doc-grid"><div>Mode of storage (Proper/Haphazard)</div><div>{formatPrintValue(formData.modeOfStorage, formData.modeOfStorageRemark)}</div></div>
 
                                     <h2>VALUATION</h2>
                                     <div className="doc-grid"><div>Is the mode of Valuation Satisfactory</div><div>{formatPrintValue(formData.modeOfValuationSatisfactory, formData.valuationRemark)}</div></div>
@@ -786,10 +793,12 @@
                                     <div className="doc-grid"><div>Amount of Insurance</div><div>{formatCurrency(formData.insuranceAmount)}</div></div>
                                     <div className="doc-grid"><div>Is Insurance cover adequate as to the amount</div><div>{formatPrintValue(formData.insuranceAdequate, formData.insuranceAdequateRemark)}</div></div>
                                     <div className="doc-grid"><div>Is insurance cover all comprehensive, state if any fire or R.R.C burglary etc</div><div>{formatPrintValue(formData.insuranceComprehensive, formData.insuranceComprehensiveRemark)}</div></div>
-                                    <div className="doc-grid"><div>Are unpledged stocks, if any adequately insured</div><div>{formatPrintValue(formData.unpledgedInsured, formData.unpledgedInsuredRemark)}</div></div>
+                                    {formData.unpledgedStocks === 'Yes' && (
+                                        <div className="doc-grid"><div>Are unpledged stocks, if any adequately insured</div><div>{formatPrintValue(formData.unpledgedInsured, formData.unpledgedInsuredRemark)}</div></div>
+                                    )}
 
                                     <h2>IN ALL CASES</h2>
-                                    <div className="doc-grid"><div>Are bank’s signboards displayed? </div><div>{formData.signboardsDisplayed}</div></div>
+                                    <div className="doc-grid"><div>Are bank’s signboards displayed? </div><div>{formatPrintValue(formData.signboardsDisplayed, formData.signboardsDisplayedRemark)}</div></div>
                                     {formData.signboardsDisplayed === 'Yes' && (
                                         <div className="doc-grid"><div>"(State whether inside or outside, if not outside, state authority)	"</div><div>{formData.signboardsInsideOutside}</div></div>
                                     )}
@@ -808,7 +817,7 @@
                                     <div className="doc-grid"><div>Is record of inspection maintained?</div><div>{formatPrintValue(formData.recordMaintained, formData.recordMaintainedRemark)}</div></div>
 
                                     <h2>9. MOVEMENT OF STOCKS</h2>
-                                    <div className="doc-grid"><div>Is turnover in stocks satisfactory? </div><div>{formData.turnoverSatisfactory}</div></div>
+                                    <div className="doc-grid"><div>Is turnover in stocks satisfactory? </div><div>{formatPrintValue(formData.turnoverSatisfactory, formData.turnoverSatisfactoryRemark)}</div></div>
                                     <div className="doc-grid" style={{alignItems: 'start'}}><div>Is turnover in account satisfactory? 	</div><div>{formData.accountTurnoverSatisfactory}</div></div>
 
                                     <h2>10. CERTIFICATE TO BE GIVEN BY THE INSPECTING OFFICER CERTIFYING THAT</h2>
