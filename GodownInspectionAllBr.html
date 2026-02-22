@@ -95,7 +95,7 @@
             conditionOfStocks: { trigger: 'Not Satisfactory', field: 'conditionOfStocksRemark', label: 'Condition of Stocks', resp: 'Borrower', text: "Some stocks appear damaged/obsolete." },
             modeOfStorage: { trigger: 'Haphazard', field: 'modeOfStorageRemark', label: 'Mode of Storage', resp: 'Borrower', text: "Advised customer to arrange and stack goods properly." },
             modeOfValuationSatisfactory: { trigger: 'Not Satisfactory', field: 'valuationRemark', label: 'Valuation Mode', resp: 'Branch', text: "Valuation is not in line with current market rates." },
-            tradeDiscountDeducted: { trigger: 'No', field: 'tradeDiscountRemark', label: 'Trade Discount', resp: 'Branch', text: "Trade discount is not deducted from valuation." },
+            tradeDiscountDeducted: { trigger: 'No', field: 'tradeDiscountRemark', label: 'Trade Discount', resp: 'Borrower', text: "Trade discount is not deducted from valuation." },
             insuranceAdequate: { trigger: 'No', field: 'insuranceAdequateRemark', label: 'Insurance Adequacy', resp: 'Borrower', text: "Advised customer to increase insurance cover to match limit." },
             insuranceComprehensive: { trigger: 'No', field: 'insuranceComprehensiveRemark', label: 'Comprehensive Insurance', resp: 'Borrower', text: "Advised to obtain comprehensive insurance policy." },
             unpledgedInsured: { trigger: 'No', field: 'unpledgedInsuredRemark', label: 'Unpledged Stocks Insurance', resp: 'Borrower', text: "Unpledged stocks are currently uninsured." },
@@ -753,7 +753,7 @@
                                                 <div className="bg-slate-50 p-4 rounded border border-slate-200">
                                                     <h4 className="text-sm font-bold text-slate-800 mb-3 border-b pb-1">Valuation</h4>
                                                     {renderFieldWithRemark('Is the mode of Valuation Satisfactory', 'modeOfValuationSatisfactory', 'conditions', 'valuationRemark', 'Not Satisfactory')}
-                                                    {renderFieldWithRemark('Whether trade discount, if any, deducted?', 'tradeDiscountDeducted', 'yesNo', 'tradeDiscountRemark', 'No')}
+                                                    {renderFieldWithRemark('Whether trade discount, if any, deducted?', 'tradeDiscountDeducted', 'yesNo', 'tradeDiscountRemark', 'Yes')}
                                                     <div className="mb-4"><label className="block text-xs font-bold text-slate-600 mb-1">Unpledged stocks, if any stored?</label><select className="w-full border-slate-300 rounded px-3 py-2 border bg-white text-sm" value={formData.unpledgedStocks} onChange={e => handleSelectChange('unpledgedStocks', e.target.value)}>{DROPDOWNS.yesNo.map(opt => <option key={opt} value={opt}>{opt}</option>)}</select></div>
                                                 </div>
 
