@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asset Verification to Word Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { background-color: #f1f5f9; }
+        .form-section {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0;
+        }
+        .form-section h2 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .input-group { margin-bottom: 1rem; }
+        .input-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #475569;
+            margin-bottom: 0.25rem;
+        }
+        .form-input {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            transition: border-color 0.15s;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59,130,246,0.1);
+        }
+        .radio-group, .checkbox-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .radio-group label, .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            font-size: 0.875rem;
+            color: #334155;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="text-slate-800 font-sans pb-20">
+
+    <!-- Top Navigation -->
+    <nav class="bg-blue-800 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-2 cursor-pointer" onclick="showDashboard()">
+                <i data-lucide="file-check-2"></i>
+                <span class="font-bold text-lg">Verification Report Generator</span>
+            </div>
+            <button onclick="showDashboard()" class="bg-blue-700 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold shadow flex items-center gap-2 transition-colors">
+                <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                Dashboard
+            </button>
+        </div>
+    </nav>
+
+    <!-- Dashboard View -->
+    <div id="dashboardView" class="max-w-5xl mx-auto px-4 sm:px-6 mt-8">
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-800">Saved Reports</h1>
+                <p class="text-slate-500 text-sm mt-1">Manage, edit, print, or delete your saved verification reports.</p>
+            </div>
+            <button onclick="createNewReport()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-semibold shadow flex items-center gap-2 transition-transform transform hover:scale-105">
+                <i data-lucide="plus" class="w-5 h-5"></i> New Report
+            </button>
+        </div>
+        <div class="bg-white rounded-xl shadow border border-slate-200 overflow-hidden">
+            <div id="tableWrapper" class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-200">
+                    <thead class="bg-slate-50">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Date</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Applicant Name</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Branch</th>
+                            <th class="px-6 py-4 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportsTableBody" class="bg-white divide-y divide-slate-200">
+                        <!-- Dynamic Rows -->
+                    </tbody>
+                </table>
+            </div>
+            <div id="emptyState" class="p-12 text-center text-slate-500 hidden">
+                <i data-lucide="folder-open" class="w-12 h-12 mx-auto text-slate-300 mb-4"></i>
+                <p class="text-lg font-medium text-slate-600">No reports saved yet.</p>
+                <p class="text-sm mt-1">Click 'New Report' to start generating asset verifications.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form View -->
+    <div id="formView" class="max-w-5xl mx-auto px-4 sm:px-6 mt-8" style="display: none;">
+        <div class="flex items-center justify-between mb-6 bg-blue-50 p-4 rounded-lg border border-blue-100">
+            <p class="text-slate-600 flex gap-3">
+                <i data-lucide="info" class="text-blue-500 shrink-0"></i>
+                Fill out the required details below. You can save your progress or generate the Word document immediately.
+            </p>
+            <button onclick="showDashboard()" class="text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1 px-3 py-1 bg-white rounded shadow-sm border border-blue-200">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i> Back
+            </button>
+        </div>
+
+        <!-- Form Start -->
+        <form id="verificationForm" onsubmit="event.preventDefault();">
+            
+            <!-- Header Data -->
+            <div class="form-section grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="input-group">
+                    <label class="input-label">Branch Name</label>
+                    <input type="text" id="branch" class="form-input" placeholder="Enter branch name">
+                </div>
+            </div>
+
+            <!-- 1-3. Basic Info -->
+            <div class="form-section">
+                <h2><span class="bg-blue-100 text-blue-700 rounded-full w-6 h-6 flex items-center justify-center text-sm">1</span> Applicant & Visit Details</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6">
+                    <div class="input-group md:col-span-2">
+                        <label class="input-label">1. Name of the Applicant</label>
+                        <input type="text" id="applicant_name" class="form-input">
+                    </div>
+                    
+                    <div class="input-group md:col-span-2 border border-slate-200 p-4 rounded-lg bg-slate-50">
+                        <label class="input-label font-bold text-slate-700">2. Address of the place visited</label>
+                        <div class="radio-group mb-3">
+                            <label><input type="radio" name="address_type" value="Residence"> Residence</label>
+                            <label><input type="radio" name="address_type" value="Shop"> Shop</label>
+                            <label><input type="radio" name="address_type" value="Office"> Office</label>
+                        </div>
+                        <textarea id="address_text" class="form-input resize-none mb-3" rows="2" placeholder="Complete address..."></textarea>
+                        <div>
+                            <label class="input-label inline-block mr-2">Phone No:</label>
+                            <input type="text" id="phone" class="form-input inline-block w-auto">
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label">3. Date of Visit</label>
+                        <input type="date" id="visit_date" class="form-input">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. Sanction Details -->
+            <div class="form-section">
+                <h2><span class="bg-blue-100 text-blue-700 rounded-full w-6 h-6 flex items-center justify-center text-sm">4</span> Sanction Details</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="input-group">
+                        <label class="input-label">Amount of Loan</label>
+                        <input type="text" id="sanc_amount" class="form-input" placeholder="Rs.">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Date of Sanction</label>
+                        <input type="date" id="sanc_date" class="form-input">
+                    </div>
+                    <div class="input-group md:col-span-2">
+                        <label class="input-label">Purpose of Loan</label>
+                        <input type="text" id="sanc_purpose" class="form-input">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. Disbursement -->
+            <div class="form-section">
+                <h2><span class="bg-blue-100 text-blue-700 rounded-full w-6 h-6 flex items-center justify-center text-sm">5</span> Details of Last Disbursement</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="input-group">
+                        <label class="input-label">Amount (Rs.)</label>
+                        <input type="text" id="disb_amount" class="form-input">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Date</label>
+                        <input type="date" id="disb_date" class="form-input">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Mode</label>
+                        <input type="text" id="disb_mode" class="form-input">
+                    </div>
+                    <div class="input-group md:col-span-2">
+                        <label class="input-label">By Bankers Cheque / DD No.</label>
+                        <input type="text" id="disb_dd" class="form-input">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Favouring</label>
+                        <input type="text" id="disb_favouring" class="form-input">
+                    </div>
+                    <div class="input-group md:col-span-2">
+                        <label class="input-label">Present Outstanding Balance (Rs.)</label>
+                        <input type="text" id="disb_os" class="form-input bg-amber-50">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Overdues if any (Rs.)</label>
+                        <input type="text" id="disb_overdue" class="form-input bg-red-50">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. Invoice -->
+            <div class="form-section">
+                <h2><span class="bg-blue-100 text-blue-700 rounded-full w-6 h-6 flex items-center justify-center text-sm">6</span> Invoice & Stamp Receipt</h2>
+                <div class="input-group flex items-center gap-4 mb-4">
+                    <label class="input-label mb-0">Whether Invoice & Stamp Receipt Obtained?</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="invoice_obtained" value="YES"> YES</label>
+                        <label><input type="radio" name="invoice_obtained" value="NO"> NO</label>
+                    </div>
+                </div>
+                <div class="bg-slate-50 border border-slate-200 p-4 rounded-lg grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="col-span-full font-semibold text-sm text-slate-500">IF YES:</div>
+                    <div class="input-group">
+                        <label class="input-label">Invoice No.</label>
+                        <input type="text" id="inv_no" class="form-input">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Dated</label>
+                        <input type="date" id="inv_date" class="form-input">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Issued by</label>
+                        <input type="text" id="inv_issued" class="form-input">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Receipt No.</label>
+                        <input type="text" id="receipt_no" class="form-input">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Dated</label>
+                        <input type="date" id="receipt_date" class="form-input">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Asset Type Dropdown -->
+            <div class="form-section bg-indigo-50 border-indigo-100">
+                <h2><span class="bg-indigo-200 text-indigo-800 rounded-full w-6 h-6 flex items-center justify-center text-sm">✓</span> Select Verification Type</h2>
+                <div class="input-group mb-0">
+                    <label class="input-label font-bold text-indigo-900">Choose the asset type to fill relevant details:</label>
+                    <select id="asset_type" class="form-input border-indigo-300 bg-white" onchange="toggleAssetSections()">
+                        <option value="">-- Please Select --</option>
+                        <option value="goods">Section 7(a) - Purchase of Electric Goods / Furniture</option>
+                        <option value="vehicle">Section 7(b) - Vehicle (Car / Bike etc.)</option>
+                        <option value="housing">Section 8 - Housing Loan</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- 7(a). Goods Verification -->
+            <div id="section_goods" class="form-section" style="display: none;">
+                <h2><span class="bg-blue-100 text-blue-700 rounded-full w-6 h-6 flex items-center justify-center text-sm">7a</span> Details of Goods / Furniture Purchased</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="input-group md:col-span-2">
+                        <label class="input-label">Description</label>
+                        <input type="text" id="good_desc" class="form-input">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Make / Model No.</label>
+                        <input type="text" id="good_make" class="form-input">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Colour</label>
+                        <input type="text" id="good_colour" class="form-input">
+                    </div>
+                    <div class="input-group md:col-span-2">
+                        <label class="input-label">Manufactured by</label>
+                        <input type="text" id="good_mfg" class="form-input">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 7(b). Vehicle -->
+            <div id="section_vehicle" class="form-section" style="display: none;">
+                <h2><span class="bg-blue-100 text-blue-700 rounded-full w-6 h-6 flex items-center justify-center text-sm">7b</span> In case of Vehicle</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="input-group md:col-span-2">
+                        <label class="input-label">Type of Vehicle</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="veh_type" value="Scooter"> Scooter</label>
+                            <label><input type="radio" name="veh_type" value="Moped"> Moped</label>
+                            <label><input type="radio" name="veh_type" value="M-Cycle"> M-Cycle</label>
+                            <label><input type="radio" name="veh_type" value="Car"> Car</label>
+                        </div>
+                    </div>
+                    <div class="input-group md:col-span-2">
+                        <label class="input-label">Make / Model No.</label>
+                        <input type="text" id="veh_make" class="form-input">
+                    </div>
+                    
+                    <div class="col-span-full grid grid-cols-1 md:grid-cols-2 gap-4 bg-amber-50/50 p-3 rounded border border-amber-100">
+                        <div>
+                            <label class="input-label text-amber-800">Engine No. (verify from vehicle)</label>
+                            <input type="text" id="veh_engine" class="form-input">
+                        </div>
+                        <div>
+                            <label class="input-label text-amber-800">Chassis No. (verify from vehicle)</label>
+                            <input type="text" id="veh_chassis" class="form-input">
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label">Colour of vehicle</label>
+                        <input type="text" id="veh_colour" class="form-input">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Registration No.</label>
+                        <input type="text" id="veh_reg" class="form-input">
+                    </div>
+                    <div class="input-group md:col-span-2">
+                        <label class="input-label">Condition of Vehicle</label>
+                        <input type="text" id="veh_cond" class="form-input">
+                    </div>
+                    
+                    <!-- Checkboxes -->
+                    <div class="input-group flex justify-between items-center bg-slate-50 p-3 rounded">
+                        <label class="input-label mb-0">Blank TTO forms obtained</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="veh_tto" value="YES"> YES</label>
+                            <label><input type="radio" name="veh_tto" value="NO"> NO</label>
+                        </div>
+                    </div>
+                    <div class="input-group flex justify-between items-center bg-slate-50 p-3 rounded">
+                        <label class="input-label mb-0">Bank's Lien Noted in RC Book with RTO</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="veh_lien" value="YES"> YES</label>
+                            <label><input type="radio" name="veh_lien" value="NO"> NO</label>
+                        </div>
+                    </div>
+                    <div class="input-group md:col-span-2 bg-slate-50 p-3 rounded flex flex-wrap gap-4 items-center">
+                        <label class="input-label mb-0">Vehicle brought to Branch for Inspection?</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="veh_insp" value="Yes"> Yes</label>
+                            <label><input type="radio" name="veh_insp" value="No"> No</label>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <label class="input-label mb-0">If Yes, date:</label>
+                            <input type="date" id="veh_insp_date" class="form-input w-auto">
+                        </div>
+                    </div>
+
+                    <!-- Insurance -->
+                    <div class="md:col-span-2 border border-blue-200 bg-blue-50/30 p-4 rounded-lg mt-2">
+                        <h4 class="font-bold text-slate-700 mb-3 text-sm uppercase">Insurance Details</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="input-group">
+                                <label class="input-label">Name of Insurance Co.</label>
+                                <input type="text" id="ins_name" class="form-input">
+                            </div>
+                            <div class="input-group">
+                                <label class="input-label">Valid upto</label>
+                                <input type="date" id="ins_valid" class="form-input">
+                            </div>
+                            <div class="input-group flex justify-between items-center">
+                                <label class="input-label mb-0">Bank's clause appearing?</label>
+                                <div class="radio-group">
+                                    <label><input type="radio" name="ins_clause" value="Yes"> Yes</label>
+                                    <label><input type="radio" name="ins_clause" value="No"> No</label>
+                                </div>
+                            </div>
+                            <div class="input-group flex justify-between items-center">
+                                <label class="input-label mb-0">Under comprehensive?</label>
+                                <div class="radio-group">
+                                    <label><input type="radio" name="ins_comp" value="Yes"> Yes</label>
+                                    <label><input type="radio" name="ins_comp" value="No"> No</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 8. Housing Loan -->
+            <div id="section_housing" class="form-section" style="display: none;">
+                <h2><span class="bg-blue-100 text-blue-700 rounded-full w-6 h-6 flex items-center justify-center text-sm">8</span> In case of Housing Loan</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="input-group md:col-span-2 mb-4">
+                        <label class="input-label font-bold text-slate-700 mb-2">Loan availed for (✓)</label>
+                        <div class="checkbox-group grid grid-cols-2 md:grid-cols-3 gap-2">
+                            <label><input type="checkbox" id="hl_land"> Purchase of Land</label>
+                            <label><input type="checkbox" id="hl_flat"> Ready Flat</label>
+                            <label><input type="checkbox" id="hl_old"> Old House</label>
+                            <label><input type="checkbox" id="hl_repair"> Repairs & Renovation</label>
+                            <label><input type="checkbox" id="hl_takeover"> Take over from other bank</label>
+                            <label><input type="checkbox" id="hl_const"> Construction of house</label>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group md:col-span-2">
+                        <label class="input-label">Location / address of Property</label>
+                        <textarea id="hl_loc" class="form-input resize-none" rows="2"></textarea>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Present Status / Stage of Construction</label>
+                        <input type="text" id="hl_stage" class="form-input">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Status of Occupation</label>
+                        <div class="radio-group mt-2">
+                            <label><input type="radio" name="hl_occ" value="Self Occupied"> Self Occupied</label>
+                            <label><input type="radio" name="hl_occ" value="Rented Out"> Rented Out</label>
+                            <label><input type="radio" name="hl_occ" value="Vacant"> Vacant</label>
+                        </div>
+                    </div>
+                    <div class="input-group md:col-span-2">
+                        <label class="input-label">Value as per valuation report / approx. exp incurrent on repairs</label>
+                        <input type="text" id="hl_val" class="form-input">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Date of last valuation</label>
+                        <input type="date" id="hl_val_date" class="form-input">
+                    </div>
+                    
+                    <div class="input-group md:col-span-2 bg-slate-50 p-4 rounded-lg flex flex-wrap gap-4 items-center justify-between border border-slate-200 mt-2">
+                        <label class="input-label mb-0 w-full md:w-auto">Insurance taken under Uni-Home Care / Suraksha Bima Policy?</label>
+                        <div class="flex items-center gap-6">
+                            <div class="radio-group">
+                                <label><input type="radio" name="hl_ins" value="Yes"> Yes</label>
+                                <label><input type="radio" name="hl_ins" value="No"> No</label>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <label class="input-label mb-0">If Yes, date:</label>
+                                <input type="date" id="hl_ins_date" class="form-input w-auto">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 9-10. Final Details & Sign-off -->
+            <div class="form-section">
+                <h2><span class="bg-blue-100 text-blue-700 rounded-full w-6 h-6 flex items-center justify-center text-sm">9</span> Documents & Comments</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div class="input-group">
+                        <label class="input-label">9. Date of Documents (Last LAD obtained on)</label>
+                        <input type="date" id="doc_lad" class="form-input">
+                    </div>
+                </div>
+
+                <div class="input-group mb-6">
+                    <label class="input-label">10. Comments of visiting officer</label>
+                    <textarea id="comments" class="form-input resize-none" rows="4"></textarea>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 pt-6 border-t border-slate-200">
+                    <div>
+                        <div class="input-group">
+                            <label class="input-label">Place</label>
+                            <input type="text" id="sign_place" class="form-input">
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">Date</label>
+                            <input type="date" id="sign_date" class="form-input">
+                        </div>
+                    </div>
+                    <div>
+                        <div class="input-group">
+                            <label class="input-label">Name of Official</label>
+                            <input type="text" id="sign_name" class="form-input">
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">Designation</label>
+                            <input type="text" id="sign_desig" class="form-input">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-10 bg-white p-4 rounded-xl shadow border border-slate-200">
+                <button type="button" onclick="showDashboard()" class="w-full sm:w-auto text-slate-600 hover:text-slate-800 font-medium py-2.5 px-6 rounded-lg border border-slate-300 hover:bg-slate-50 transition-colors">
+                    Cancel
+                </button>
+                <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                    <button type="button" onclick="saveForm()" class="w-full sm:w-auto bg-teal-600 hover:bg-teal-700 text-white font-bold py-2.5 px-6 rounded-lg shadow flex items-center justify-center gap-2 transition-transform transform hover:scale-105">
+                        <i data-lucide="save" class="w-5 h-5"></i>
+                        Save Data
+                    </button>
+                    <button type="button" onclick="generateWord()" class="w-full sm:w-auto bg-blue-700 hover:bg-blue-800 text-white font-bold py-2.5 px-6 rounded-lg shadow flex items-center justify-center gap-2 transition-transform transform hover:scale-105">
+                        <i data-lucide="download" class="w-5 h-5"></i>
+                        Export to MS Word
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- JS LOGIC TO GENERATE EXACT WORD FILE -->
+    <script>
+        lucide.createIcons();
+
+        // --- Data Management Logic ---
+        const STORAGE_KEY = 'asset_verification_reports';
+        let currentReportId = null;
+
+        function getSavedReports() {
+            return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+        }
+
+        function saveReportsToLocal(reports) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(reports));
+        }
+
+        // --- View Navigation ---
+        function showDashboard() {
+            document.getElementById('dashboardView').style.display = 'block';
+            document.getElementById('formView').style.display = 'none';
+            renderDashboard();
+            window.scrollTo(0, 0);
+        }
+
+        function showForm() {
+            document.getElementById('dashboardView').style.display = 'none';
+            document.getElementById('formView').style.display = 'block';
+            window.scrollTo(0, 0);
+        }
+
+        function createNewReport() {
+            currentReportId = null;
+            document.getElementById('verificationForm').reset();
+            toggleAssetSections(); // Reset dropdown sections
+            showForm();
+        }
+
+        // --- Dashboard Rendering ---
+        function renderDashboard() {
+            const reports = getSavedReports();
+            const tbody = document.getElementById('reportsTableBody');
+            const emptyState = document.getElementById('emptyState');
+            const table = document.getElementById('tableWrapper');
+
+            tbody.innerHTML = '';
+
+            if (reports.length === 0) {
+                emptyState.style.display = 'block';
+                table.style.display = 'none';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            table.style.display = 'block';
+
+            // Sort by most recent first
+            reports.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+            reports.forEach(report => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 transition-colors';
+                
+                // Format Date safely
+                let dateDisplay = 'N/A';
+                if(report.createdAt) {
+                    const d = new Date(report.createdAt);
+                    dateDisplay = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                }
+
+                tr.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">${dateDisplay}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">${report.applicant_name || '<em>Unnamed</em>'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">${report.branch || '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <div class="flex items-center justify-end gap-3">
+                            <button onclick="editReport('${report.id}')" class="text-blue-600 hover:text-blue-900 flex items-center gap-1" title="Edit">
+                                <i data-lucide="edit" class="w-4 h-4"></i> Edit
+                            </button>
+                            <button onclick="downloadReport('${report.id}')" class="text-teal-600 hover:text-teal-900 flex items-center gap-1" title="Download Word">
+                                <i data-lucide="download" class="w-4 h-4"></i> Print/Word
+                            </button>
+                            <button onclick="deleteReport('${report.id}')" class="text-red-600 hover:text-red-900 flex items-center gap-1" title="Delete">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i> Delete
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+            lucide.createIcons();
+        }
+
+        // --- CRUD Operations ---
+        function collectFormData() {
+            const form = document.getElementById('verificationForm');
+            const elements = form.elements;
+            const data = {};
+
+            for (let el of elements) {
+                if (el.type === 'radio') {
+                    if (el.checked) data[el.name] = el.value;
+                } else if (el.type === 'checkbox') {
+                    if (el.id) data[el.id] = el.checked;
+                } else if (el.id) {
+                    data[el.id] = el.value;
+                }
+            }
+            return data;
+        }
+
+        function populateForm(data) {
+            const form = document.getElementById('verificationForm');
+            form.reset();
+
+            for (let key in data) {
+                const el = document.getElementById(key);
+                if (el) {
+                    if (el.type === 'checkbox') {
+                        el.checked = data[key];
+                    } else {
+                        el.value = data[key];
+                    }
+                } else {
+                    // It might be a radio button group
+                    const radios = document.getElementsByName(key);
+                    for (let r of radios) {
+                        if (r.value === data[key]) {
+                            r.checked = true;
+                        }
+                    }
+                }
+            }
+            toggleAssetSections(); // Ensure the UI reflects the loaded asset type
+        }
+
+        function saveForm() {
+            const data = collectFormData();
+            const reports = getSavedReports();
+
+            if (!currentReportId) {
+                // Create new
+                data.id = 'report_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                data.createdAt = new Date().toISOString();
+                reports.push(data);
+            } else {
+                // Update existing
+                const index = reports.findIndex(r => r.id === currentReportId);
+                if (index > -1) {
+                    data.id = currentReportId;
+                    data.createdAt = reports[index].createdAt;
+                    data.updatedAt = new Date().toISOString();
+                    reports[index] = data;
+                }
+            }
+
+            saveReportsToLocal(reports);
+            showDashboard();
+        }
+
+        function editReport(id) {
+            const reports = getSavedReports();
+            const report = reports.find(r => r.id === id);
+            if (report) {
+                currentReportId = report.id;
+                populateForm(report);
+                showForm();
+            }
+        }
+
+        function deleteReport(id) {
+            if (confirm("Are you sure you want to delete this report? This action cannot be undone.")) {
+                let reports = getSavedReports();
+                reports = reports.filter(r => r.id !== id);
+                saveReportsToLocal(reports);
+                renderDashboard();
+            }
+        }
+
+        function downloadReport(id) {
+            // Temporarily load it to use the existing export logic, then return to dashboard
+            const reports = getSavedReports();
+            const report = reports.find(r => r.id === id);
+            if (report) {
+                populateForm(report);
+                generateWord();
+                document.getElementById('verificationForm').reset();
+            }
+        }
+
+        // Initialize App to Dashboard on load
+        window.addEventListener('DOMContentLoaded', () => {
+            showDashboard();
+        });
+
+        // Asset Selection Logic
+        function toggleAssetSections() {
+            const type = document.getElementById('asset_type').value;
+            document.getElementById('section_goods').style.display = type === 'goods' ? 'block' : 'none';
+            document.getElementById('section_vehicle').style.display = type === 'vehicle' ? 'block' : 'none';
+            document.getElementById('section_housing').style.display = type === 'housing' ? 'block' : 'none';
+        }
+
+        // Helper to format dates to DD-MM-YYYY
+        function fmtDate(val) {
+            if(!val) return "________________";
+            const [y,m,d] = val.split('-');
+            return `${d}-${m}-${y}`;
+        }
+        
+        // Helper to get selected radio value
+        function getRadio(name) {
+            const el = document.querySelector(`input[name="${name}"]:checked`);
+            return el ? el.value : "________";
+        }
+        
+        // Helper to get normal text value safely
+        function getVal(id) {
+            const val = document.getElementById(id).value.trim();
+            return val ? val : "________________";
+        }
+        
+        // Checkbox symbol helper for MS Word rendering (utf-8 boxes)
+        function getCbSymbol(id) {
+            return document.getElementById(id).checked ? '&#9745;' : '&#9744;';
+        }
+
+        // Logic to construct MS Word File
+        function generateWord() {
+            // Data Mapping
+            const branch = getVal('branch');
+            const applicant = getVal('applicant_name');
+            
+            const addrType = getRadio('address_type');
+            const isRes = addrType === 'Residence' ? '&#9745;' : '&#9744;';
+            const isShop = addrType === 'Shop' ? '&#9745;' : '&#9744;';
+            const isOff = addrType === 'Office' ? '&#9745;' : '&#9744;';
+            const addressText = document.getElementById('address_text').value.replace(/\n/g, '<br>');
+            const phone = getVal('phone');
+            const visitDate = fmtDate(document.getElementById('visit_date').value);
+            
+            const sAmt = getVal('sanc_amount');
+            const sDate = fmtDate(document.getElementById('sanc_date').value);
+            const sPur = getVal('sanc_purpose');
+            
+            const dAmt = getVal('disb_amount');
+            const dDate = fmtDate(document.getElementById('disb_date').value);
+            const dMode = getVal('disb_mode');
+            const dDD = getVal('disb_dd');
+            const dFav = getVal('disb_favouring');
+            const dOS = getVal('disb_os');
+            const dOD = getVal('disb_overdue');
+
+            const invObtained = getRadio('invoice_obtained');
+            const invNo = getVal('inv_no');
+            const invDate = fmtDate(document.getElementById('inv_date').value);
+            const invIssued = getVal('inv_issued');
+            const recNo = getVal('receipt_no');
+            const recDate = fmtDate(document.getElementById('receipt_date').value);
+
+            const gDesc = getVal('good_desc');
+            const gMake = getVal('good_make');
+            const gCol = getVal('good_colour');
+            const gMfg = getVal('good_mfg');
+
+            const vType = getRadio('veh_type');
+            const vMake = getVal('veh_make');
+            const vEng = getVal('veh_engine');
+            const vChas = getVal('veh_chassis');
+            const vCol = getVal('veh_colour');
+            const vReg = getVal('veh_reg');
+            const vCond = getVal('veh_cond');
+            const vTto = getRadio('veh_tto');
+            const vLien = getRadio('veh_lien');
+            const vInsp = getRadio('veh_insp');
+            const vInspD = fmtDate(document.getElementById('veh_insp_date').value);
+            
+            const insName = getVal('ins_name');
+            const insVal = fmtDate(document.getElementById('ins_valid').value);
+            const insCl = getRadio('ins_clause');
+            const insComp = getRadio('ins_comp');
+
+            const occType = getRadio('hl_occ');
+
+            const hLoc = document.getElementById('hl_loc').value.replace(/\n/g, '<br>') || "________________________";
+            const hStage = getVal('hl_stage');
+            const hVal = getVal('hl_val');
+            const hValD = fmtDate(document.getElementById('hl_val_date').value);
+            const hIns = getRadio('hl_ins');
+            const hInsD = fmtDate(document.getElementById('hl_ins_date').value);
+
+            const docLAD = fmtDate(document.getElementById('doc_lad').value);
+            const comments = document.getElementById('comments').value.replace(/\n/g, '<br><br>') || "<br><br><br><br><br>";
+
+            const place = getVal('sign_place');
+            const dateStr = fmtDate(document.getElementById('sign_date').value);
+            const name = getVal('sign_name');
+            const desig = getVal('sign_desig');
+
+            // Construct Word HTML using exact PDF styling attributes
+            const wordHTML = `
+            <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+            <head><meta charset='utf-8'><title>Periodic Asset Verification Report</title>
+            <style>
+                body { font-family: Arial, sans-serif; font-size: 11pt; color: #000; }
+                table { border-collapse: collapse; }
+                td { padding: 4px; vertical-align: top; }
+            </style>
+            </head>
+            <body>
+                <table width="100%" border="0">
+                    <tr>
+                        <td align="left"><b>Annexure 10:</b></td>
+                        <td align="right"><b>BRANCH:</b> ${branch}</td>
+                    </tr>
+                </table>
+                <h3 align="center" style="text-decoration: underline; font-size: 13pt; margin-bottom: 20px;">
+                    PERIODIC ASSET VERIFICATION REPORT (POST DISBURSEMENT)<br>
+                    -IN CASE OF RETAIL LOANS
+                </h3>
+
+                <!-- Main Layout Table identical to PDF -->
+                <table width="100%" border="1">
+                    <tr>
+                        <td width="5%" align="center"><b>1.</b></td>
+                        <td width="35%">Name of the Applicant</td>
+                        <td width="60%"><b>${applicant}</b></td>
+                    </tr>
+                    <tr>
+                        <td align="center"><b>2.</b></td>
+                        <td>Address of the place visited<br>:Residence /shop/office</td>
+                        <td>
+                            ${isRes} Residence &nbsp;&nbsp; ${isShop} Shop &nbsp;&nbsp; ${isOff} Office<br><br>
+                            ${addressText}<br><br>
+                            Phone No. ${phone}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="center"><b>3.</b></td>
+                        <td>Date of visit</td>
+                        <td>: ${visitDate}</td>
+                    </tr>
+                    <tr>
+                        <td align="center"><b>4.</b></td>
+                        <td>Sanction Details</td>
+                        <td>
+                            <table width="100%" border="0">
+                                <tr>
+                                    <td width="50%">Amount of Loan : ${sAmt}</td>
+                                    <td width="50%">Date of Sanction : ${sDate}</td>
+                                </tr>
+                                <tr><td colspan="2">Purpose of Loan : ${sPur}</td></tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="center"><b>5.</b></td>
+                        <td>Details of last Disbursement</td>
+                        <td>
+                            <table width="100%" border="0">
+                                <tr>
+                                    <td>Rs. ${dAmt}</td>
+                                    <td>Date: ${dDate}</td>
+                                    <td>Mode : ${dMode}</td>
+                                </tr>
+                                <tr><td colspan="3"><br>By Bankers Cheque / DD No. ${dDD} Favouring ${dFav}</td></tr>
+                                <tr><td colspan="3"><br>Present outstanding balance Rs. ${dOS} (with over dues if any Rs. ${dOD})</td></tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="center"><b>6.</b></td>
+                        <td>Whether Invoice & Stamp Receipt Obtained?</td>
+                        <td>
+                            YES/NO : ${invObtained}
+                            <br><br><b>IF YES:</b><br>
+                            <table width="100%" border="0">
+                                <tr>
+                                    <td>Invoice No. ${invNo}</td>
+                                    <td>Dated. ${invDate}</td>
+                                    <td>Issued by ${invIssued}</td>
+                                </tr>
+                                <tr><td colspan="3"><br>Receipt No. ${recNo} Dated ${recDate}</td></tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="center"><b>7.</b></td>
+                        <td colspan="2"><b>Details of Goods / Articles / Furniture Purchased & Physically verified</b></td>
+                    </tr>
+                    <tr>
+                        <td align="center" style="border-top: none;"></td>
+                        <td>(a) Description</td>
+                        <td>
+                            ${gDesc}<br><br>
+                            <table width="100%" border="0">
+                                <tr>
+                                    <td width="50%">Make / Model No. ${gMake}</td>
+                                    <td width="50%">Colour ${gCol}</td>
+                                </tr>
+                                <tr><td colspan="2"><br>Manufactured by ${gMfg}</td></tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="center" style="border-top: none;"></td>
+                        <td>(b) In case of Vehicle</td>
+                        <td>
+                            <table width="100%" border="0" cellpadding="2">
+                                <tr><td colspan="2">Type of Vehicle -Scooter / Moped/M-Cycle/Car: <b>${vType}</b></td></tr>
+                                <tr><td colspan="2">Make / Model No. <b>${vMake}</b></td></tr>
+                                <tr>
+                                    <td width="60%">Engine No. ${vEng}<br>Chasis No. ${vChas}</td>
+                                    <td width="40%" valign="middle"><i>(to be verified from the vehicle)</i></td>
+                                </tr>
+                                <tr>
+                                    <td>Colour of the vehicle: ${vCol}</td>
+                                    <td>Registration No: ${vReg}</td>
+                                </tr>
+                                <tr><td colspan="2">Condition of Vehicle: ${vCond}</td></tr>
+                                <tr><td colspan="2">Blank TTO forms obtained YES/NO: <b>${vTto}</b></td></tr>
+                                <tr><td colspan="2">Whether Bank's Lien Noted in RC Book with RTO YES/NO: <b>${vLien}</b></td></tr>
+                                <tr><td colspan="2">Was the Vehicle brought to Branch for Inspection Yes / No. If Yes, give date: <b>${vInsp}</b>, ${vInspD}</td></tr>
+                            </table>
+                            <br>
+                            <table width="100%" border="1" cellpadding="4">
+                                <tr>
+                                    <td>
+                                        <b>Insurance</b><br>
+                                        Name of Insurance Co.: ${insName}<br>
+                                        Valid upto: ${insVal}<br>
+                                        Whether Bank's clause is appearing in Insurance Policy: Yes/No <b>${insCl}</b><br>
+                                        Under comprehensive: Yes/No <b>${insComp}</b>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="center"><b>8.</b></td>
+                        <td>In case of Housing Loan:</td>
+                        <td>
+                            Loan availed for (&radic;)<br>
+                            ${getCbSymbol('hl_land')} Purchase of Land &nbsp;&nbsp; 
+                            ${getCbSymbol('hl_flat')} Ready Flat &nbsp;&nbsp; 
+                            ${getCbSymbol('hl_old')} Old House<br>
+                            ${getCbSymbol('hl_repair')} Repairs & Renovation &nbsp;&nbsp; 
+                            ${getCbSymbol('hl_takeover')} Take over from other bank &nbsp;&nbsp; 
+                            ${getCbSymbol('hl_const')} Construction of house
+                            <br><br>
+                            <table width="100%" border="0">
+                                <tr>
+                                    <td width="40%">Location / address of the Property</td>
+                                    <td width="60%">${hLoc}</td>
+                                </tr>
+                                <tr>
+                                    <td><br>Present Status/ Stage of Construction</td>
+                                    <td><br>${hStage}</td>
+                                </tr>
+                                <tr>
+                                    <td><br>Status of Occupation (&radic;)</td>
+                                    <td><br>
+                                        ${occType === 'Self Occupied' ? '&#9745;' : '&#9744;'} Self Occupied &nbsp;
+                                        ${occType === 'Rented Out' ? '&#9745;' : '&#9744;'} Rented Out &nbsp;
+                                        ${occType === 'Vacant' ? '&#9745;' : '&#9744;'} Vacant
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><br>Value as per valuation report/approx. exp incurrent on repairs/renovation</td>
+                                    <td><br>${hVal}</td>
+                                </tr>
+                                <tr>
+                                    <td><br>Date of last valuation</td>
+                                    <td><br>${hValD}</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2"><br>Whether Insurance taken under Uni-Home Care Policy/NIC-Baroda Home Loan Suraksha Bima Policy Yes / No: <b>${hIns}</b> &nbsp;&nbsp; If Yes. date <b>${hInsD}</b></td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="center"><b>9.</b></td>
+                        <td>Date of Documents</td>
+                        <td>Last LAD obtained on ${docLAD}</td>
+                    </tr>
+                    <tr>
+                        <td align="center"><b>10.</b></td>
+                        <td colspan="2">Comments of visiting officer:<br><br>${comments}</td>
+                    </tr>
+                </table>
+
+                <br><br>
+                <table width="100%" border="0">
+                    <tr>
+                        <td width="50%" valign="bottom">
+                            Place: ${place}<br><br>
+                            Date: ${dateStr}
+                        </td>
+                        <td width="50%" align="right" valign="bottom">
+                            <b>(Signature of Bank's Official)</b><br><br><br>
+                            NAME: ${name}<br><br>
+                            DESIGNATION: ${desig}
+                        </td>
+                    </tr>
+                </table>
+            </body>
+            </html>`;
+
+            // Trigger Download
+            const source = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(wordHTML);
+            const fileDownload = document.createElement("a");
+            document.body.appendChild(fileDownload);
+            fileDownload.href = source;
+            const fileName = applicant !== "________________" ? `Verification_Report_${applicant.replace(/\s+/g, '_')}.doc` : 'Asset_Verification_Report.doc';
+            fileDownload.download = fileName;
+            fileDownload.click();
+            document.body.removeChild(fileDownload);
+        }
+    </script>
+</body>
+</html>
