@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MSME Credit Proposal Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root {
+  --navy:#0C1A2E; --navy2:#1E3358; --gold:#C9933A; --gold2:#E8B864;
+  --gold-pale:#FAF3E8; --g50:#F8F9FC; --g100:#EFF1F6; --g200:#DDE1EC;
+  --g400:#9099B0; --g600:#5A6480; --g800:#2D3555;
+  --green:#1A7A5C; --greenL:#E6F5F0; --red:#B83232; --redL:#FDEAEA;
+  --amber:#C97B20; --amberL:#FFF4E0;
+  --sw:280px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:var(--g50);color:var(--g800);display:flex;min-height:100vh;overflow-x:hidden}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* SIDEBAR */
+#sb{width:var(--sw);min-height:100vh;background:var(--navy);display:flex;flex-direction:column;position:fixed;left:0;top:0;z-index:100;overflow-y:auto}
+.sb-logo{padding:26px 22px 18px;border-bottom:1px solid rgba(255,255,255,.07)}
+.sb-bank{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:700;color:var(--gold2)}
+.sb-sub{font-size:10px;color:rgba(255,255,255,.4);margin-top:3px;text-transform:uppercase;letter-spacing:1px}
+.sb-prog{padding:14px 22px;border-bottom:1px solid rgba(255,255,255,.07)}
+.prog-lbl{font-size:10px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.8px;display:flex;justify-content:space-between;margin-bottom:7px}
+.prog-bar{height:3px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width .4s}
+.steps-nav{padding:10px 0;flex:1}
+.si{display:flex;align-items:flex-start;gap:11px;padding:9px 22px;cursor:pointer;transition:background .2s;border-left:3px solid transparent}
+.si:hover{background:rgba(255,255,255,.04)}
+.si.active{background:rgba(201,147,58,.12);border-left-color:var(--gold)}
+.si.done{border-left-color:var(--green)}
+.snum{width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:rgba(255,255,255,.45);flex-shrink:0}
+.si.active .snum{background:var(--gold);border-color:var(--gold);color:var(--navy)}
+.si.done .snum{background:var(--green);border-color:var(--green);color:#fff}
+.stitle{font-size:12px;font-weight:500;color:rgba(255,255,255,.55);line-height:1.3}
+.si.active .stitle{color:var(--gold2);font-weight:600}
+.si.done .stitle{color:rgba(255,255,255,.65)}
+.ssub{font-size:10px;color:rgba(255,255,255,.28);margin-top:1px}
+.sb-foot{padding:14px 22px;border-top:1px solid rgba(255,255,255,.07);font-size:10.5px;color:rgba(255,255,255,.2);line-height:1.6}
+
+/* MAIN */
+#main{margin-left:var(--sw);flex:1;display:flex;flex-direction:column}
+.topbar{background:#fff;border-bottom:1px solid var(--g200);padding:13px 38px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:0 1px 4px rgba(12,26,46,.07)}
+.topbar-title{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:700;color:var(--navy)}
+.sc{padding:32px 38px;max-width:1060px;width:100%;margin:0 auto;flex:1}
+.sh{margin-bottom:26px}
+.sbadge{display:inline-flex;align-items:center;background:var(--gold-pale);border:1px solid rgba(201,147,58,.3);color:var(--amber);font-size:11px;font-weight:600;letter-spacing:.7px;text-transform:uppercase;padding:3px 10px;border-radius:20px;margin-bottom:8px}
+.sh h1{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:700;color:var(--navy)}
+.sh p{margin-top:6px;font-size:13.5px;color:var(--g600);line-height:1.6;max-width:600px}
+
+/* CARDS */
+.card{background:#fff;border:1px solid var(--g200);border-radius:10px;padding:22px;margin-bottom:18px;box-shadow:0 1px 3px rgba(12,26,46,.07)}
+.ct{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:700;color:var(--navy);display:flex;align-items:center;gap:8px;margin-bottom:3px}
+.ct .ico{width:26px;height:26px;background:var(--gold-pale);border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:13px}
+.cs{font-size:12.5px;color:var(--g400);margin-bottom:16px}
+.cdiv{height:1px;background:var(--g100);margin:16px 0}
+
+/* UPLOAD */
+.uz{border:2px dashed var(--g200);border-radius:8px;padding:26px 18px;text-align:center;cursor:pointer;transition:all .2s;background:var(--g50);position:relative}
+.uz:hover,.uz.drag{border-color:var(--gold);background:var(--gold-pale)}
+.uz input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.uz h4{font-size:13.5px;font-weight:600;color:var(--g800);margin-bottom:3px}
+.uz p{font-size:12px;color:var(--g400)}
+.ftags{margin-top:9px;display:flex;gap:5px;justify-content:center;flex-wrap:wrap}
+.ftag{background:#fff;border:1px solid var(--g200);border-radius:4px;padding:2px 7px;font-size:10px;font-weight:600;color:var(--g600)}
+.flist{margin-top:12px;display:flex;flex-direction:column;gap:7px}
+.fi{display:flex;align-items:center;gap:9px;padding:9px 13px;background:#fff;border:1px solid var(--g200);border-radius:7px;font-size:13px}
+.fi .fn{flex:1;color:var(--g800);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fi .fsz{font-size:11px;color:var(--g400)}
+.fst{font-size:11px;font-weight:600;padding:2px 7px;border-radius:4px}
+.fst.pending{background:var(--amberL);color:var(--amber)}
+.fst.processing{background:var(--gold-pale);color:var(--gold)}
+.fst.done{background:var(--greenL);color:var(--green)}
+.fst.error{background:var(--redL);color:var(--red)}
+.frm{width:20px;height:20px;border-radius:50%;background:var(--g100);border:none;cursor:pointer;font-size:11px;color:var(--g600);display:flex;align-items:center;justify-content:center}
+.frm:hover{background:var(--redL);color:var(--red)}
+
+/* FORMS */
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.fg.c3{grid-template-columns:1fr 1fr 1fr}
+.fg.c1{grid-template-columns:1fr}
+.fgrp{display:flex;flex-direction:column;gap:5px}
+.fgrp.s2{grid-column:span 2}
+.fgrp.s3{grid-column:span 3}
+label{font-size:11.5px;font-weight:600;color:var(--g600);text-transform:uppercase;letter-spacing:.3px}
+label .req{color:var(--red);margin-left:2px}
+input[type=text],input[type=number],input[type=date],select,textarea{border:1.5px solid var(--g200);border-radius:7px;padding:8px 11px;font-size:13px;font-family:'Outfit',sans-serif;color:var(--g800);background:#fff;transition:border-color .15s;width:100%}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,147,58,.1)}
+input.ex{background:#F0FBF5;border-color:#A3D9C3}
+textarea{resize:vertical;min-height:76px}
+select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 11 11'%3E%3Cpath fill='%235A6480' d='M5.5 7L1 2.5h9z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;padding-right:30px}
+.hint{font-size:11px;color:var(--g400);margin-top:2px}
+
+/* DYNAMIC ROWS */
+.drow{display:grid;gap:11px;align-items:start;padding:14px;background:var(--g50);border:1px solid var(--g200);border-radius:8px;margin-bottom:9px;position:relative}
+.drow .drm{position:absolute;top:9px;right:9px;background:var(--redL);border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:12px;color:var(--red);display:flex;align-items:center;justify-content:center}
+.addbtn{display:inline-flex;align-items:center;gap:5px;background:transparent;border:1.5px dashed var(--gold);color:var(--gold);padding:7px 14px;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;transition:all .2s;margin-top:7px;font-family:'Outfit',sans-serif}
+.addbtn:hover{background:var(--gold-pale)}
+
+/* FIN TABLE */
+.ftw{overflow-x:auto;margin-top:7px}
+.ftbl{width:100%;border-collapse:collapse;font-size:12px}
+.ftbl th{background:var(--navy);color:#fff;padding:9px 11px;text-align:center;font-weight:600;font-size:11px;white-space:nowrap}
+.ftbl th.rh{text-align:left;background:#152240;min-width:175px}
+.ftbl td{padding:7px 9px;border:1px solid var(--g200);text-align:center}
+.ftbl td.rh{text-align:left;font-weight:500;background:var(--g50);color:var(--g800);border-left:3px solid var(--gold)}
+.ftbl td.sh{background:var(--navy2);color:#fff;font-weight:700;font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;text-align:left;padding-left:11px}
+.ftbl input{border:none;background:transparent;width:100%;text-align:center;font-family:'Outfit',sans-serif;font-size:12px;color:var(--g800);padding:1px}
+.ftbl input.ex{color:var(--green);font-weight:500}
+.ftbl input:focus{outline:none;background:var(--gold-pale);border-radius:3px}
+.yc{background:#FFFDF8}
+.pc{background:#F8FAFF}
+
+/* ALERTS */
+.alert{padding:11px 15px;border-radius:8px;font-size:12.5px;display:flex;gap:9px;margin-bottom:14px;line-height:1.5}
+.alert.info{background:#EEF3FF;color:#3052C4;border-left:3px solid #3052C4}
+.alert.warn{background:var(--amberL);color:var(--amber);border-left:3px solid var(--amber)}
+.alert.ok{background:var(--greenL);color:var(--green);border-left:3px solid var(--green)}
+
+/* NAV */
+.navrow{display:flex;justify-content:space-between;align-items:center;padding:18px 38px;background:#fff;border-top:1px solid var(--g200);position:sticky;bottom:0;z-index:40}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:10px 22px;border-radius:8px;font-size:13.5px;font-weight:600;cursor:pointer;transition:all .2s;border:none;font-family:'Outfit',sans-serif}
+.btn-sec{background:#fff;border:1.5px solid var(--g200);color:var(--g800)}
+.btn-sec:hover{border-color:var(--g400)}
+.btn-pri{background:var(--navy);color:#fff}
+.btn-pri:hover{background:var(--navy2);transform:translateY(-1px)}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#fff}
+.btn-gold:hover{transform:translateY(-1px);box-shadow:0 4px 18px rgba(201,147,58,.4)}
+
+/* REVIEW */
+.rvgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.rvi{background:var(--g50);border:1px solid var(--g100);border-radius:7px;padding:9px 13px}
+.rvi .rl{font-size:10.5px;font-weight:600;color:var(--g400);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
+.rvi .rv{font-size:13px;font-weight:500;color:var(--navy)}
+.rvi .rv.emp{color:var(--red);font-style:italic;font-weight:400}
+.rs h3{font-family:'Cormorant Garamond',serif;font-size:15px;font-weight:700;color:var(--navy);margin-bottom:10px;padding-bottom:7px;border-bottom:2px solid var(--gold-pale)}
+
+/* WELCOME */
+.hero{background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 100%);border-radius:12px;padding:38px 34px;color:#fff;margin-bottom:22px;position:relative;overflow:hidden}
+.hero::after{content:'';position:absolute;right:-50px;top:-50px;width:220px;height:220px;border-radius:50%;background:rgba(201,147,58,.07)}
+.hero h1{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:700;margin-bottom:9px;position:relative}
+.hero h1 span{color:var(--gold2)}
+.hero p{font-size:14px;color:rgba(255,255,255,.7);line-height:1.7;max-width:540px;position:relative}
+.fgrid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px}
+.fcard{background:#fff;border:1px solid var(--g200);border-radius:10px;padding:18px}
+.fcard .ficon{font-size:26px;margin-bottom:10px}
+.fcard h3{font-size:13.5px;font-weight:700;color:var(--navy);margin-bottom:5px}
+.fcard p{font-size:12px;color:var(--g600);line-height:1.6}
+.dcl{background:#fff;border:1px solid var(--g200);border-radius:10px;padding:18px}
+.dcl h3{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:700;color:var(--navy);margin-bottom:12px}
+.clgrid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.cli{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--g800);padding:5px 8px;background:var(--g50);border-radius:6px}
+.cldot{width:6px;height:6px;border-radius:50%;background:var(--gold);flex-shrink:0}
+
+/* OVERLAY */
+.ov{position:fixed;inset:0;background:rgba(12,26,46,.72);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.ovbox{background:#fff;border-radius:12px;padding:34px;text-align:center;max-width:340px;width:90%}
+.spinner{width:48px;height:48px;border:4px solid var(--g100);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 18px}
+.ovbox h3{font-family:'Cormorant Garamond',serif;font-size:19px;color:var(--navy);margin-bottom:7px}
+.ovbox p{font-size:12.5px;color:var(--g400)}
+.ovprog{margin-top:16px;height:4px;background:var(--g100);border-radius:4px;overflow:hidden}
+.ovpf{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width .3s}
+.exnote{background:var(--amberL);border:1px solid rgba(201,123,32,.2);border-radius:7px;padding:9px 13px;font-size:12px;color:var(--amber);margin-top:9px}
+
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--g200);border-radius:3px}
+</style>
+</head>
+<body>
+
+<nav id="sb">
+  <div class="sb-logo">
+    <div class="sb-bank">Bank of Baroda</div>
+    <div class="sb-sub">Credit Proposal Generator</div>
+  </div>
+  <div class="sb-prog">
+    <div class="prog-lbl"><span>Overall Progress</span><span id="ppct">0%</span></div>
+    <div class="prog-bar"><div class="prog-fill" id="pfill" style="width:0%"></div></div>
+  </div>
+  <div class="steps-nav" id="snav"></div>
+  <div class="sb-foot">All processing done locally.<br>No data sent to any server.</div>
+</nav>
+
+<div id="main">
+  <div class="topbar">
+    <div class="topbar-title" id="ttl">MSME Credit Proposal Generator</div>
+    <div style="font-size:12px;color:var(--g400)" id="tmeta">Bank of Baroda Format</div>
+  </div>
+  <div class="sc" id="sc"></div>
+  <div class="navrow">
+    <button class="btn btn-sec" id="btnBack" onclick="nav(-1)">&#8592; Back</button>
+    <span style="font-size:12px;color:var(--g400)" id="nhint"></span>
+    <button class="btn btn-pri" id="btnNext" onclick="nav(1)">Continue &#8594;</button>
+  </div>
+</div>
+
+<div class="ov" id="ov" style="display:none">
+  <div class="ovbox">
+    <div class="spinner"></div>
+    <h3>Processing Document</h3>
+    <p id="ovmsg">Extracting data...</p>
+    <div class="ovprog"><div class="ovpf" id="ovpf" style="width:10%"></div></div>
+  </div>
+</div>
+
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+const STEPS=[
+  {id:'welcome',    title:'Welcome',           sub:'Overview & checklist'},
+  {id:'identity',   title:'Identity Docs',     sub:'PAN · GST · Udyam'},
+  {id:'constitution',title:'Constitution',     sub:'Deed · MOA'},
+  {id:'promoters',  title:'Promoters',         sub:'Partners · Directors'},
+  {id:'credit',     title:'Credit Request',    sub:'Facilities · Quotations'},
+  {id:'hist',       title:'Historical Fin.',   sub:'FY22 – FY24'},
+  {id:'proj',       title:'Projected Fin.',    sub:'FY25 – FY27'},
+  {id:'cibil',      title:'CIBIL & Banking',   sub:'Reports · SOA'},
+  {id:'security',   title:'Security',          sub:'Valuation · Legal'},
+  {id:'business',   title:'Business',          sub:'Project · Licenses'},
+  {id:'pricing',    title:'Pricing & Rating',  sub:'ROI · Rating · Fees'},
+  {id:'generate',   title:'Generate Note',     sub:'Review & Download'},
+];
+
+let cur=0;
+const FILES={};
+STEPS.forEach(s=>FILES[s.id]=[]);
+
+const D={
+  meta:{mtgDate:'',agenda:'',cmte:'RMCC',branch:'',region:'',zone:''},
+  id:{firmName:'',pan:'',gstin:'',udyam:'',msme:'',estDate:'',const:'Partnership',address:'',nature:''},
+  con:{type:'Partnership',deedDate:'',objective:'',partners:[]},
+  prom:[],
+  cred:{facs:[],scheme:'',takeover:'fresh',exBank:'',exAmt:'',purpose:'',qSupp:'',qAmt:'',qDesc:''},
+  hist:[],
+  proj:[],
+  cibil:{firmScore:'',firmStatus:'Standard',exFacs:[],perCibil:[],conduct:'',adverse:'Nil'},
+  sec:{primary:'',stock:'',debtors:'',props:[],grtrs:[]},
+  biz:{desc:'',products:'',cap:'',util:'',rawmat:'',customers:[],suppliers:[],licenses:[],outlook:''},
+  price:{rating:'',fr:'',cr:'',roi:'',baseRate:'',procFee:'',inspFee:'',devs:'Nil'},
+};
+
+const FIN=[
+  {k:'netSales',   l:'Net Sales / Turnover'},
+  {k:'pbdit',      l:'PBDIT / EBITDA'},
+  {k:'pat',        l:'Net Profit After Tax'},
+  {k:'netWorth',   l:"Partners' Capital / Net Worth"},
+  {k:'tnw',        l:'Tangible Net Worth (TNW)'},
+  {k:'totalDebt',  l:'Total Debt (TL + WC)'},
+  {k:'curAssets',  l:'Total Current Assets'},
+  {k:'curLiab',    l:'Total Current Liabilities'},
+  {k:'stock',      l:'Stock / Inventories'},
+  {k:'debtors',    l:'Trade Receivables / Debtors'},
+  {k:'creditors',  l:'Trade Payables / Creditors'},
+  {k:'fixedAssets',l:'Net Fixed Assets'},
+];
+
+/* ── UTILITIES ── */
+const gv=id=>{const e=document.getElementById(id);return e?e.value:''};
+const sv=(id,v)=>{const e=document.getElementById(id);if(e){e.value=v}};
+const mx=(id)=>{const e=document.getElementById(id);if(e)e.classList.add('ex')};
+const num=s=>{if(!s)return'';const n=parseFloat(String(s).replace(/[,\s₹]/g,''));return isNaN(n)?'':n};
+const fmt=v=>v?'Rs. '+v+' L':'—';
+const fv=(v,fb='N/A')=>v||fb;
+
+function showOv(show,msg=''){
+  document.getElementById('ov').style.display=show?'flex':'none';
+  if(msg)document.getElementById('ovmsg').textContent=msg;
+}
+function setOvProg(p){document.getElementById('ovpf').style.width=p+'%'}
+
+/* ── PDF EXTRACTION ── */
+async function pdfText(file){
+  try{
+    const ab=await file.arrayBuffer();
+    const pdf=await pdfjsLib.getDocument({data:ab}).promise;
+    let t='';
+    for(let i=1;i<=Math.min(pdf.numPages,80);i++){
+      const pg=await pdf.getPage(i);
+      const ct=await pg.getTextContent();
+      t+=ct.items.map(x=>x.str).join(' ')+'\n';
+    }
+    return t.trim();
+  }catch(e){return''}
+}
+
+/* ── EXCEL EXTRACTION ── */
+async function xlsxRows(file){
+  return new Promise(res=>{
+    const r=new FileReader();
+    r.onload=e=>{
+      try{
+        const wb=XLSX.read(e.target.result,{type:'array'});
+        const sh=wb.Sheets[wb.SheetNames[0]];
+        res(XLSX.utils.sheet_to_json(sh,{header:1,defval:''}));
+      }catch(err){res([])}
+    };
+    r.readAsArrayBuffer(file);
+  });
+}
+
+/* ── SMART PARSERS ── */
+function after(text,keys,maxLen=80){
+  for(const k of keys){
+    const re=new RegExp(k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'[:\\s]+([^\\n]{1,'+maxLen+'})','i');
+    const m=text.match(re);
+    if(m)return m[1].trim().replace(/\s+/g,' ').split(/[;|]/)[0].trim();
+  }
+  return'';
+}
+function findNum(text,keys){
+  for(const k of keys){
+    const re=new RegExp(k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'[^\\d]*(\\d[\\d,.]*)','i');
+    const m=text.match(re);
+    if(m)return m[1].replace(/,/g,'');
+  }
+  return'';
+}
+
+function parsePAN(t){
+  return{
+    pan:t.match(/[A-Z]{5}[0-9]{4}[A-Z]/)?.[0]||'',
+    name:after(t,['Name','NAME'],80),
+  };
+}
+function parseGST(t){
+  return{
+    gstin:t.match(/\d{2}[A-Z]{5}\d{4}[A-Z][A-Z\d][Z][A-Z\d]/)?.[0]||'',
+    name:after(t,['Legal Name of Business','Legal Name','Trade Name'],80),
+    date:after(t,['Date of Registration','Effective Date of Registration'],30),
+    const:after(t,['Constitution of Business'],60),
+    addr:after(t,['Principal Place of Business'],150),
+  };
+}
+function parseUdyam(t){
+  return{
+    no:t.match(/UDYAM-[A-Z]{2}-\d{2}-\d{7}/)?.[0]||'',
+    name:after(t,['Name of Enterprise','Enterprise Name'],80),
+    cat:after(t,['Major Activity','Type of Organization','Category'],40),
+  };
+}
+function parseDeed(t){
+  const date=after(t,['This deed','dated'],30)||'';
+  const obj=after(t,['Business of','Nature of Business','Object of the Firm'],200)||'';
+  const parts=[];
+  const re1=/(?:Partner|PARTNER)[\s:\-]+([A-Z][a-z]+(?:\s[A-Z][a-z]+)+)/g;
+  let m;
+  while((m=re1.exec(t))!==null)if(!parts.find(p=>p.name===m[1]))parts.push({name:m[1],share:'',pan:''});
+  const re2=/([A-Z][a-z]+(?:\s[A-Z][a-z]+)+)[\s:\-]+(\d{1,3})%/g;
+  while((m=re2.exec(t))!==null){
+    const p=parts.find(p=>p.name.startsWith(m[1].split(' ')[0]));
+    if(p)p.share=m[2];else parts.push({name:m[1],share:m[2],pan:''});
+  }
+  return{date,obj,parts};
+}
+function parseLoan(t){
+  return{
+    amt:findNum(t,['Amount of Loan','Loan Amount','Amount Required','Limit Required','Facility Amount']),
+    purpose:after(t,['Purpose of Loan','Purpose','Loan Purpose'],200),
+    tenure:after(t,['Tenure','Repayment Period','Loan Period'],30),
+    scheme:after(t,['Scheme','Under Scheme'],60),
+  };
+}
+function parseBS(t,year){
+  const c=t.replace(/\n+/g,' ');
+  return{
+    year,type:'audited',
+    netSales:findNum(c,['Net Sales','Net Turnover','Revenue from Operations','Sales (Net)','Turnover','Net Revenue']),
+    pbdit:findNum(c,['PBDIT','EBITDA','Gross Profit','Operating Profit','Profit Before Dep']),
+    pat:findNum(c,['Profit After Tax','Net Profit','PAT','Profit for the Year','Net Profit After Tax']),
+    netWorth:findNum(c,['Net Worth','Networth','Capital and Reserves','Partners Capital','Proprietors Fund',"Partner's Capital"]),
+    tnw:findNum(c,['Tangible Net Worth','TNW','Net Tangible Assets']),
+    totalDebt:findNum(c,['Total Debt','Total Borrowings','Secured Loans','Long Term Debt']),
+    curAssets:findNum(c,['Total Current Assets','Current Assets','Gross Current Assets']),
+    curLiab:findNum(c,['Total Current Liabilities','Current Liabilities and Provisions','Current Liabilities']),
+    stock:findNum(c,['Inventories','Stock in Trade','Closing Stock','Raw Material','Finished Goods']),
+    debtors:findNum(c,['Trade Receivables','Sundry Debtors','Debtors','Accounts Receivable']),
+    creditors:findNum(c,['Trade Payables','Sundry Creditors','Creditors','Accounts Payable']),
+    fixedAssets:findNum(c,['Net Fixed Assets','Fixed Assets','Tangible Assets','Property Plant']),
+  };
+}
+function parseCIBIL(t){
+  const score=t.match(/(?:CIBIL|Credit)\s*(?:Score|Rank)[:\s]*(\d{3})/i)?.[1]||t.match(/\b[7-9]\d{2}\b/)?.[0]||'';
+  const status=/NPA|Non.?Performing/i.test(t)?'NPA':/SMA.?[12]/.test(t)?'SMA':'Standard';
+  const dpd=t.match(/DPD[:\s]*(\d+)/i)?.[1]||'0';
+  const accts=[];
+  const re=/(?:Cash Credit|CC|Term Loan|TL|Overdraft|OD)[^₹\d]*(?:Rs\.?|₹)?\s*([\d,]+)/gi;
+  let m;
+  while((m=re.exec(t))!==null)accts.push({type:m[0].split(/[^a-zA-Z]/)[0],outstanding:m[1].replace(/,/g,''),bank:''});
+  return{score,status,dpd,accts};
+}
+function parseValuation(t){
+  return{
+    mv:findNum(t,['Market Value','Fair Market Value','Open Market Value']),
+    dv:findNum(t,['Distress Value','Forced Sale Value','Realizable Value','Net Realisable Value']),
+    owner:after(t,['Owner','Property Owner','Name of Owner','In the name of'],60),
+    loc:after(t,['Situated at','Property situated','Location','Address of Property'],150),
+    survey:after(t,['Survey No','Sy No','Plot No','Survey Number'],30),
+    area:after(t,['Area','Extent','Total Area','Plot Area'],30),
+    valuer:after(t,['Valued by','Name of Valuer','Valuer Name'],60),
+  };
+}
+function parseRating(t){
+  return{
+    grade:t.match(/BOB\s*\d+/i)?.[0]||after(t,['Rating Grade','Assigned Rating'],20)||'',
+    fr:t.match(/FR\s*\d+/i)?.[0]||'',
+    cr:t.match(/CR\s*\d+/i)?.[0]||'',
+  };
+}
+function parseROI(rows){
+  const r={};
+  for(const row of rows){
+    const j=row.join(' ').toLowerCase();
+    if(j.includes('effective')&&j.includes('rate'))r.eff=row.find(c=>String(c).includes('%'))||'';
+    if(j.includes('mclr')||j.includes('repo'))r.base=row.find(c=>String(c).includes('%'))||'';
+    if(j.includes('processing')&&j.includes('fee'))r.proc=row.find(c=>String(c).match(/\d/))||'';
+    if(j.includes('inspection')&&j.includes('charge'))r.insp=row.find(c=>String(c).match(/\d/))||'';
+  }
+  return r;
+}
+
+/* ── FILE PROCESSING DISPATCH ── */
+async function processFile(stepId,file,idx){
+  setFSt(stepId,idx,'processing');
+  const ext=file.name.split('.').pop().toLowerCase();
+  let text='';
+  try{
+    if(['pdf'].includes(ext)){
+      showOv(true,'Reading PDF: '+file.name);
+      text=await pdfText(file);
+      if(!text||text.replace(/\s/g,'').length<80){
+        text='[SCANNED]';
+        setFNote(stepId,idx,'⚠ Scanned PDF detected — key fields may need manual entry below.');
+      }
+    } else if(['xlsx','xls'].includes(ext)){
+      showOv(true,'Reading Excel: '+file.name);
+      const rows=await xlsxRows(file);
+      text=rows.map(r=>r.join('\t')).join('\n');
+      if(stepId==='pricing'){const roi=parseROI(rows);if(roi.eff){sv('price_roi',roi.eff);mx('price_roi')}if(roi.base){sv('price_base',roi.base);mx('price_base')}if(roi.proc){sv('price_proc',roi.proc);mx('price_proc')}if(roi.insp){sv('price_insp',roi.insp);mx('price_insp')}}
+      if(stepId==='hist'||stepId==='proj'){const yr=file.name.match(/20\d{2}/)?.[0]||'';const rows2=await xlsxRows(file);const t2=rows2.map(r=>r.join(' ')).join('\n');const data=parseBS(t2,yr?'FY'+(parseInt(yr)-1)+'-'+yr.slice(-2):'');if(data.netSales){const arr=stepId==='hist'?D.hist:D.proj;arr.push(data);arr.sort((a,b)=>a.year<b.year?-1:1);renderStep();}}
+    } else if(['jpg','jpeg','png','bmp','gif','webp'].includes(ext)){
+      text='[IMAGE] OCR not loaded — please enter data manually in fields below.';
+      setFNote(stepId,idx,'ℹ Image uploaded. Enter extracted data manually in the fields below.');
+    }
+    await dispatch(stepId,file,text);
+    setFSt(stepId,idx,'done');
+  }catch(e){setFSt(stepId,idx,'error');console.error(e);}
+  showOv(false);
+}
+
+async function dispatch(stepId,file,text){
+  const fn=file.name.toLowerCase();
+  if(stepId==='identity'){
+    if(fn.includes('pan')||fn.includes('_p_')){const d=parsePAN(text);if(d.pan){sv('id_pan',d.pan);mx('id_pan')}if(d.name){sv('id_firm',d.name);mx('id_firm')}}
+    if(text.includes('GSTIN')||text.includes('Goods and Services Tax')||fn.includes('gst')){const d=parseGST(text);if(d.gstin){sv('id_gstin',d.gstin);mx('id_gstin')}if(d.name){sv('id_firm',d.name);mx('id_firm')}if(d.addr){sv('id_addr',d.addr);mx('id_addr')}if(d.date){sv('id_estDate',d.date);mx('id_estDate')}}
+    if(text.includes('UDYAM')||fn.includes('udyam')){const d=parseUdyam(text);if(d.no){sv('id_udyam',d.no);mx('id_udyam')}if(d.name){sv('id_firm',d.name);mx('id_firm')}}
+  }
+  if(stepId==='constitution'){
+    if(fn.includes('deed')||fn.includes('partner')||text.toLowerCase().includes('partnership deed')){
+      const d=parseDeed(text);
+      if(d.date){sv('con_date',d.date);mx('con_date')}
+      if(d.obj){sv('con_obj',d.obj);mx('con_obj')}
+      if(d.parts.length){D.con.partners=d.parts;renderStep();}
+    }
+  }
+  if(stepId==='credit'){
+    if(fn.includes('applic')||fn.includes('loan')||fn.includes('credit')){const d=parseLoan(text);if(d.amt){sv('fac_amt_0',d.amt);mx('fac_amt_0')}if(d.purpose){sv('cred_purpose',d.purpose);mx('cred_purpose')}if(d.scheme){sv('cred_scheme',d.scheme);mx('cred_scheme')}}
+    if(fn.includes('quot')||fn.includes('mach')){const supp=after(text,['From','Supplier','Company Name','M/s'],60);const amt=findNum(text,['Total Amount','Grand Total','Total Cost','Amount']);if(supp){sv('cred_qsupp',supp);mx('cred_qsupp')}if(amt){sv('cred_qamt',amt);mx('cred_qamt')}}
+  }
+  if(stepId==='hist'||stepId==='proj'){
+    const yr=file.name.match(/20\d{2}/)?.[0]||text.match(/31(?:st)?\s*March\s*20(\d{2})/i)?.[1]||'';
+    const label=yr?(stepId==='hist'?'FY'+(parseInt(yr)-1)+'-'+yr.slice(-2):'FY'+(parseInt(yr)-1)+'-'+yr.slice(-2)):'';
+    const data=parseBS(text,label||'');
+    const arr=stepId==='hist'?D.hist:D.proj;
+    const existing=arr.find(y=>y.year===data.year);
+    if(existing)Object.assign(existing,data);
+    else if(data.netSales||data.pat)arr.push(data);
+    arr.sort((a,b)=>a.year<b.year?-1:1);
+    renderStep();
+  }
+  if(stepId==='cibil'){
+    const d=parseCIBIL(text);
+    if(fn.includes('commercial')||fn.includes('firm')||fn.includes('company')){
+      if(d.score){sv('cibil_score',d.score);mx('cibil_score')}
+      if(d.accts.length){D.cibil.exFacs=d.accts;renderStep();}
+    } else {
+      if(d.score)D.cibil.perCibil.push({name:'',score:d.score,dpd:d.dpd,status:d.status});
+      renderStep();
+    }
+  }
+  if(stepId==='security'){
+    if(fn.includes('valuat')||fn.includes('value')||fn.includes('prop')){
+      const d=parseValuation(text);
+      D.sec.props.push({desc:d.loc,survey:d.survey,area:d.area,owner:d.owner,mv:d.mv,dv:d.dv,valuer:d.valuer});
+      renderStep();
+    }
+    if(fn.includes('stock')){
+      const sv2=findNum(text,['Total Stock','Value of Stock','Stock Value','Closing Stock']);
+      const dv2=findNum(text,['Book Debt','Debtors','Trade Receivables']);
+      if(sv2){sv('sec_stock',sv2);mx('sec_stock')}
+      if(dv2){sv('sec_debt',dv2);mx('sec_debt')}
+    }
+  }
+  if(stepId==='pricing'){
+    if(fn.includes('rating')){const d=parseRating(text);if(d.grade){sv('price_rating',d.grade);mx('price_rating')}if(d.fr){sv('price_fr',d.fr);mx('price_fr')}if(d.cr){sv('price_cr',d.cr);mx('price_cr')}}
+  }
+}
+
+/* ── FILE UI ── */
+async function handleFiles(stepId,files){
+  const list=FILES[stepId];
+  const start=list.length;
+  for(const f of files)list.push({file:f,note:''});
+  renderFileList(stepId);
+  showOv(true,'Preparing...');
+  for(let i=start;i<list.length;i++){
+    setOvProg(((i-start+1)/files.length)*100);
+    await processFile(stepId,list[i].file,i);
+  }
+  showOv(false);
+}
+function renderFileList(stepId){
+  const c=document.getElementById('fl_'+stepId);
+  if(!c)return;
+  c.innerHTML=FILES[stepId].map((f,i)=>`
+    <div class="fi">
+      <span>${ficon(f.file.name)}</span>
+      <span class="fn">${f.file.name}</span>
+      <span class="fsz">${fsize(f.file.size)}</span>
+      <span class="fst pending" id="fst_${stepId}_${i}">Pending</span>
+      <button class="frm" onclick="FILES['${stepId}'].splice(${i},1);renderFileList('${stepId}')" title="Remove">×</button>
+    </div>
+    <div id="fnote_${stepId}_${i}" style="font-size:11.5px;color:var(--amber);padding:3px 10px;display:none"></div>
+  `).join('');
+}
+function setFSt(s,i,st){
+  const e=document.getElementById('fst_'+s+'_'+i);
+  if(e){e.className='fst '+st;e.textContent=st==='processing'?'⏳ Reading…':st==='done'?'✓ Done':st==='error'?'✗ Error':'Pending'}
+}
+function setFNote(s,i,msg){const e=document.getElementById('fnote_'+s+'_'+i);if(e){e.textContent=msg;e.style.display='block'}}
+function setupDZ(stepId){
+  const z=document.getElementById('dz_'+stepId);
+  if(!z)return;
+  const inp=z.querySelector('input');
+  inp.onchange=e=>handleFiles(stepId,Array.from(e.target.files));
+  z.addEventListener('dragover',e=>{e.preventDefault();z.classList.add('drag')});
+  z.addEventListener('dragleave',()=>z.classList.remove('drag'));
+  z.addEventListener('drop',e=>{e.preventDefault();z.classList.remove('drag');handleFiles(stepId,Array.from(e.dataTransfer.files))});
+}
+function ficon(n){const e=n.split('.').pop().toLowerCase();return{pdf:'📄',xlsx:'📊',xls:'📊',doc:'📝',docx:'📝',jpg:'🖼',jpeg:'🖼',png:'🖼'}[e]||'📎'}
+function fsize(b){return b<1024?b+'B':b<1048576?(b/1024).toFixed(1)+'KB':(b/1048576).toFixed(1)+'MB'}
+
+function uzHTML(sid,title,sub,accept){
+  return`<div class="card"><div class="ct"><div class="ico">📤</div>${title}</div><div class="cs">${sub}</div>
+    <div class="uz" id="dz_${sid}">
+      <input type="file" accept="${accept}" multiple>
+      <div style="font-size:26px;margin-bottom:8px">📂</div>
+      <h4>Drop files here or click to browse</h4>
+      <p>Supports PDF · JPG · PNG · Excel files</p>
+      <div class="ftags">${accept.split(',').map(a=>'<span class="ftag">'+a.replace('.','').toUpperCase()+'</span>').join('')}</div>
+    </div>
+    <div class="flist" id="fl_${sid}"></div>
+  </div>`;
+}
+
+/* ── SAVE STEP DATA ── */
+function saveStep(){
+  const id=STEPS[cur].id;
+  if(id==='identity'){
+    D.id.firmName=gv('id_firm');D.id.pan=gv('id_pan');D.id.gstin=gv('id_gstin');
+    D.id.udyam=gv('id_udyam');D.id.msme=gv('id_msme');D.id.estDate=gv('id_estDate');
+    D.id.const=gv('id_const');D.id.address=gv('id_addr');D.id.nature=gv('id_nature');
+    D.meta.branch=gv('meta_branch');D.meta.region=gv('meta_region');D.meta.zone=gv('meta_zone');
+  }
+  if(id==='constitution'){
+    D.con.type=gv('con_type');D.con.deedDate=gv('con_date');D.con.objective=gv('con_obj');
+    D.con.partners=[];
+    document.querySelectorAll('.prow').forEach((r,i)=>{
+      D.con.partners.push({
+        name:r.querySelector('[name="pn_'+i+'"]')?.value||'',
+        share:r.querySelector('[name="ps_'+i+'"]')?.value||'',
+        pan:r.querySelector('[name="pp_'+i+'"]')?.value||'',
+        addr:r.querySelector('[name="pa_'+i+'"]')?.value||'',
+      });
+    });
+  }
+  if(id==='credit'){
+    D.cred.scheme=gv('cred_scheme');D.cred.takeover=gv('cred_takeover');
+    D.cred.exBank=gv('cred_exbank');D.cred.exAmt=gv('cred_examt');
+    D.cred.purpose=gv('cred_purpose');D.cred.qSupp=gv('cred_qsupp');
+    D.cred.qAmt=gv('cred_qamt');D.cred.qDesc=gv('cred_qdesc');
+    D.cred.facs=[];
+    document.querySelectorAll('.facrow').forEach((r,i)=>{
+      D.cred.facs.push({
+        type:r.querySelector('[name="ft_'+i+'"]')?.value||'',
+        amt:r.querySelector('[name="fa_'+i+'"]')?.value||'',
+        purpose:r.querySelector('[name="fp_'+i+'"]')?.value||'',
+        tenure:r.querySelector('[name="fe_'+i+'"]')?.value||'',
+        roi:r.querySelector('[name="fr_'+i+'"]')?.value||'',
+        repay:r.querySelector('[name="fy_'+i+'"]')?.value||'',
+      });
+    });
+  }
+  if(id==='hist'||id==='proj'){
+    const arr=id==='hist'?D.hist:D.proj;
+    document.querySelectorAll('#ftbl_'+id+' input[data-k]').forEach(inp=>{
+      const yr=inp.dataset.yr;const k=inp.dataset.k;
+      let o=arr.find(y=>y.year===yr);
+      if(!o){o={year:yr,type:id==='hist'?'audited':'projected'};arr.push(o);}
+      o[k]=inp.value;
+    });
+  }
+  if(id==='cibil'){
+    D.cibil.firmScore=gv('cibil_score');D.cibil.firmStatus=gv('cibil_status');
+    D.cibil.adverse=gv('cibil_adverse');D.cibil.conduct=gv('cibil_conduct');
+    D.cibil.exFacs=[];
+    document.querySelectorAll('.cibrow').forEach((r,i)=>{
+      D.cibil.exFacs.push({bank:r.querySelector('[name="cb_'+i+'"]')?.value||'',type:r.querySelector('[name="ct_'+i+'"]')?.value||'',outstanding:r.querySelector('[name="co_'+i+'"]')?.value||''});
+    });
+  }
+  if(id==='security'){
+    D.sec.primary=gv('sec_prim');D.sec.stock=gv('sec_stock');D.sec.debtors=gv('sec_debt');
+    D.sec.props=[];
+    document.querySelectorAll('.proprow').forEach((r,i)=>{
+      D.sec.props.push({desc:r.querySelector('[name="pd_'+i+'"]')?.value||'',survey:r.querySelector('[name="ps_'+i+'"]')?.value||'',area:r.querySelector('[name="pa_'+i+'"]')?.value||'',owner:r.querySelector('[name="po_'+i+'"]')?.value||'',mv:r.querySelector('[name="pmv_'+i+'"]')?.value||'',dv:r.querySelector('[name="pdv_'+i+'"]')?.value||'',valuer:r.querySelector('[name="pv_'+i+'"]')?.value||''});
+    });
+    D.sec.grtrs=[];
+    document.querySelectorAll('.grtrow').forEach((r,i)=>{
+      D.sec.grtrs.push({name:r.querySelector('[name="gn_'+i+'"]')?.value||'',type:r.querySelector('[name="gt_'+i+'"]')?.value||'Personal',nw:r.querySelector('[name="gnw_'+i+'"]')?.value||'',pan:r.querySelector('[name="gp_'+i+'"]')?.value||''});
+    });
+  }
+  if(id==='business'){
+    D.biz.desc=gv('biz_desc');D.biz.products=gv('biz_prod');D.biz.cap=gv('biz_cap');
+    D.biz.util=gv('biz_util');D.biz.rawmat=gv('biz_raw');D.biz.outlook=gv('biz_out');
+  }
+  if(id==='pricing'){
+    D.price.rating=gv('price_rating');D.price.fr=gv('price_fr');D.price.cr=gv('price_cr');
+    D.price.roi=gv('price_roi');D.price.baseRate=gv('price_base');
+    D.price.procFee=gv('price_proc');D.price.inspFee=gv('price_insp');D.price.devs=gv('price_devs');
+    D.meta.mtgDate=gv('meta_mtg');D.meta.agenda=gv('meta_agenda');D.meta.cmte=gv('meta_cmte');
+  }
+}
+
+/* ── NAVIGATION ── */
+function nav(dir){
+  saveStep();
+  const nx=cur+dir;
+  if(nx<0||nx>=STEPS.length)return;
+  cur=nx;
+  renderSidebar();
+  renderStep();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function gotoStep(i){if(i>cur)saveStep();cur=i;renderSidebar();renderStep();}
+
+/* ── SIDEBAR ── */
+function renderSidebar(){
+  document.getElementById('snav').innerHTML=STEPS.map((s,i)=>{
+    const cls=i===cur?'active':i<cur?'done':'';
+    const numHtml=i===cur?`<div class="snum">${i+1}</div>`:i<cur?`<div class="snum">✓</div>`:`<div class="snum">${i+1}</div>`;
+    return`<div class="si ${cls}" onclick="gotoStep(${i})">${numHtml}<div><div class="stitle">${s.title}</div><div class="ssub">${s.sub}</div></div></div>`;
+  }).join('');
+  const pct=Math.round((cur/(STEPS.length-1))*100);
+  document.getElementById('pfill').style.width=pct+'%';
+  document.getElementById('ppct').textContent=pct+'%';
+  document.getElementById('ttl').textContent=STEPS[cur].title;
+  document.getElementById('btnBack').style.display=cur===0?'none':'inline-flex';
+  const isLast=cur===STEPS.length-1;
+  document.getElementById('btnNext').textContent=isLast?'📄 Generate Credit Note':'Continue →';
+  document.getElementById('btnNext').className='btn '+(isLast?'btn-gold':'btn-pri');
+  document.getElementById('btnNext').onclick=isLast?doGenerate:()=>nav(1);
+}
+
+/* ── STEP RENDERERS ── */
+function renderStep(){
+  const renders={
+    welcome:rWelcome,identity:rIdentity,constitution:rConstitution,
+    promoters:rPromoters,credit:rCredit,hist:()=>rFin('hist'),
+    proj:()=>rFin('proj'),cibil:rCIBIL,security:rSecurity,
+    business:rBusiness,pricing:rPricing,generate:rGenerate
+  };
+  document.getElementById('sc').innerHTML='';
+  renders[STEPS[cur].id]?.();
+  STEPS.forEach(s=>setupDZ(s.id));
+}
+
+function rWelcome(){
+  document.getElementById('sc').innerHTML=`
+  <div class="hero">
+    <h1>MSME Credit Proposal <span>Generator</span></h1>
+    <p>Upload customer documents — PAN, GST, CIBIL, ITR, valuation reports and more. The system intelligently extracts data and generates a complete Bank of Baroda credit appraisal note.</p>
+    <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap">
+      <span style="background:rgba(201,147,58,.2);color:var(--gold2);font-size:11.5px;font-weight:600;padding:4px 11px;border-radius:20px">✓ 100% Offline</span>
+      <span style="background:rgba(201,147,58,.2);color:var(--gold2);font-size:11.5px;font-weight:600;padding:4px 11px;border-radius:20px">✓ Auto PDF Extraction</span>
+      <span style="background:rgba(201,147,58,.2);color:var(--gold2);font-size:11.5px;font-weight:600;padding:4px 11px;border-radius:20px">✓ BoB Format Output</span>
+    </div>
+  </div>
+  <div class="fgrid3">
+    <div class="fcard"><div class="ficon">📤</div><h3>Upload Documents</h3><p>Drag-and-drop PDFs, scanned images, or Excel files. Multiple files per step supported.</p></div>
+    <div class="fcard"><div class="ficon">🔍</div><h3>Smart Extraction</h3><p>Pattern-based data extraction from PAN, GST, CIBIL, Balance Sheets, Valuation reports and more.</p></div>
+    <div class="fcard"><div class="ficon">📋</div><h3>Generate Note</h3><p>One click to produce a complete 75+ page credit appraisal note in Bank of Baroda format.</p></div>
+  </div>
+  <div class="dcl"><h3>📁 Documents You Will Need (Step-by-Step)</h3>
+  <div class="clgrid">
+  ${['PAN Card (Firm)','GST Registration Certificate','Udyam / MSME Certificate','Partnership Deed / MOA',
+    'Promoter Personal Info Forms','Net Worth Certificates (CA)','Loan / Facility Application','Machinery Quotation(s)',
+    'ITR + Balance Sheet (3 years)','Provisional / Projected B/S','Commercial CIBIL Report','Personal CIBIL (All Partners)',
+    'Valuation Reports (All Props)','Legal Opinion / TCR','Stock Statement','Factory / Pollution Licenses',
+    'Customer & Supplier Letters','Internal Rating PDF','ROI / Interest Rate Table','Processing Fee Circular',
+  ].map(d=>`<div class="cli"><div class="cldot"></div>${d}</div>`).join('')}
+  </div></div>`;
+}
+
+function rIdentity(){
+  document.getElementById('sc').innerHTML=`
+  <div class="sh"><div class="sbadge">Step 1 of 11</div><h1>Identity Documents</h1>
+  <p>Upload PAN card, GST certificate, and Udyam registration. Data auto-extracted from digital PDFs.</p></div>
+  <div class="alert info">ℹ Download PDFs from government portals (GSTN, Udyam portal, Income Tax) for best auto-extraction accuracy.</div>
+  ${uzHTML('identity','Upload Identity Documents','PAN Card · GST Certificate · Udyam Registration','.pdf,.jpg,.jpeg,.png')}
+  <div class="card">
+    <div class="ct"><div class="ico">🪪</div>Firm Identity Details</div>
+    <div class="cs">Auto-filled fields shown with green border. Verify and correct as needed.</div>
+    <div class="fg">
+      <div class="fgrp s2"><label>Firm / Company Name <span class="req">*</span></label><input type="text" id="id_firm" value="${D.id.firmName}" placeholder="e.g. M/s Shree Padmavati Cotton Industries"></div>
+      <div class="fgrp"><label>PAN Number <span class="req">*</span></label><input type="text" id="id_pan" value="${D.id.pan}" placeholder="AAAAA0000A" maxlength="10" style="text-transform:uppercase"></div>
+      <div class="fgrp"><label>GSTIN <span class="req">*</span></label><input type="text" id="id_gstin" value="${D.id.gstin}" placeholder="29AAAAA0000A1Z5" style="text-transform:uppercase"></div>
+      <div class="fgrp"><label>Udyam Registration No.</label><input type="text" id="id_udyam" value="${D.id.udyam}" placeholder="UDYAM-KA-00-0000000" style="text-transform:uppercase"></div>
+      <div class="fgrp"><label>MSME Classification</label>
+        <select id="id_msme">
+          <option value="">-- Select --</option>
+          <option value="Micro" ${D.id.msme==='Micro'?'selected':''}>Micro Enterprise</option>
+          <option value="Small" ${D.id.msme==='Small'?'selected':''}>Small Enterprise</option>
+          <option value="Medium" ${D.id.msme==='Medium'?'selected':''}>Medium Enterprise</option>
+        </select>
+      </div>
+      <div class="fgrp"><label>Date of Establishment</label><input type="text" id="id_estDate" value="${D.id.estDate}" placeholder="DD/MM/YYYY"></div>
+      <div class="fgrp"><label>Constitution</label>
+        <select id="id_const">
+          <option value="Partnership" ${D.id.const==='Partnership'?'selected':''}>Partnership Firm</option>
+          <option value="Proprietorship" ${D.id.const==='Proprietorship'?'selected':''}>Sole Proprietorship</option>
+          <option value="Private Limited" ${D.id.const==='Private Limited'?'selected':''}>Private Limited Co.</option>
+          <option value="LLP" ${D.id.const==='LLP'?'selected':''}>LLP</option>
+          <option value="Public Limited" ${D.id.const==='Public Limited'?'selected':''}>Public Limited</option>
+        </select>
+      </div>
+      <div class="fgrp s2"><label>Registered Address <span class="req">*</span></label><textarea id="id_addr" rows="2" placeholder="Full registered address">${D.id.address}</textarea></div>
+      <div class="fgrp s2"><label>Nature of Business</label><input type="text" id="id_nature" value="${D.id.nature}" placeholder="e.g. Cotton Ginning and Pressing, Trading, Manufacturing..."></div>
+    </div>
+    <div class="cdiv"></div>
+    <div class="ct" style="font-size:14px;margin-bottom:12px"><div class="ico">🏦</div>Branch Details</div>
+    <div class="fg c3">
+      <div class="fgrp"><label>Branch Name <span class="req">*</span></label><input type="text" id="meta_branch" value="${D.meta.branch}" placeholder="e.g. Dharwad Branch"></div>
+      <div class="fgrp"><label>Region</label><input type="text" id="meta_region" value="${D.meta.region}" placeholder="e.g. Hubli"></div>
+      <div class="fgrp"><label>Zone</label><input type="text" id="meta_zone" value="${D.meta.zone}" placeholder="e.g. Mangaluru"></div>
+    </div>
+  </div>`;
+}
+
+function rConstitution(){
+  if(D.con.partners.length===0)D.con.partners.push({name:'',share:'',pan:'',addr:''});
+  document.getElementById('sc').innerHTML=`
+  <div class="sh"><div class="sbadge">Step 2 of 11</div><h1>Constitution Documents</h1>
+  <p>Upload Partnership Deed, MOA or Certificate of Incorporation. Partner/director details will be auto-extracted.</p></div>
+  ${uzHTML('constitution','Upload Constitution Documents','Partnership Deed · MOA · Certificate of Incorporation','.pdf,.jpg,.jpeg,.png')}
+  <div class="card">
+    <div class="ct"><div class="ico">📋</div>Constitution Details</div>
+    <div class="fg">
+      <div class="fgrp"><label>Constitution Type</label>
+        <select id="con_type">${['Partnership','Proprietorship','Private Limited','LLP','Public Limited'].map(t=>`<option ${D.con.type===t?'selected':''}>${t}</option>`).join('')}</select>
+      </div>
+      <div class="fgrp"><label>Date of Deed / Incorporation</label><input type="text" id="con_date" value="${D.con.deedDate}" placeholder="DD/MM/YYYY"></div>
+      <div class="fgrp s2"><label>Business Objective / Firm Objects</label><textarea id="con_obj" rows="3" placeholder="Main objects / nature of business as per deed/MOA">${D.con.objective}</textarea></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ct"><div class="ico">👥</div>Partners / Directors</div>
+    <div class="cs">Add all partners with shareholding. Green fields = auto-extracted from deed.</div>
+    <div id="pcon"></div>
+    <button class="addbtn" onclick="D.con.partners.push({name:'',share:'',pan:'',addr:''});rConstitution()">+ Add Partner / Director</button>
+  </div>`;
+  const pc=document.getElementById('pcon');
+  D.con.partners.forEach((p,i)=>{
+    const d=document.createElement('div');
+    d.className='drow prow';
+    d.style.gridTemplateColumns='2fr 1fr 1fr 2fr';
+    d.innerHTML=`
+      <div class="fgrp"><label>Full Name</label><input type="text" name="pn_${i}" value="${p.name||''}" placeholder="Full name as per PAN" class="${p.name?'ex':''}"></div>
+      <div class="fgrp"><label>Share %</label><input type="number" name="ps_${i}" value="${p.share||''}" placeholder="e.g. 51" min="0" max="100" class="${p.share?'ex':''}"></div>
+      <div class="fgrp"><label>PAN</label><input type="text" name="pp_${i}" value="${p.pan||''}" placeholder="AAAAA0000A" style="text-transform:uppercase"></div>
+      <div class="fgrp"><label>Address</label><input type="text" name="pa_${i}" value="${p.addr||''}" placeholder="Residential address"></div>
+      <button class="drm" onclick="D.con.partners.splice(${i},1);if(!D.con.partners.length)D.con.partners.push({name:'',share:'',pan:'',addr:''});rConstitution()">×</button>`;
+    pc.appendChild(d);
+  });
+}
+
+function rPromoters(){
+  if(D.prom.length===0)D.prom.push({name:'',dob:'',pan:'',qual:'',exp:'',nw:'',phone:'',addr:'',bg:''});
+  document.getElementById('sc').innerHTML=`
+  <div class="sh"><div class="sbadge">Step 3 of 11</div><h1>Promoter Details</h1>
+  <p>Upload Personal Information Forms and Net Worth Certificates. Individual details will be captured here.</p></div>
+  ${uzHTML('promoters','Upload Promoter Documents','Personal Info Forms · Net Worth Certificates · KYC','.pdf,.jpg,.jpeg,.png')}
+  <div class="card">
+    <div class="ct"><div class="ico">👤</div>Promoter Profiles</div>
+    <div class="cs">Key person details for credit appraisal. Net worth as per CA certificate (in Rs. Lakhs).</div>
+    <div id="promcont"></div>
+    <button class="addbtn" onclick="D.prom.push({name:'',dob:'',pan:'',qual:'',exp:'',nw:'',phone:'',addr:'',bg:''});rPromoters()">+ Add Promoter</button>
+  </div>`;
+  const c=document.getElementById('promcont');
+  D.prom.forEach((p,i)=>{
+    const d=document.createElement('div');
+    d.style.cssText='border:1px solid var(--g200);border-radius:8px;padding:14px;margin-bottom:11px;position:relative';
+    d.innerHTML=`<div style="font-size:11px;font-weight:700;color:var(--navy);margin-bottom:11px;text-transform:uppercase;letter-spacing:.5px">Promoter ${i+1}</div>
+    <button class="drm" style="position:absolute;top:10px;right:10px" onclick="D.prom.splice(${i},1);if(!D.prom.length)D.prom.push({});rPromoters()">×</button>
+    <div class="fg c3">
+      <div class="fgrp s2"><label>Full Name</label><input type="text" value="${p.name||''}" placeholder="Full name as per PAN" oninput="D.prom[${i}].name=this.value"></div>
+      <div class="fgrp"><label>Date of Birth</label><input type="text" value="${p.dob||''}" placeholder="DD/MM/YYYY" oninput="D.prom[${i}].dob=this.value"></div>
+      <div class="fgrp"><label>PAN</label><input type="text" value="${p.pan||''}" placeholder="AAAAA0000A" style="text-transform:uppercase" oninput="D.prom[${i}].pan=this.value"></div>
+      <div class="fgrp"><label>Qualification</label><input type="text" value="${p.qual||''}" placeholder="e.g. Graduate" oninput="D.prom[${i}].qual=this.value"></div>
+      <div class="fgrp"><label>Experience (Yrs)</label><input type="number" value="${p.exp||''}" placeholder="e.g. 15" oninput="D.prom[${i}].exp=this.value"></div>
+      <div class="fgrp"><label>Net Worth (Rs. Lakhs)</label><input type="number" value="${p.nw||''}" placeholder="As per CA cert." oninput="D.prom[${i}].nw=this.value" class="${p.nw?'ex':''}"></div>
+      <div class="fgrp"><label>Phone</label><input type="text" value="${p.phone||''}" placeholder="Mobile" oninput="D.prom[${i}].phone=this.value"></div>
+      <div class="fgrp s3"><label>Residential Address</label><input type="text" value="${p.addr||''}" placeholder="Current residential address" oninput="D.prom[${i}].addr=this.value"></div>
+      <div class="fgrp s3"><label>Brief Background</label><textarea rows="2" placeholder="Experience, expertise, role in business..." oninput="D.prom[${i}].bg=this.value">${p.bg||''}</textarea></div>
+    </div>`;
+    c.appendChild(d);
+  });
+}
+
+function rCredit(){
+  if(D.cred.facs.length===0)D.cred.facs.push({type:'Cash Credit / Overdraft',amt:'',purpose:'Working Capital',tenure:'12 Months',roi:'',repay:''});
+  document.getElementById('sc').innerHTML=`
+  <div class="sh"><div class="sbadge">Step 4 of 11</div><h1>Credit Request</h1>
+  <p>Upload Loan Application and Machinery Quotations. Add each proposed facility separately.</p></div>
+  ${uzHTML('credit','Upload Credit Request Documents','Loan Application · Machinery Quotation · Scheme Guidelines','.pdf,.jpg,.jpeg,.png')}
+  <div class="card">
+    <div class="ct"><div class="ico">💰</div>Proposed Credit Facilities</div>
+    <div class="cs">Add each facility separately. Amounts in Rs. Lakhs.</div>
+    <div id="faccont"></div>
+    <button class="addbtn" onclick="D.cred.facs.push({type:'Term Loan',amt:'',purpose:'',tenure:'',roi:'',repay:''});rCredit()">+ Add Facility</button>
+    <div class="cdiv"></div>
+    <div class="fg">
+      <div class="fgrp"><label>Bank Scheme Name</label><input type="text" id="cred_scheme" value="${D.cred.scheme}" placeholder="e.g. Baroda Property Pride" class="${D.cred.scheme?'ex':''}"></div>
+      <div class="fgrp"><label>Account Category</label>
+        <select id="cred_takeover">
+          <option value="fresh" ${D.cred.takeover==='fresh'?'selected':''}>Fresh Sanction</option>
+          <option value="takeover" ${D.cred.takeover==='takeover'?'selected':''}>Takeover from Another Bank</option>
+          <option value="enhancement" ${D.cred.takeover==='enhancement'?'selected':''}>Enhancement of Existing</option>
+          <option value="renewal" ${D.cred.takeover==='renewal'?'selected':''}>Renewal</option>
+        </select>
+      </div>
+      <div class="fgrp"><label>Existing Banker (if Takeover)</label><input type="text" id="cred_exbank" value="${D.cred.exBank}" placeholder="e.g. Yes Bank, HDFC Bank"></div>
+      <div class="fgrp"><label>Outstanding at Existing Bank (Rs. L)</label><input type="number" id="cred_examt" value="${D.cred.exAmt}" placeholder="Current outstanding"></div>
+      <div class="fgrp s2"><label>Overall Purpose / Justification</label><textarea id="cred_purpose" rows="3" placeholder="Justification for the credit requirement" class="${D.cred.purpose?'ex':''}">${D.cred.purpose}</textarea></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ct"><div class="ico">🔧</div>Quotation Details (for Term Loan)</div>
+    <div class="fg">
+      <div class="fgrp"><label>Machinery Supplier Name</label><input type="text" id="cred_qsupp" value="${D.cred.qSupp}" placeholder="Supplier name as per quotation" class="${D.cred.qSupp?'ex':''}"></div>
+      <div class="fgrp"><label>Quotation Amount (Rs. Lakhs)</label><input type="number" id="cred_qamt" value="${D.cred.qAmt}" placeholder="Total cost" class="${D.cred.qAmt?'ex':''}"></div>
+      <div class="fgrp s2"><label>Machinery Description</label><textarea id="cred_qdesc" rows="2" placeholder="Brief description of machinery to be purchased">${D.cred.qDesc}</textarea></div>
+    </div>
+  </div>`;
+  const fc=document.getElementById('faccont');
+  D.cred.facs.forEach((f,i)=>{
+    const d=document.createElement('div');
+    d.className='drow facrow';
+    d.style.gridTemplateColumns='2fr 1.2fr 1fr 1fr';
+    d.innerHTML=`
+      <div class="fgrp"><label>Facility Type</label>
+        <select name="ft_${i}">${['Cash Credit / Overdraft','Term Loan','WCDL','Letter of Credit','Bank Guarantee','GECL'].map(t=>`<option ${f.type===t?'selected':''}>${t}</option>`).join('')}</select>
+      </div>
+      <div class="fgrp"><label>Amount (Rs. Lakhs)</label><input type="number" name="fa_${i}" id="fac_amt_${i}" value="${f.amt||''}" placeholder="0.00" class="${f.amt?'ex':''}"></div>
+      <div class="fgrp"><label>Tenure</label><input type="text" name="fe_${i}" value="${f.tenure||''}" placeholder="12 Months"></div>
+      <div class="fgrp"><label>Rate of Interest</label><input type="text" name="fr_${i}" value="${f.roi||''}" placeholder="9.85%"></div>
+      <div class="fgrp s2"><label>Purpose</label><input type="text" name="fp_${i}" value="${f.purpose||''}" placeholder="Purpose of this facility" class="${f.purpose?'ex':''}"></div>
+      <div class="fgrp s2"><label>Repayment Terms</label><input type="text" name="fy_${i}" value="${f.repay||''}" placeholder="On Demand / 60 EMIs of Rs.X"></div>
+      <button class="drm" onclick="D.cred.facs.splice(${i},1);if(!D.cred.facs.length)D.cred.facs.push({type:'Cash Credit / Overdraft',amt:'',purpose:'',tenure:'',roi:'',repay:''});rCredit()">×</button>`;
+    fc.appendChild(d);
+  });
+}
+
+function rFin(sec){
+  const isHist=sec==='hist';
+  const arr=isHist?D.hist:D.proj;
+  const defYrs=isHist?['FY21-22','FY22-23','FY23-24']:['FY24-25','FY25-26','FY26-27'];
+  const years=defYrs.map(y=>{const ex=arr.find(r=>r.year===y)||{year:y,type:isHist?'audited':'projected'};return ex;});
+  document.getElementById('sc').innerHTML=`
+  <div class="sh"><div class="sbadge">Step ${isHist?5:6} of 11</div>
+  <h1>${isHist?'Historical Financials (Audited)':'Projected Financials'}</h1>
+  <p>${isHist?'Upload ITR, Balance Sheet & P&L for FY 2021-22, 2022-23, 2023-24. Also 3CB/3CD audit reports.':'Upload Provisional, Estimated and Projected Balance Sheets for FY 2024-25 onwards.'}</p></div>
+  <div class="alert warn">⚠ Upload each year separately. Include year in filename (e.g. BS_FY2024.pdf) for automatic year detection.</div>
+  ${uzHTML(sec, isHist?'Upload Financial Statements':'Upload Projected Financials', isHist?'ITR · Balance Sheet · P&L · 3CB/3CD for each year':'Provisional BS · Estimated BS · Projected BS','.pdf,.jpg,.jpeg,.png,.xlsx,.xls')}
+  <div class="card">
+    <div class="ct"><div class="ico">📊</div>Financial Data Table</div>
+    <div class="cs">All values in Rs. Lakhs. Green = auto-extracted. Edit any cell directly.</div>
+    <div class="ftw">
+      <table class="ftbl" id="ftbl_${sec}">
+        <thead><tr>
+          <th class="rh">Financial Parameter</th>
+          ${years.map(y=>`<th class="${isHist?'yc':'pc'}">${y.year}<br><span style="font-size:9.5px;font-weight:400;opacity:.7">${isHist?'Audited':y.type||'Projected'}</span></th>`).join('')}
+        </tr></thead>
+        <tbody>
+          <tr><td class="sh" colspan="${years.length+1}">📈 Profit &amp; Loss</td></tr>
+          ${FIN.slice(0,3).map(r=>`<tr><td class="rh">${r.l}</td>${years.map(y=>`<td class="${isHist?'yc':'pc'}"><input type="number" data-k="${r.k}" data-yr="${y.year}" value="${y[r.k]||''}" placeholder="0.00" class="${y[r.k]?'ex':''}"></td>`).join('')}</tr>`).join('')}
+          <tr><td class="sh" colspan="${years.length+1}">📋 Balance Sheet</td></tr>
+          ${FIN.slice(3).map(r=>`<tr><td class="rh">${r.l}</td>${years.map(y=>`<td class="${isHist?'yc':'pc'}"><input type="number" data-k="${r.k}" data-yr="${y.year}" value="${y[r.k]||''}" placeholder="0.00" class="${y[r.k]?'ex':''}"></td>`).join('')}</tr>`).join('')}
+          <tr><td class="sh" colspan="${years.length+1}">📉 Derived Ratios</td></tr>
+          <tr><td class="rh">Current Ratio</td>${years.map(y=>{const cr=(y.curAssets&&y.curLiab)?((+y.curAssets)/(+y.curLiab)).toFixed(2):'—';return`<td style="text-align:center;color:var(--navy);font-weight:600">${cr}</td>`}).join('')}</tr>
+          <tr><td class="rh">DE Ratio (TOL/TNW)</td>${years.map(y=>{const de=(y.totalDebt&&y.tnw)?((+y.totalDebt)/(+y.tnw)).toFixed(2):'—';return`<td style="text-align:center;color:var(--navy);font-weight:600">${de}</td>`}).join('')}</tr>
+          <tr><td class="rh">Net Profit Margin %</td>${years.map(y=>{const npm=(y.pat&&y.netSales)?(((+y.pat)/(+y.netSales))*100).toFixed(2)+'%':'—';return`<td style="text-align:center;color:var(--navy);font-weight:600">${npm}</td>`}).join('')}</tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="exnote">💡 Tip: After uploading Balance Sheets, the table auto-populates. Verify and correct values. Ratios are computed automatically.</div>
+  </div>`;
+  setupDZ(sec);
+}
+
+function rCIBIL(){
+  if(D.cibil.perCibil.length===0)D.cibil.perCibil.push({name:'',score:'',dpd:'0',status:'Standard'});
+  document.getElementById('sc').innerHTML=`
+  <div class="sh"><div class="sbadge">Step 7 of 11</div><h1>CIBIL &amp; Banking</h1>
+  <p>Upload Commercial CIBIL, Personal CIBIL for each partner, and Bank Statement of Account (SOA).</p></div>
+  ${uzHTML('cibil','Upload CIBIL & Banking Documents','Commercial CIBIL · Personal CIBIL (all partners) · Bank SOA','.pdf,.jpg,.jpeg,.png')}
+  <div class="card">
+    <div class="ct"><div class="ico">🏦</div>Commercial CIBIL — Firm</div>
+    <div class="fg">
+      <div class="fgrp"><label>CIBIL Score / CMR</label><input type="text" id="cibil_score" value="${D.cibil.firmScore}" placeholder="e.g. 750 or CMR-3" class="${D.cibil.firmScore?'ex':''}"></div>
+      <div class="fgrp"><label>CRILC / Account Status</label>
+        <select id="cibil_status">${['Standard','SMA-0','SMA-1','SMA-2','NPA'].map(s=>`<option ${D.cibil.firmStatus===s?'selected':''}>${s}</option>`).join('')}</select>
+      </div>
+      <div class="fgrp s2"><label>Adverse Remarks / Observations</label><input type="text" id="cibil_adverse" value="${D.cibil.adverse}" placeholder="e.g. Nil / Any overdue details"></div>
+    </div>
+    <div class="cdiv"></div>
+    <div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:10px">Existing Facilities (from CIBIL)</div>
+    <div id="cibexcont">
+      ${D.cibil.exFacs.length?D.cibil.exFacs.map((f,i)=>`
+        <div class="drow cibrow" style="grid-template-columns:2fr 1.5fr 1fr;margin-top:6px">
+          <div class="fgrp"><label>Bank / Institution</label><input type="text" name="cb_${i}" value="${f.bank||''}" placeholder="Lender name"></div>
+          <div class="fgrp"><label>Facility Type</label><input type="text" name="ct_${i}" value="${f.type||''}" placeholder="CC / TL / OD" class="ex"></div>
+          <div class="fgrp"><label>Outstanding (Rs. L)</label><input type="number" name="co_${i}" value="${f.outstanding||''}" placeholder="0.00" class="ex"></div>
+          <button class="drm" onclick="D.cibil.exFacs.splice(${i},1);rCIBIL()">×</button>
+        </div>`).join('')
+      :'<div style="font-size:13px;color:var(--g400);padding:11px;background:var(--g50);border-radius:6px">Upload CIBIL report to auto-populate, or add manually.</div>'}
+    </div>
+    <button class="addbtn" onclick="D.cibil.exFacs.push({bank:'',type:'',outstanding:''});rCIBIL()" style="margin-top:9px">+ Add Existing Facility</button>
+  </div>
+  <div class="card">
+    <div class="ct"><div class="ico">👤</div>Personal CIBIL — Partners / Directors</div>
+    <div id="percibcont">
+      ${D.cibil.perCibil.map((c,i)=>`
+        <div class="drow" style="grid-template-columns:2fr 1fr 1fr 1.5fr;margin-top:7px">
+          <div class="fgrp"><label>Partner / Director Name</label><input type="text" value="${c.name||''}" placeholder="Full name" oninput="D.cibil.perCibil[${i}].name=this.value"></div>
+          <div class="fgrp"><label>CIBIL Score</label><input type="number" value="${c.score||''}" placeholder="e.g. 760" min="300" max="900" oninput="D.cibil.perCibil[${i}].score=this.value" class="${c.score?'ex':''}">
+            ${c.score?`<div class="hint" style="color:${+c.score>=700?'var(--green)':+c.score>=600?'var(--amber)':'var(--red)'}">${+c.score>=700?'✓ Good':+c.score>=600?'⚠ Average':'✗ Poor'}</div>`:''}
+          </div>
+          <div class="fgrp"><label>DPD</label><input type="number" value="${c.dpd||'0'}" placeholder="0" oninput="D.cibil.perCibil[${i}].dpd=this.value"></div>
+          <div class="fgrp"><label>Status</label>
+            <select oninput="D.cibil.perCibil[${i}].status=this.value">${['Standard','SMA-1','SMA-2','NPA'].map(s=>`<option ${(c.status||'Standard')===s?'selected':''}>${s}</option>`).join('')}</select>
+          </div>
+          <button class="drm" onclick="D.cibil.perCibil.splice(${i},1);if(!D.cibil.perCibil.length)D.cibil.perCibil.push({name:'',score:'',dpd:'0',status:'Standard'});rCIBIL()">×</button>
+        </div>`).join('')}
+    </div>
+    <button class="addbtn" onclick="D.cibil.perCibil.push({name:'',score:'',dpd:'0',status:'Standard'});rCIBIL()">+ Add Partner CIBIL</button>
+  </div>
+  <div class="card">
+    <div class="ct"><div class="ico">📋</div>Bank Account Conduct</div>
+    <div class="fgrp"><label>Conduct of Account Remarks</label>
+      <textarea id="cibil_conduct" rows="4" placeholder="Comments on existing banking — utilisation, credits, cheque returns, SMA status...">${D.cibil.conduct}</textarea>
+    </div>
+  </div>`;
+}
+
+function rSecurity(){
+  if(D.sec.props.length===0)D.sec.props.push({desc:'',survey:'',area:'',owner:'',mv:'',dv:'',valuer:''});
+  const totalMV=D.sec.props.reduce((s,p)=>s+(+p.mv||0),0);
+  const totalDV=D.sec.props.reduce((s,p)=>s+(+p.dv||0),0);
+  const grtrs=D.sec.grtrs.length?D.sec.grtrs:D.con.partners.filter(p=>p.name).map(p=>({name:p.name,type:'Personal',nw:'',pan:p.pan}));
+  document.getElementById('sc').innerHTML=`
+  <div class="sh"><div class="sbadge">Step 8 of 11</div><h1>Security Details</h1>
+  <p>Upload Valuation Reports, Legal Opinions, and Stock Statement. Property data auto-extracted from valuation PDFs.</p></div>
+  ${uzHTML('security','Upload Security Documents','Valuation Reports · Legal Opinion · Stock Statement · Guarantee forms','.pdf,.jpg,.jpeg,.png')}
+  <div class="card">
+    <div class="ct"><div class="ico">📦</div>Primary Security (Hypothecation)</div>
+    <div class="fg">
+      <div class="fgrp s2"><label>Primary Security Description</label><input type="text" id="sec_prim" value="${D.sec.primary}" placeholder="e.g. Hypothecation of stock of Cotton, Cotton Bales and Book Debts"></div>
+      <div class="fgrp"><label>Stock Value (Rs. Lakhs)</label><input type="number" id="sec_stock" value="${D.sec.stock}" placeholder="As per latest stock statement" class="${D.sec.stock?'ex':''}"></div>
+      <div class="fgrp"><label>Book Debts Value (Rs. Lakhs)</label><input type="number" id="sec_debt" value="${D.sec.debtors}" placeholder="As per debtors statement" class="${D.sec.debtors?'ex':''}"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ct"><div class="ico">🏠</div>Collateral Securities (Immovable Properties)</div>
+    <div class="cs">All values in Rs. Lakhs. Data auto-extracted from valuation reports.</div>
+    <div id="propcont">
+      ${D.sec.props.map((p,i)=>`
+        <div class="drow proprow" style="grid-template-columns:2fr 1fr 1fr;margin-top:8px">
+          <div style="font-size:11px;font-weight:700;color:var(--navy);grid-column:span 3;margin-bottom:-6px">Property ${i+1}</div>
+          <div class="fgrp s2"><label>Property Description / Location</label><input type="text" name="pd_${i}" value="${p.desc||''}" placeholder="Plot/Land/Building description and location" class="${p.desc?'ex':''}"></div>
+          <div class="fgrp"><label>Survey No. / Plot No.</label><input type="text" name="ps_${i}" value="${p.survey||''}" placeholder="Sy.No." class="${p.survey?'ex':''}"></div>
+          <div class="fgrp"><label>Area</label><input type="text" name="pa_${i}" value="${p.area||''}" placeholder="e.g. 2400 Sq.ft" class="${p.area?'ex':''}"></div>
+          <div class="fgrp"><label>Owner Name</label><input type="text" name="po_${i}" value="${p.owner||''}" placeholder="Title holder name" class="${p.owner?'ex':''}"></div>
+          <div class="fgrp"><label>Market Value (Rs. L)</label><input type="number" name="pmv_${i}" value="${p.mv||''}" placeholder="0.00" class="${p.mv?'ex':''}"></div>
+          <div class="fgrp"><label>Distress Value (Rs. L)</label><input type="number" name="pdv_${i}" value="${p.dv||''}" placeholder="0.00" class="${p.dv?'ex':''}"></div>
+          <div class="fgrp"><label>Valuer Name</label><input type="text" name="pv_${i}" value="${p.valuer||''}" placeholder="Valuer / CA firm" class="${p.valuer?'ex':''}"></div>
+          <button class="drm" onclick="D.sec.props.splice(${i},1);if(!D.sec.props.length)D.sec.props.push({});rSecurity()">×</button>
+        </div>`).join('')}
+    </div>
+    <button class="addbtn" onclick="D.sec.props.push({desc:'',survey:'',area:'',owner:'',mv:'',dv:'',valuer:''});rSecurity()">+ Add Property</button>
+    <div style="margin-top:12px;font-size:13px;color:var(--g600)">
+      <strong>Total Market Value: Rs. ${totalMV.toFixed(2)} Lakhs</strong>&emsp;
+      <strong>Total Distress Value: Rs. ${totalDV.toFixed(2)} Lakhs</strong>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ct"><div class="ico">🤝</div>Personal / Corporate Guarantors</div>
+    <div id="grtrcont">
+      ${grtrs.map((g,i)=>`
+        <div class="drow grtrow" style="grid-template-columns:2fr 1fr 1fr 1fr;margin-top:7px">
+          <div class="fgrp"><label>Guarantor Name</label><input type="text" name="gn_${i}" value="${g.name||''}" placeholder="Full name"></div>
+          <div class="fgrp"><label>Type</label><select name="gt_${i}"><option ${(g.type||'Personal')==='Personal'?'selected':''}>Personal</option><option ${g.type==='Corporate'?'selected':''}>Corporate</option></select></div>
+          <div class="fgrp"><label>Net Worth (Rs. L)</label><input type="number" name="gnw_${i}" value="${g.nw||''}" placeholder="0.00"></div>
+          <div class="fgrp"><label>PAN</label><input type="text" name="gp_${i}" value="${g.pan||''}" placeholder="AAAAA0000A" style="text-transform:uppercase"></div>
+          <button class="drm" onclick="D.sec.grtrs.splice(${i},1);rSecurity()">×</button>
+        </div>`).join('')}
+    </div>
+    <button class="addbtn" onclick="(D.sec.grtrs.length||D.sec.grtrs.push(...D.con.partners.filter(p=>p.name).map(p=>({name:p.name,type:'Personal',nw:'',pan:p.pan}))));D.sec.grtrs.push({name:'',type:'Personal',nw:'',pan:''});rSecurity()">+ Add Guarantor</button>
+  </div>`;
+}
+
+function rBusiness(){
+  if(D.biz.licenses.length===0)D.biz.licenses.push({type:'',number:'',valid:'',auth:''});
+  if(D.biz.customers.length===0)D.biz.customers.push({name:'',loc:''});
+  if(D.biz.suppliers.length===0)D.biz.suppliers.push({name:'',loc:''});
+  document.getElementById('sc').innerHTML=`
+  <div class="sh"><div class="sbadge">Step 9 of 11</div><h1>Business &amp; Compliance</h1>
+  <p>Upload Project Report, Licenses, Customer/Supplier Letters, and Auditor Compliance Certificates.</p></div>
+  ${uzHTML('business','Upload Business Documents','Project Report · Licenses · Customer/Supplier Letters · Auditor Certs','.pdf,.jpg,.jpeg,.png')}
+  <div class="card">
+    <div class="ct"><div class="ico">🏭</div>Business Details</div>
+    <div class="fg">
+      <div class="fgrp s2"><label>Business Description</label><textarea id="biz_desc" rows="4" placeholder="Detailed description — history, operations, products/services...">${D.biz.desc}</textarea></div>
+      <div class="fgrp"><label>Products / Services</label><input type="text" id="biz_prod" value="${D.biz.products}" placeholder="e.g. Cotton Lint, Cotton Seeds, Bales"></div>
+      <div class="fgrp"><label>Raw Materials</label><input type="text" id="biz_raw" value="${D.biz.rawmat}" placeholder="e.g. Raw Cotton (Kappas)"></div>
+      <div class="fgrp"><label>Installed Capacity</label><input type="text" id="biz_cap" value="${D.biz.cap}" placeholder="e.g. 200 Quintals/day"></div>
+      <div class="fgrp"><label>Capacity Utilisation %</label><input type="text" id="biz_util" value="${D.biz.util}" placeholder="e.g. 75%"></div>
+      <div class="fgrp s2"><label>Industry Outlook</label><textarea id="biz_out" rows="3" placeholder="Industry overview, market trends, government support for the sector...">${D.biz.outlook}</textarea></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ct"><div class="ico">🤝</div>Key Customers &amp; Suppliers</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div>
+        <div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:9px">Key Customers</div>
+        ${D.biz.customers.map((c,i)=>`
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+            <div class="fgrp"><label>Name</label><input type="text" value="${c.name||''}" placeholder="Customer name" oninput="D.biz.customers[${i}].name=this.value"></div>
+            <div class="fgrp"><label>Location</label><input type="text" value="${c.loc||''}" placeholder="City, State" oninput="D.biz.customers[${i}].loc=this.value"></div>
+          </div>`).join('')}
+        <button class="addbtn" onclick="D.biz.customers.push({name:'',loc:''});rBusiness()">+ Add Customer</button>
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:9px">Key Suppliers</div>
+        ${D.biz.suppliers.map((s,i)=>`
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+            <div class="fgrp"><label>Name</label><input type="text" value="${s.name||''}" placeholder="Supplier name" oninput="D.biz.suppliers[${i}].name=this.value"></div>
+            <div class="fgrp"><label>Location</label><input type="text" value="${s.loc||''}" placeholder="City, State" oninput="D.biz.suppliers[${i}].loc=this.value"></div>
+          </div>`).join('')}
+        <button class="addbtn" onclick="D.biz.suppliers.push({name:'',loc:''});rBusiness()">+ Add Supplier</button>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ct"><div class="ico">✅</div>Licenses &amp; Statutory Compliance</div>
+    <div id="liccont">
+      ${D.biz.licenses.map((l,i)=>`
+        <div class="drow" style="grid-template-columns:2fr 1.5fr 1fr 2fr;margin-top:8px">
+          <div class="fgrp"><label>License / Approval Type</label><input type="text" value="${l.type||''}" placeholder="e.g. Factory License, FSSAI..." oninput="D.biz.licenses[${i}].type=this.value"></div>
+          <div class="fgrp"><label>Reg. / License No.</label><input type="text" value="${l.number||''}" placeholder="Number" oninput="D.biz.licenses[${i}].number=this.value"></div>
+          <div class="fgrp"><label>Valid Till</label><input type="text" value="${l.valid||''}" placeholder="DD/MM/YYYY" oninput="D.biz.licenses[${i}].valid=this.value"></div>
+          <div class="fgrp"><label>Issuing Authority</label><input type="text" value="${l.auth||''}" placeholder="Authority name" oninput="D.biz.licenses[${i}].auth=this.value"></div>
+          <button class="drm" onclick="D.biz.licenses.splice(${i},1);if(!D.biz.licenses.length)D.biz.licenses.push({});rBusiness()">×</button>
+        </div>`).join('')}
+    </div>
+    <button class="addbtn" onclick="D.biz.licenses.push({type:'',number:'',valid:'',auth:''});rBusiness()">+ Add License</button>
+  </div>`;
+}
+
+function rPricing(){
+  document.getElementById('sc').innerHTML=`
+  <div class="sh"><div class="sbadge">Step 10 of 11</div><h1>Pricing &amp; Internal Rating</h1>
+  <p>Upload Internal Rating PDF, ROI Table (Excel or PDF), and Processing Fee circular.</p></div>
+  ${uzHTML('pricing','Upload Pricing Documents','Internal Rating PDF · ROI Table (Excel/PDF) · Fee Circular','.pdf,.jpg,.jpeg,.png,.xlsx,.xls')}
+  <div class="card">
+    <div class="ct"><div class="ico">⭐</div>Credit Rating</div>
+    <div class="fg c3">
+      <div class="fgrp"><label>Internal Rating (BOB)</label><input type="text" id="price_rating" value="${D.price.rating}" placeholder="e.g. BOB 4" class="${D.price.rating?'ex':''}"></div>
+      <div class="fgrp"><label>FR Rating</label><input type="text" id="price_fr" value="${D.price.fr}" placeholder="e.g. FR 3" class="${D.price.fr?'ex':''}"></div>
+      <div class="fgrp"><label>CR Rating</label><input type="text" id="price_cr" value="${D.price.cr}" placeholder="e.g. CR4" class="${D.price.cr?'ex':''}"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ct"><div class="ico">💹</div>Rate of Interest &amp; Charges</div>
+    <div class="fg">
+      <div class="fgrp"><label>Base Rate (MCLR / Repo)</label><input type="text" id="price_base" value="${D.price.baseRate}" placeholder="e.g. 9.10% (1 Yr MCLR)" class="${D.price.baseRate?'ex':''}"></div>
+      <div class="fgrp"><label>Effective Rate of Interest</label><input type="text" id="price_roi" value="${D.price.roi}" placeholder="e.g. 9.85% p.a." class="${D.price.roi?'ex':''}"></div>
+      <div class="fgrp"><label>Processing Fee</label><input type="text" id="price_proc" value="${D.price.procFee}" placeholder="e.g. 0.50% + GST" class="${D.price.procFee?'ex':''}"></div>
+      <div class="fgrp"><label>Inspection Charges</label><input type="text" id="price_insp" value="${D.price.inspFee}" placeholder="e.g. Rs.5,000 per inspection" class="${D.price.inspFee?'ex':''}"></div>
+      <div class="fgrp s2"><label>Deviations from Policy (if any)</label><textarea id="price_devs" rows="3" placeholder="List any deviations from standard policy with justification...">${D.price.devs}</textarea></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ct"><div class="ico">🗓</div>Committee Details</div>
+    <div class="fg c3">
+      <div class="fgrp"><label>Committee Name</label>
+        <select id="meta_cmte">${['RMCC','DRMCC','MCB','ZCC'].map(c=>`<option ${D.meta.cmte===c?'selected':''}>${c}</option>`).join('')}</select>
+      </div>
+      <div class="fgrp"><label>Meeting Date</label><input type="text" id="meta_mtg" value="${D.meta.mtgDate}" placeholder="DD.MM.YYYY"></div>
+      <div class="fgrp"><label>Agenda Number</label><input type="text" id="meta_agenda" value="${D.meta.agenda}" placeholder="e.g. A-1"></div>
+    </div>
+  </div>`;
+}
+
+function rGenerate(){
+  const totalExp=D.cred.facs.reduce((s,f)=>s+(+f.amt||0),0);
+  const totalMV=D.sec.props.reduce((s,p)=>s+(+p.mv||0),0);
+  const cov=totalMV>0&&totalExp>0?((totalMV/totalExp)*100).toFixed(1)+'%':'N/A';
+  const allYrs=[...D.hist,...D.proj];
+  const rv=(l,v)=>{const e=!v||v==='N/A'||v==='0';return`<div class="rvi"><div class="rl">${l}</div><div class="rv${e?' emp':''}">${e?'— Not provided':v}</div></div>`};
+  document.getElementById('sc').innerHTML=`
+  <div class="sh"><div class="sbadge">Step 11 of 11</div><h1>Review &amp; Generate</h1>
+  <p>Review the summary below. Click Generate to download your complete credit proposal note.</p></div>
+  <div class="alert ok">✅ All data collected. Review and click Generate Credit Proposal Note below.</div>
+  <div class="card rs"><h3>🏢 Identity & Basic Details</h3><div class="rvgrid">
+    ${rv('Firm Name',D.id.firmName)}${rv('PAN',D.id.pan)}${rv('GSTIN',D.id.gstin)}${rv('Udyam No.',D.id.udyam)}
+    ${rv('MSME Category',D.id.msme)}${rv('Constitution',D.id.const)}${rv('Date of Estb.',D.id.estDate)}${rv('Branch',D.meta.branch)}
+    ${rv('Region',D.meta.region)}${rv('Zone',D.meta.zone)}
+  </div></div>
+  <div class="card rs"><h3>💰 Credit Facilities — Total: Rs. ${totalExp.toFixed(2)} Lakhs</h3><div class="rvgrid">
+    ${D.cred.facs.map(f=>rv(f.type,'Rs. '+f.amt+' L | '+f.tenure)).join('')}
+    ${rv('Scheme',D.cred.scheme)}${rv('Security Coverage',cov)}
+  </div></div>
+  <div class="card rs"><h3>📊 Financial Highlights (Rs. Lakhs)</h3>
+    ${allYrs.length?`<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">
+    <tr style="background:var(--navy);color:#fff"><th style="padding:7px 10px;text-align:left">Parameter</th>${allYrs.map(y=>`<th style="padding:7px">${y.year}</th>`).join('')}</tr>
+    ${['netSales','pat','netWorth','curAssets','curLiab','stock'].map((k,ki)=>`<tr style="background:${ki%2?'var(--g50)':'#fff'}"><td style="padding:6px 10px;font-weight:500">${FIN.find(r=>r.k===k)?.l||k}</td>${allYrs.map(y=>`<td style="padding:6px;text-align:center">${y[k]||'—'}</td>`).join('')}</tr>`).join('')}
+    </table></div>`:'<div style="color:var(--g400);font-size:13px">No financial data entered yet.</div>'}
+  </div>
+  <div class="card rs"><h3>🏠 Security Summary</h3><div class="rvgrid">
+    ${rv('Primary Security',D.sec.primary)}${rv('Stock Value',D.sec.stock?'Rs. '+D.sec.stock+' L':'')}
+    ${rv('No. of Properties',D.sec.props.filter(p=>p.mv).length+' properties')}${rv('Total Market Value','Rs. '+totalMV.toFixed(2)+' L')}
+  </div></div>
+  <div style="text-align:center;padding:30px 0 10px">
+    <button class="btn btn-gold" style="padding:15px 44px;font-size:15px;letter-spacing:.4px" onclick="doGenerate()">📄 Generate Credit Proposal Note</button>
+    <div style="margin-top:10px;font-size:12px;color:var(--g400)">Downloads as .doc — open in Microsoft Word or Google Docs</div>
+  </div>`;
+}
+
+/* ── GENERATE CREDIT NOTE ── */
+function doGenerate(){
+  saveStep();
+  const html=buildNote();
+  const blob=new Blob([html],{type:'application/msword'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='CreditProposal_'+( D.id.firmName.replace(/[^a-zA-Z0-9]/g,'_')||'MSME')+'_'+new Date().toISOString().split('T')[0]+'.doc';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function buildNote(){
+  const firm=D.id.firmName||'[FIRM NAME]';
+  const totalExp=D.cred.facs.reduce((s,f)=>s+(+f.amt||0),0);
+  const totalMV=D.sec.props.reduce((s,p)=>s+(+p.mv||0),0);
+  const totalDV=D.sec.props.reduce((s,p)=>s+(+p.dv||0),0);
+  const cov=totalMV>0&&totalExp>0?((totalMV/totalExp)*100).toFixed(1)+'%':'N/A';
+  const today=new Date().toLocaleDateString('en-IN');
+  const allYrs=[...D.hist,...D.proj];
+  const lastAudit=D.hist.length?D.hist[D.hist.length-1]:{};
+  const partners=D.con.partners.filter(p=>p.name);
+  const grtrs=D.sec.grtrs.length?D.sec.grtrs:partners.map(p=>({name:p.name,type:'Personal',nw:'',pan:p.pan}));
+
+  return`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+<head><meta charset="UTF-8"><title>Credit Proposal - ${firm}</title>
+<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml><![endif]-->
+<style>
+body{font-family:'Times New Roman',serif;font-size:11pt;margin:1in;color:#000;line-height:1.4}
+h1{font-size:14pt;text-align:center;font-weight:bold;text-transform:uppercase;margin:10pt 0}
+h2{font-size:12pt;font-weight:bold;text-decoration:underline;margin-top:16pt}
+h3{font-size:11pt;font-weight:bold;margin-top:12pt}
+p{margin:5pt 0}
+table{border-collapse:collapse;width:100%;margin:7pt 0;font-size:10pt}
+th{background:#0C1A2E;color:white;padding:5pt 7pt;font-weight:bold;font-size:9.5pt}
+th.tl{text-align:left}
+td{border:1pt solid #999;padding:4pt 7pt;vertical-align:top}
+td.lb{background:#F0F0F0;font-weight:bold;width:35%}
+td.sh{background:#1E3358;color:white;font-weight:bold;font-size:9.5pt;text-align:left;padding-left:10pt}
+td.ct{text-align:center}
+td.rt{text-align:right}
+td.bd{font-weight:bold}
+.pb{page-break-before:always}
+.sec{background:#0C1A2E;color:white;padding:5pt 9pt;font-weight:bold;font-size:11pt;margin:12pt 0 6pt}
+.sub{background:#1E3358;color:white;padding:4pt 7pt;font-weight:bold;font-size:10pt;margin:8pt 0 5pt}
+ul{margin:4pt 0 4pt 18pt}
+li{margin:2pt 0}
+</style></head><body>
+
+<p style="text-align:right;font-size:10pt">${fv(D.meta.cmte)}-CM/MEETING DT: ${fv(D.meta.mtgDate,today)} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; AGENDA NO: ${fv(D.meta.agenda,'A-1')}</p>
+<h1>&#2348;&#2376;&#2306;&#2325; &#2321;&#2398; &#2348;&#2397;&#2378;&#2342;&#2366; / BANK OF BARODA</h1>
+<p style="text-align:center;font-size:12pt;font-weight:bold">&#2352;&#2366;&#2332;&#2381;&#2351; &#2325;&#2366;&#2352;&#2381;&#2351;&#2366;&#2354;&#2351; / R.O. ${fv(D.meta.region,'').toUpperCase()}</p>
+<p style="text-align:center">ASSET CLASSIFICATION: NA &nbsp;&nbsp;&nbsp; CREDIT RATING: ${fv(D.price.rating,'NA')}</p>
+<br>
+<table style="border:2pt solid #0C1A2E">
+<tr><td class="lb">Proposal in respect of</td><td style="font-weight:bold">A/c &#8211; ${firm}</td></tr>
+<tr><td class="lb">Branch</td><td>${fv(D.meta.branch)} Branch</td></tr>
+<tr><td class="lb">Region</td><td>${fv(D.meta.region)}</td></tr>
+<tr><td class="lb">Zone</td><td>${fv(D.meta.zone)}</td></tr>
+<tr><td class="lb">Date</td><td>${today}</td></tr>
+</table>
+
+<div class="pb"></div>
+<h1>NOTE TO ${fv(D.meta.cmte)} &#8211; R.O. ${fv(D.meta.region,'').toUpperCase()}</h1>
+
+<div class="sec">SECTION I: DETAILS OF THE PROPOSAL</div>
+
+<h3>1.0 Gist of the Proposal / Issue for Consideration</h3>
+<p>The proposal is for <b>${D.cred.takeover==='takeover'?'Takeover and fresh sanction':'fresh sanction'}</b> of Working Capital and Term Loan credit facilities to <b>${firm}</b>, a ${fv(D.id.const,'Partnership Firm')} engaged in <b>${fv(D.id.nature,'the business')}</b>, with aggregate exposure of <b>Rs. ${totalExp.toFixed(2)} Lakhs</b> under <b>${fv(D.cred.scheme,'Bank Scheme')}</b>.</p>
+${D.cred.takeover==='takeover'?`<p>The firm is presently banking with <b>${fv(D.cred.exBank)}</b> with outstanding of Rs. ${fv(D.cred.exAmt)} Lakhs. They have approached Bank of Baroda, ${fv(D.meta.branch)}, to transfer their credit facilities.</p>`:''}
+
+<h3>2.0 Basic Data</h3>
+<div class="sub">Security Coverage (Rs. in Lakhs)</div>
+<table>
+<tr><th class="tl" style="width:30%">Security Type</th><th class="tl">Description</th><th>Value</th></tr>
+<tr><td class="lb">Primary Security</td><td colspan="2">${fv(D.sec.primary,'Hypothecation of stocks and book debts of the firm')}</td></tr>
+<tr><td class="lb">Collateral / EM</td><td>${D.sec.props.filter(p=>p.desc).map(p=>`${p.desc} (Sy.No: ${p.survey||'&#8212;'}, ${p.area||'&#8212;'}, Owner: ${p.owner||'&#8212;'})`).join('<br>')||'As per valuation reports'}</td>
+<td class="ct">MV: Rs.${totalMV.toFixed(2)} L<br>DV: Rs.${totalDV.toFixed(2)} L</td></tr>
+<tr><td class="lb">Security Coverage</td><td colspan="2">${cov} of total exposure</td></tr>
+</table>
+
+<div class="sub">Proposed Credit Facilities (Rs. in Lakhs)</div>
+<table>
+<tr><th class="tl">Facility</th><th>Amount (Rs. L)</th><th class="tl">Purpose</th><th>Tenure</th><th>ROI</th></tr>
+${D.cred.facs.map(f=>`<tr><td>${f.type}</td><td class="ct"><b>Rs. ${f.amt||0}</b></td><td>${f.purpose||'&#8212;'}</td><td class="ct">${f.tenure||'&#8212;'}</td><td class="ct">${f.roi||fv(D.price.roi,'As per guidelines')}</td></tr>`).join('')}
+<tr><td class="bd">Total Exposure</td><td class="ct bd">Rs. ${totalExp.toFixed(2)}</td><td colspan="3"></td></tr>
+</table>
+
+${partners.length?`<div class="sub">2.03) Partners / Directors</div>
+<table><tr><th class="tl">Name</th><th>Share %</th><th>PAN</th></tr>
+${partners.map(p=>`<tr><td>${p.name}</td><td class="ct">${p.share||'&#8212;'}%</td><td>${p.pan||'&#8212;'}</td></tr>`).join('')}
+</table>`:''}
+
+<div class="sub">2.05) Guarantors</div>
+<table><tr><th class="tl">Name</th><th>Type</th><th>Net Worth (Rs. L)</th><th>PAN</th></tr>
+${grtrs.map(g=>`<tr><td>${g.name||'&#8212;'}</td><td>${g.type||'Personal'}</td><td class="ct">${g.nw||'&#8212;'}</td><td>${g.pan||'&#8212;'}</td></tr>`).join('')}
+</table>
+
+<h3>3.0 Background of the Firm</h3>
+<p><b>${firm}</b> is a ${fv(D.id.const,'Partnership Firm')}${D.id.estDate?' established in '+D.id.estDate:''} engaged in ${fv(D.id.nature,'the business')}.</p>
+${D.biz.desc?`<p>${D.biz.desc.substring(0,700)}</p>`:''}
+${D.biz.rawmat?`<p><b>Raw Materials:</b> ${D.biz.rawmat}. ${D.biz.cap?'Installed Capacity: '+D.biz.cap+'. ':''} ${D.biz.util?'Utilisation: '+D.biz.util+'.':''}</p>`:''}
+${D.prom.filter(p=>p.name).map((p,i)=>`<h3>Partner/Promoter Profile &#8212; ${p.name}</h3><p>${p.bg||'Experienced professional with '+fv(p.exp,'several')+' years of industry experience.'} Net Worth: Rs. ${fv(p.nw,'&#8212;')} Lakhs.</p>`).join('')}
+
+<h3>4.0 Conduct of Account / Other Information</h3>
+<p>${fv(D.cibil.conduct,'The firm is approaching our bank for the first time. No prior account history with our bank.')}</p>
+
+<h3>5.0 Compliance</h3>
+<p>KYC Compliance of Firm/Partners: Confirmed.<br>
+Customer Due Diligence: Carried out satisfactorily.<br>
+GSTIN: ${fv(D.id.gstin,'As per records')} &#8212; Active.</p>
+${D.biz.licenses.filter(l=>l.type).length?`<table><tr><th class="tl">License Type</th><th>Number</th><th>Valid Till</th><th class="tl">Authority</th></tr>
+${D.biz.licenses.filter(l=>l.type).map(l=>`<tr><td>${l.type}</td><td>${l.number||'&#8212;'}</td><td>${l.valid||'&#8212;'}</td><td>${l.auth||'&#8212;'}</td></tr>`).join('')}
+</table>`:''}
+
+<h3>7.0 Justification for Sanction of Credit Facilities</h3>
+<p>${fv(D.cred.purpose,firm+' is a well-established firm with sound track record and experience in the industry.')}
+${lastAudit.netSales?` The Firm has achieved Net Sales of Rs. ${lastAudit.netSales} Lakhs as per ${lastAudit.year} financials.`:''}
+The firm has offered ${D.sec.props.filter(p=>p.mv).length} immovable properties as collateral valued at Rs. ${totalMV.toFixed(2)} Lakhs (MV), providing ${cov} security coverage against total exposure of Rs. ${totalExp.toFixed(2)} Lakhs.
+CIBIL status reported as ${fv(D.cibil.firmStatus,'Standard')}. ${fv(D.cibil.adverse,'No adverse remarks')} in CIBIL reports.
+Personal CIBIL: ${D.cibil.perCibil.filter(c=>c.name&&c.score).map(c=>`${c.name} &#8211; ${c.score}`).join(', ')||'As per reports attached.'}</p>
+
+<h3>8.0 Recommendations</h3>
+<p>In view of the need-based requirements of the Firm, experience of Promoters, sound security coverage, and as stated in this Note, the Branch has recommended and we endorse for sanction of the following credit facilities:</p>
+<table>
+<tr><th class="tl">Facility</th><th>Amount (Rs. L)</th><th class="tl">Purpose</th><th>Tenure</th></tr>
+${D.cred.facs.map(f=>`<tr><td>${f.type}</td><td class="ct">${f.amt||0}</td><td>${f.purpose||'&#8212;'}</td><td>${f.tenure||'&#8212;'}</td></tr>`).join('')}
+<tr><td class="bd">Total</td><td class="ct bd">${totalExp.toFixed(2)}</td><td colspan="2"></td></tr>
+</table>
+<p>We endorse the branch recommendation for sanction on terms and conditions as per Annexure D.</p>
+
+<div class="pb"></div>
+<div class="sec">SECTION II &#8211; FINANCIAL PARAMETERS AND ASSESSMENT</div>
+
+<h3>Financial Performance (Rs. in Lakhs)</h3>
+<table>
+<tr><th class="tl" style="width:22%">Parameter</th>
+${allYrs.map(y=>`<th>${y.year}<br><span style="font-size:8pt;font-weight:400">${y.type||''}</span></th>`).join('')}
+</tr>
+${FIN.map(r=>`<tr><td class="lb">${r.l}</td>${allYrs.map(y=>`<td class="ct">${y[r.k]||'&#8212;'}</td>`).join('')}</tr>`).join('')}
+<tr><td class="lb">Current Ratio</td>${allYrs.map(y=>{const cr=(y.curAssets&&y.curLiab)?(+y.curAssets/+y.curLiab).toFixed(2):'&#8212;';return`<td class="ct">${cr}</td>`}).join('')}</tr>
+<tr><td class="lb">DE Ratio (TOL/TNW)</td>${allYrs.map(y=>{const de=(y.totalDebt&&y.tnw)?(+y.totalDebt/+y.tnw).toFixed(2):'&#8212;';return`<td class="ct">${de}</td>`}).join('')}</tr>
+<tr><td class="lb">Net Profit Margin %</td>${allYrs.map(y=>{const npm=(y.pat&&y.netSales)?((+y.pat/+y.netSales)*100).toFixed(2)+'%':'&#8212;';return`<td class="ct">${npm}</td>`}).join('')}</tr>
+</table>
+
+<h3>Brief Comments on Financials</h3>
+<p><b>Sales/Receipts:</b> ${lastAudit.netSales?`The Firm achieved Net Sales of Rs. ${lastAudit.netSales} Lakhs in ${lastAudit.year}.`:'As per financial statements submitted.'} ${D.proj.length&&D.proj[0].netSales?`Estimated sales of Rs. ${D.proj[0].netSales} Lakhs for ${D.proj[0].year}.`:''}</p>
+<p><b>Net Profit:</b> ${lastAudit.pat?`Reported PAT of Rs. ${lastAudit.pat} Lakhs for ${lastAudit.year}.`:'As per statements.'}</p>
+<p><b>Net Worth:</b> ${lastAudit.tnw||lastAudit.netWorth?`Tangible Net Worth (TNW) was Rs. ${lastAudit.tnw||lastAudit.netWorth} Lakhs as per ${lastAudit.year}.`:'As per statements.'}</p>
+<p><b>Current Ratio:</b> ${lastAudit.curAssets&&lastAudit.curLiab?`Current ratio was ${(+lastAudit.curAssets/+lastAudit.curLiab).toFixed(2)} for ${lastAudit.year}, within acceptable norms.`:'As per statements.'}</p>
+
+<div class="pb"></div>
+<div class="sec">SECTION III &#8211; INDUSTRY ANALYSIS</div>
+<h3>Market Overview</h3>
+<p>${D.biz.outlook||fv(D.id.nature,'The industry')+ ' is an important sector of the Indian economy with steady demand and government support for MSME businesses in this segment.'}</p>
+
+<h3>SWOT Analysis</h3>
+<table>
+<tr><th style="width:50%;background:#1A7A5C">STRENGTHS</th><th style="background:#B83232">WEAKNESSES</th></tr>
+<tr>
+<td>&#8226; Experienced management &#8212; ${D.prom.map(p=>p.name).filter(Boolean).join(', ')||'key promoters'}<br>
+&#8226; Established business${D.id.estDate?' since '+D.id.estDate:''}<br>
+&#8226; Security coverage: ${cov}<br>
+&#8226; CIBIL status: ${fv(D.cibil.firmStatus,'Standard')}<br>
+&#8226; ${D.id.udyam?'Registered MSME (Udyam: '+D.id.udyam+')':'MSME Registered'}</td>
+<td>&#8226; Working capital intensive business<br>
+&#8226; Seasonal nature of business (if applicable)<br>
+&#8226; Dependence on commodity/raw material prices</td>
+</tr>
+<tr><th style="background:#0C5A8A">OPPORTUNITIES</th><th style="background:#7A5C0C">THREATS</th></tr>
+<tr>
+<td>&#8226; Growing demand for ${fv(D.biz.products,'the product')}<br>
+&#8226; Government support for MSME sector<br>
+&#8226; Banking with Bank of Baroda for better credit management</td>
+<td>&#8226; Competition from organised sector<br>
+&#8226; Fluctuation in raw material prices<br>
+&#8226; Changes in government policy / MSP</td>
+</tr>
+</table>
+
+<div class="pb"></div>
+<h1>ANNEXURE &#8211; &#8220;D&#8221;</h1>
+<h2 style="text-align:center">ADVANCES A/c: ${firm} &#8211; FACILITY WISE TERMS &amp; CONDITIONS</h2>
+
+${D.cred.facs.map((f,i)=>`
+<h3>${f.type} &#8212; Rs. ${f.amt||0} Lakhs</h3>
+<table>
+<tr><td class="lb">Purpose</td><td>${f.purpose||'&#8212;'}</td></tr>
+<tr><td class="lb">Amount</td><td>Rs. ${f.amt||0} Lakhs</td></tr>
+<tr><td class="lb">Tenure / Review Period</td><td>${f.tenure||'&#8212;'}</td></tr>
+<tr><td class="lb">Rate of Interest</td><td>${f.roi||fv(D.price.roi,'As per bank guidelines + applicable spread')}</td></tr>
+<tr><td class="lb">Repayment</td><td>${f.repay||'&#8212;'}</td></tr>
+<tr><td class="lb">Margin</td><td>25% on Drawing Power (WC) / As per scheme guidelines (TL)</td></tr>
+</table>`).join('')}
+
+<h3>Primary Security</h3>
+<p>${fv(D.sec.primary,'Hypothecation of entire current assets including stock of goods and book debts of the firm.')}</p>
+
+<h3>Collateral Security / Equitable Mortgage</h3>
+<table>
+<tr><th>Sr.</th><th class="tl">Property Description</th><th>Survey No.</th><th class="tl">Owner</th><th>Market Value (Rs. L)</th><th>Distress Value (Rs. L)</th></tr>
+${D.sec.props.filter(p=>p.desc||p.mv).map((p,i)=>`<tr><td class="ct">${i+1}</td><td>${p.desc||'&#8212;'}</td><td>${p.survey||'&#8212;'}</td><td>${p.owner||'&#8212;'}</td><td class="ct">${p.mv||'&#8212;'}</td><td class="ct">${p.dv||'&#8212;'}</td></tr>`).join('')||'<tr><td colspan="6" class="ct">No properties entered</td></tr>'}
+<tr><td colspan="4" class="rt bd">Total</td><td class="ct bd">${totalMV.toFixed(2)}</td><td class="ct bd">${totalDV.toFixed(2)}</td></tr>
+</table>
+
+<h3>Personal Guarantee</h3>
+<table>
+<tr><th class="tl">Guarantor Name</th><th>Type</th><th>Net Worth (Rs. L)</th><th>PAN</th></tr>
+${grtrs.map(g=>`<tr><td>${g.name||'&#8212;'}</td><td>${g.type||'Personal'}</td><td class="ct">${g.nw||'&#8212;'}</td><td>${g.pan||'&#8212;'}</td></tr>`).join('')}
+</table>
+
+<h3>General Documents Required</h3>
+<ul>
+<li>KYC documents of Firm and all Partners/Directors</li>
+<li>Partnership Deed / MOA and Certificate of Incorporation</li>
+<li>Latest Audited Balance Sheet, P&amp;L Account and Tax Audit Report</li>
+<li>Stock Statement / Book Debt Statement (latest)</li>
+<li>Legal Opinion / Title Clearance Report (TCR) for all properties</li>
+<li>Valuation Report from approved valuer for all mortgaged properties</li>
+<li>CIBIL Report of Firm and all Partners/Directors</li>
+<li>All applicable licenses and statutory approvals</li>
+<li>ITR of Firm and all Partners for last 3 years &#8212; verified</li>
+</ul>
+
+<h3>Additional Stipulations</h3>
+<ul>
+<li>Firm and Partners to accept all terms and conditions unconditionally.</li>
+<li>Branch to ensure all statutory dues (GST, Income Tax, PF, ESI) are paid and current.</li>
+<li>Branch to register charge with CERSAI immediately on creation of EM as per SARFAESI Act.</li>
+<li>Security documents to be vetted by Regional Legal Department before disbursement.</li>
+<li>Branch to recover all applicable charges (processing fee, inspection charges, mortgage charges) before release.</li>
+<li>Firm to route all business transactions through the sanctioned account exclusively.</li>
+<li>Stock statement to be obtained annually. Annual inspection of hypothecated assets to be conducted.</li>
+${D.cred.takeover==='takeover'?'<li>Disbursement to be made directly to '+fv(D.cred.exBank,'existing bank')+' through NEFT/RTGS. Closure letter / No Dues Certificate to be obtained before release of new facilities.</li>':''}
+${D.price.devs&&D.price.devs!=='Nil'?'<li><b>Deviations: </b>'+D.price.devs+'</li>':''}
+</ul>
+
+<div class="pb"></div>
+<h1>ANNEXURE &#8211; E: CIBIL DETAILS</h1>
+
+<h3>Commercial CIBIL &#8212; ${firm}</h3>
+<table>
+<tr><td class="lb">CIBIL Score / CMR Rating</td><td>${fv(D.cibil.firmScore)}</td><td class="lb">CRILC Status</td><td>${fv(D.cibil.firmStatus,'Standard')}</td></tr>
+<tr><td class="lb">Adverse Remarks</td><td colspan="3">${fv(D.cibil.adverse,'Nil &#8212; No adverse remarks in CIBIL report of the firm')}</td></tr>
+</table>
+
+${D.cibil.exFacs.length?`<h3>Existing Facilities as per CIBIL</h3>
+<table><tr><th class="tl">Bank / Institution</th><th class="tl">Facility</th><th>Outstanding (Rs. L)</th></tr>
+${D.cibil.exFacs.map(f=>`<tr><td>${f.bank||'&#8212;'}</td><td>${f.type||'&#8212;'}</td><td class="ct">${f.outstanding||'&#8212;'}</td></tr>`).join('')}
+</table>`:''}
+
+<h3>Personal CIBIL &#8212; Partners / Directors</h3>
+<table><tr><th class="tl">Name</th><th>CIBIL Score</th><th>DPD</th><th>Status</th></tr>
+${D.cibil.perCibil.map(c=>`<tr><td>${c.name||'&#8212;'}</td><td class="ct">${c.score||'&#8212;'}</td><td class="ct">${c.dpd||'0'}</td><td>${c.status||'Standard'}</td></tr>`).join('')}
+</table>
+<p><b>Bank Conduct Remarks:</b> ${fv(D.cibil.conduct,'Account conducted satisfactorily. No adverse remarks.')}</p>
+
+<div class="pb"></div>
+<br><br><br>
+<table style="border:none;width:100%">
+<tr>
+<td style="border:none;text-align:center;width:50%"><p>___________________________</p><p><b>Chief Manager &#8211; Credit Dept.</b></p><p>R.O. ${fv(D.meta.region)}</p><p>Sponsorer</p></td>
+<td style="border:none;text-align:center;width:50%"><p>___________________________</p><p><b>Asst. General Manager &amp; RM</b></p><p>R.O. ${fv(D.meta.region)}</p></td>
+</tr>
+</table>
+
+<br>
+<p style="text-align:center;font-size:9pt;color:#666">Generated by MSME Credit Proposal Generator | Date: ${today} | All data as per documents submitted by applicant.</p>
+</body></html>`;
+}
+
+/* ── INIT ── */
+renderSidebar();
+renderStep();
+</script>
+</body>
+</html>
