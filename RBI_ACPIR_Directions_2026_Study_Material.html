@@ -1,0 +1,1391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RBI Asset Classification, Provisioning & Income Recognition Directions 2026 – Study Material</title>
+<style>
+  :root {
+    --primary: #1a3a5c;
+    --accent: #c8941a;
+    --accent2: #1d6fa8;
+    --danger: #a32d2d;
+    --success: #3b6d11;
+    --warn: #854f0b;
+    --light-bg: #f7f5ef;
+    --card-bg: #ffffff;
+    --border: #d3d1c7;
+    --text: #1c1c1a;
+    --muted: #5f5e5a;
+    --highlight: #faeeda;
+    --highlight2: #e6f1fb;
+    --highlight3: #eaf3de;
+    --highlight4: #fcebeb;
+    --stage1: #1d6fa8;
+    --stage2: #c8941a;
+    --stage3: #a32d2d;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: Georgia, 'Times New Roman', serif;
+    background: var(--light-bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.7;
+  }
+  .hero {
+    background: var(--primary);
+    color: white;
+    padding: 2.5rem 2rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    right: -60px; top: -60px;
+    width: 280px; height: 280px;
+    border-radius: 50%;
+    background: rgba(200,148,26,0.15);
+  }
+  .hero-badge {
+    display: inline-block;
+    background: var(--accent);
+    color: white;
+    font-family: Arial, sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 1rem;
+  }
+  .hero h1 {
+    font-size: 1.7rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+    line-height: 1.3;
+  }
+  .hero .subtitle {
+    font-size: 0.97rem;
+    color: rgba(255,255,255,0.75);
+    font-family: Arial, sans-serif;
+    margin-bottom: 1rem;
+  }
+  .hero-meta {
+    display: flex; gap: 1.5rem; flex-wrap: wrap;
+    font-family: Arial, sans-serif; font-size: 12px;
+    color: rgba(255,255,255,0.65);
+  }
+  .hero-meta span { display: flex; align-items: center; gap: 5px; }
+  .toc-nav {
+    background: var(--card-bg);
+    border-bottom: 2px solid var(--accent);
+    padding: 0.9rem 2rem;
+    display: flex; gap: 0.5rem; flex-wrap: wrap;
+    font-family: Arial, sans-serif; font-size: 12px;
+  }
+  .toc-nav a {
+    color: var(--primary);
+    text-decoration: none;
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-weight: 600;
+    transition: background 0.15s;
+  }
+  .toc-nav a:hover { background: var(--highlight2); }
+  .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .section { margin-bottom: 3rem; }
+  .section-header {
+    display: flex; align-items: center; gap: 0.75rem;
+    margin-bottom: 1.5rem; padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--accent);
+  }
+  .section-num {
+    background: var(--primary);
+    color: white;
+    font-family: Arial, sans-serif;
+    font-size: 12px; font-weight: 700;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .section-title { font-size: 1.25rem; font-weight: 700; color: var(--primary); }
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+  .card-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    font-family: Arial, sans-serif;
+    color: var(--accent2);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 0.75rem;
+  }
+  .card.accent { border-left: 4px solid var(--accent); }
+  .card.info { border-left: 4px solid var(--accent2); background: var(--highlight2); }
+  .card.warning { border-left: 4px solid var(--warn); background: var(--highlight); }
+  .card.danger { border-left: 4px solid var(--danger); background: var(--highlight4); }
+  .card.success { border-left: 4px solid var(--success); background: var(--highlight3); }
+  ul { padding-left: 1.5rem; }
+  ul li { margin-bottom: 0.4rem; }
+  .key-point {
+    background: var(--highlight);
+    border: 1px solid #f0c84a;
+    border-radius: 6px;
+    padding: 0.7rem 1rem;
+    margin-bottom: 0.6rem;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+  }
+  .key-point strong { color: var(--warn); }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  @media (max-width: 700px) { .grid-3, .grid-2 { grid-template-columns: 1fr; } }
+  .stat-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+  }
+  .stat-card .stat-val {
+    font-size: 1.8rem;
+    font-weight: 700;
+    font-family: Arial, sans-serif;
+    line-height: 1.1;
+  }
+  .stat-card .stat-label {
+    font-size: 12px;
+    color: var(--muted);
+    font-family: Arial, sans-serif;
+    margin-top: 4px;
+  }
+  .stage-box {
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+  }
+  .stage1 { background: #e6f1fb; border: 2px solid var(--stage1); }
+  .stage2 { background: #faeeda; border: 2px solid var(--stage2); }
+  .stage3 { background: #fcebeb; border: 2px solid var(--stage3); }
+  .stage-label {
+    font-family: Arial, sans-serif;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 1px; text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+  .stage1 .stage-label { color: var(--stage1); }
+  .stage2 .stage-label { color: var(--stage2); }
+  .stage3 .stage-label { color: var(--stage3); }
+  .stage-title { font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; }
+  .stage1 .stage-title { color: #0c447c; }
+  .stage2 .stage-title { color: #854f0b; }
+  .stage3 .stage-title { color: #791f1f; }
+
+  table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; font-size: 14px; }
+  th { background: var(--primary); color: white; padding: 0.6rem 0.9rem; text-align: left; font-family: Arial, sans-serif; font-size: 12px; font-weight: 700; }
+  td { padding: 0.55rem 0.9rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:nth-child(even) td { background: var(--light-bg); }
+  tr:hover td { background: var(--highlight2); }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-family: Arial, sans-serif;
+    font-weight: 700;
+  }
+  .badge-blue { background: var(--highlight2); color: var(--accent2); }
+  .badge-amber { background: var(--highlight); color: var(--warn); }
+  .badge-red { background: var(--highlight4); color: var(--danger); }
+  .badge-green { background: var(--highlight3); color: var(--success); }
+
+  /* CHEAT SHEET */
+  .cheat-section {
+    page-break-inside: avoid;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+  }
+  .cheat-title {
+    font-family: Arial, sans-serif;
+    font-size: 12px; font-weight: 700;
+    color: white;
+    background: var(--primary);
+    padding: 4px 10px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 0.75rem;
+    letter-spacing: 0.5px;
+  }
+  .cheat-row { display: flex; gap: 0.5rem; margin-bottom: 0.35rem; font-size: 13.5px; font-family: Arial, sans-serif; }
+  .cheat-key { min-width: 160px; color: var(--muted); flex-shrink: 0; }
+  .cheat-val { font-weight: 600; color: var(--text); }
+
+  /* MCQ */
+  .mcq-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+  .mcq-num {
+    font-family: Arial, sans-serif;
+    font-size: 11px; font-weight: 700;
+    color: white;
+    background: var(--accent2);
+    padding: 2px 8px;
+    border-radius: 10px;
+    display: inline-block;
+    margin-bottom: 0.6rem;
+  }
+  .mcq-q { font-weight: 700; margin-bottom: 0.75rem; color: var(--primary); }
+  .mcq-opt { display: flex; gap: 8px; margin-bottom: 0.35rem; font-size: 14px; font-family: Arial, sans-serif; }
+  .mcq-opt .opt-key {
+    min-width: 22px; height: 22px;
+    border: 1.5px solid var(--border);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .correct .opt-key { border-color: var(--success); background: var(--highlight3); color: var(--success); }
+  .mcq-answer {
+    margin-top: 0.75rem;
+    padding: 0.6rem 0.9rem;
+    background: var(--highlight3);
+    border-left: 3px solid var(--success);
+    border-radius: 4px;
+    font-size: 13px;
+    font-family: Arial, sans-serif;
+    color: var(--success);
+  }
+  .mcq-answer strong { color: #27500a; }
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin: 1rem 0;
+    flex-wrap: wrap;
+  }
+  .flow-box {
+    background: var(--card-bg);
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    padding: 0.6rem 1rem;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    min-width: 120px;
+  }
+  .flow-arrow {
+    font-size: 1.3rem;
+    color: var(--muted);
+    padding: 0 0.3rem;
+  }
+  .highlight-box {
+    background: #fffbea;
+    border: 2px dashed var(--accent);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+  }
+  .highlight-box h4 { color: var(--accent); margin-bottom: 0.5rem; font-size: 0.95rem; }
+  hr { border: none; border-top: 2px dashed var(--border); margin: 2.5rem 0; }
+  .separator-title {
+    text-align: center;
+    font-family: Arial, sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: white;
+    background: var(--primary);
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 2rem 0 1.5rem;
+  }
+  .note-box {
+    background: #e6f1fb;
+    border: 1px solid #b5d4f4;
+    border-radius: 6px;
+    padding: 0.7rem 1rem;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    color: #0c447c;
+    margin-bottom: 0.75rem;
+  }
+  .note-box::before { content: '📌 '; }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">Bank of Baroda IBO Exam – Study Material</div>
+  <h1>RBI (Commercial Banks – Asset Classification, Provisioning &amp; Income Recognition) Directions, 2026</h1>
+  <p class="subtitle">Chapter Study Notes | Quick Reference Cheat Sheet | Most Probable MCQs</p>
+  <div class="hero-meta">
+    <span>📅 Issued: April 27, 2026</span>
+    <span>⚡ Effective: April 1, 2027</span>
+    <span>📋 Ref: DOR.STR.REC.No.6/21.06.011/2026-27</span>
+    <span>🏦 Applicable to: Scheduled Commercial Banks</span>
+  </div>
+</div>
+
+<!-- NAV -->
+<div class="toc-nav">
+  <a href="#overview">Overview</a>
+  <a href="#npa">NPA Classification</a>
+  <a href="#ecl">ECL Framework</a>
+  <a href="#stages">3-Stage Model</a>
+  <a href="#provisioning">Provisioning</a>
+  <a href="#eir">EIR Method</a>
+  <a href="#income">Income Recognition</a>
+  <a href="#governance">Governance</a>
+  <a href="#cheatsheet">Cheat Sheet</a>
+  <a href="#mcq">MCQs</a>
+</div>
+
+<div class="container">
+
+<!-- ============================================================ -->
+<!-- PART 1: OVERVIEW -->
+<!-- ============================================================ -->
+<div class="section" id="overview">
+  <div class="section-header">
+    <div class="section-num">1</div>
+    <div class="section-title">Overview &amp; Background</div>
+  </div>
+
+  <div class="card accent">
+    <div class="card-title">Why These Directions Were Issued</div>
+    <p>Indian banks were governed by the old IRACP norms (Income Recognition, Asset Classification &amp; Provisioning) based on an <strong>incurred loss</strong> model — provisioning happened only after a default event occurred. This led to delayed recognition of losses and underestimation of credit risk. The new 2026 Directions introduce a <strong>forward-looking Expected Credit Loss (ECL)</strong> model, aligned with global standards (IFRS 9).</p>
+  </div>
+
+  <div class="grid-3">
+    <div class="stat-card">
+      <div class="stat-val" style="color:var(--primary);">3</div>
+      <div class="stat-label">Key changes introduced<br>(ECL + Staging + EIR)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" style="color:var(--accent);">Apr 1, 2027</div>
+      <div class="stat-label">Date of commencement</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" style="color:var(--success);">5 yrs</div>
+      <div class="stat-label">Transition timeline prescribed</div>
+    </div>
+  </div>
+
+  <div class="card info">
+    <div class="card-title">Legal Basis</div>
+    <ul>
+      <li><strong>Sections 21 &amp; 35A</strong> of the Banking Regulation Act, 1949</li>
+      <li>Issued by Reserve Bank of India on <strong>April 27, 2026</strong></li>
+      <li>Applicable from <strong>April 1, 2027</strong></li>
+      <li>Repeals the earlier RBI (Commercial Banks – Income Recognition, Asset Classification and Provisioning) Directions, 2025 on commencement</li>
+    </ul>
+  </div>
+
+  <div class="card warning">
+    <div class="card-title">Applicability – Who Is Covered?</div>
+    <ul>
+      <li>Banking companies (under Banking Regulation Act, 1949)</li>
+      <li>Corresponding new banks (nationalized banks)</li>
+      <li>State Bank of India</li>
+    </ul>
+    <p style="margin-top:0.6rem; font-size:13px; font-weight:700; color:var(--danger);">EXCLUDED: Small Finance Banks (SFBs), Payment Banks, Local Area Banks (LABs)</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Three Pillars of the New Framework</div>
+    <div class="grid-3">
+      <div style="text-align:center; padding:0.75rem; background:var(--highlight2); border-radius:6px;">
+        <div style="font-size:1.4rem; font-weight:700; color:var(--accent2);">1</div>
+        <div style="font-family:Arial,sans-serif; font-size:13px; font-weight:700;">ECL Framework</div>
+        <div style="font-size:12px; color:var(--muted); font-family:Arial,sans-serif;">Forward-looking provisioning using probability-weighted loss estimates</div>
+      </div>
+      <div style="text-align:center; padding:0.75rem; background:var(--highlight); border-radius:6px;">
+        <div style="font-size:1.4rem; font-weight:700; color:var(--accent);">2</div>
+        <div style="font-family:Arial,sans-serif; font-size:13px; font-weight:700;">3-Stage Classification</div>
+        <div style="font-size:12px; color:var(--muted); font-family:Arial,sans-serif;">Stage 1, 2, 3 based on credit risk changes since origination</div>
+      </div>
+      <div style="text-align:center; padding:0.75rem; background:var(--highlight3); border-radius:6px;">
+        <div style="font-size:1.4rem; font-weight:700; color:var(--success);">3</div>
+        <div style="font-family:Arial,sans-serif; font-size:13px; font-weight:700;">EIR Method</div>
+        <div style="font-size:12px; color:var(--muted); font-family:Arial,sans-serif;">Effective Interest Rate for income recognition &amp; discounting</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="note-box">Old IRACP Norms: Incurred Loss Model → New 2026 Directions: Expected Credit Loss (ECL) Model. Both NPA classification norms AND new ECL staging coexist from April 1, 2027.</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PART 2: NPA CLASSIFICATION -->
+<!-- ============================================================ -->
+<div class="section" id="npa">
+  <div class="section-header">
+    <div class="section-num">2</div>
+    <div class="section-title">Chapter II – Classification as Non-Performing Asset (NPA)</div>
+  </div>
+
+  <div class="card accent">
+    <div class="card-title">Core NPA Definition – 90-Day Rule</div>
+    <p>A financial asset is classified as NPA if any of the following conditions are satisfied:</p>
+  </div>
+
+  <table>
+    <thead>
+      <tr><th>Type of Facility</th><th>NPA Trigger Condition</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Term Loan / Bills</strong></td>
+        <td>Interest and/or principal overdue for more than <strong>90 days</strong></td>
+      </tr>
+      <tr>
+        <td><strong>OD / CC (Out of Order)</strong></td>
+        <td>(i) Outstanding &gt; sanctioned limit/DP for 90 days; (ii) No credits for 90 days; (iii) Credits insufficient to cover interest for past 90 days</td>
+      </tr>
+      <tr>
+        <td><strong>OD/CC – stale stock statements</strong></td>
+        <td>Drawing permitted for 90 days based on stock/receivable statements older than 3 months</td>
+      </tr>
+      <tr>
+        <td><strong>Agricultural – Short Duration Crops</strong></td>
+        <td>Overdue for <strong>2 crop seasons</strong> (same crop season type)</td>
+      </tr>
+      <tr>
+        <td><strong>Agricultural – Long Duration Crops</strong></td>
+        <td>Overdue for <strong>1 crop season</strong> (crop duration &gt;12 months, up to 18 months)</td>
+      </tr>
+      <tr>
+        <td><strong>Securitization</strong></td>
+        <td>Liquidity facility outstanding for more than 90 days</td>
+      </tr>
+      <tr>
+        <td><strong>Partial Credit Enhancement</strong></td>
+        <td>Outstanding from date of drawal for 90 days or more</td>
+      </tr>
+      <tr>
+        <td><strong>Credit Cards</strong></td>
+        <td>Minimum amount due not paid within 90 days from payment due date in statement</td>
+      </tr>
+      <tr>
+        <td><strong>Bonds / Debentures</strong></td>
+        <td>Interest/instalment due and unpaid for more than 90 days</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="card warning">
+    <div class="card-title">Borrower-Level NPA Classification (Critical Rule)</div>
+    <p>If any one exposure to a borrower is NPA, <strong>ALL exposures to that borrower</strong> are classified as NPA. NPA classification is applied at the <strong>borrower level</strong>, not facility level.</p>
+    <div class="note-box" style="margin-top:0.75rem; margin-bottom:0;">Exception: Bills discounted under LC may NOT be classified NPA when other borrower facilities are NPA — until payment is refused or borrower defaults on LC payment.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Sub-Classification of NPAs</div>
+    <div class="grid-3">
+      <div style="background:#faeeda; border:1.5px solid var(--accent); border-radius:8px; padding:0.9rem;">
+        <div style="font-family:Arial,sans-serif; font-size:11px; font-weight:700; color:var(--warn); text-transform:uppercase; letter-spacing:1px;">Sub-Standard</div>
+        <div style="font-size:1.1rem; font-weight:700; margin:0.3rem 0; color:var(--warn);">≤ 12 months NPA</div>
+        <div style="font-size:12px; font-family:Arial,sans-serif;">Well-defined credit weaknesses; bank may sustain some loss if deficiencies not corrected</div>
+      </div>
+      <div style="background:#fcebeb; border:1.5px solid var(--danger); border-radius:8px; padding:0.9rem;">
+        <div style="font-family:Arial,sans-serif; font-size:11px; font-weight:700; color:var(--danger); text-transform:uppercase; letter-spacing:1px;">Doubtful</div>
+        <div style="font-size:1.1rem; font-weight:700; margin:0.3rem 0; color:var(--danger);">&gt; 12 months in Sub-Std</div>
+        <div style="font-size:12px; font-family:Arial,sans-serif;">Collection or full liquidation highly questionable and improbable</div>
+      </div>
+      <div style="background:#f1efe8; border:1.5px solid #888780; border-radius:8px; padding:0.9rem;">
+        <div style="font-family:Arial,sans-serif; font-size:11px; font-weight:700; color:#5f5e5a; text-transform:uppercase; letter-spacing:1px;">Loss Asset</div>
+        <div style="font-size:1.1rem; font-weight:700; margin:0.3rem 0; color:#444441;">Loss identified</div>
+        <div style="font-size:12px; font-family:Arial,sans-serif;">Loss identified by bank/auditors/RBI inspection; uncollectible; continuation not warranted</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Special Cases of Asset Classification</div>
+    <table>
+      <thead>
+        <tr><th>Special Category</th><th>Rule</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Central Govt Securities / SLR Securities</strong></td>
+          <td>Not to be classified as Non-performing Investment (NPI)</td>
+        </tr>
+        <tr>
+          <td><strong>Central Govt Guaranteed Advances</strong></td>
+          <td>NPA only when Govt repudiates its guarantee when invoked</td>
+        </tr>
+        <tr>
+          <td><strong>Advances against Term Deposits (same bank)</strong></td>
+          <td>Need not be treated as NPA, provided margin (TDR value ≥ 100% of loan) is available. Exception: NPA due to borrower-level classification rule (para 8.9)</td>
+        </tr>
+        <tr>
+          <td><strong>Loans with moratorium on interest</strong></td>
+          <td>Interest does not become overdue during moratorium; NPA only after due date post-moratorium</td>
+        </tr>
+        <tr>
+          <td><strong>Staff Housing Loans (interest payable after principal)</strong></td>
+          <td>NPA only on non-repayment of instalment/interest on respective due dates</td>
+        </tr>
+        <tr>
+          <td><strong>Agricultural – Natural Calamities</strong></td>
+          <td>Bank may convert to term loan or reschedule; treated as current dues; NPA norms apply on revised terms</td>
+        </tr>
+        <tr>
+          <td><strong>Export Project Finance</strong></td>
+          <td>Where importer paid but funds blocked due to political reasons (war, UN embargo, etc.) – asset classification deferred by 1 year from date of deposit abroad</td>
+        </tr>
+        <tr>
+          <td><strong>Co-Lending Arrangements (CLA)</strong></td>
+          <td>Borrower-level SMA/NPA classification for both lending entities; info sharing on near-real time basis (latest next working day)</td>
+        </tr>
+        <tr>
+          <td><strong>Consortium Advances</strong></td>
+          <td>Based on record of recovery of individual member bank; if lead bank not sharing recovery, treated as NPA in books of other members</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card info">
+    <div class="card-title">NPA Upgrade – When Can an NPA Become Standard?</div>
+    <ul>
+      <li>Only when <strong>entire arrears of interest AND principal</strong> are repaid</li>
+      <li>For borrowers with multiple facilities: upgrade only on repayment of <strong>all arrears across all facilities</strong></li>
+      <li>Borrower and co-borrower are <strong>jointly and severally liable</strong></li>
+    </ul>
+  </div>
+
+  <div class="card success">
+    <div class="card-title">Automation of Asset Classification (Annex 3)</div>
+    <ul>
+      <li>Banks must flag accounts as overdue as part of <strong>day-end processes</strong> on the due date</li>
+      <li>NPA classification must also happen via <strong>day-end process</strong> (not delayed)</li>
+      <li><strong>NPA date = calendar date</strong> for which day-end process is run</li>
+      <li>Example: Due date March 31 → overdue from March 31 → NPA from June 29 (90 days later)</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PART 3: ECL FRAMEWORK -->
+<!-- ============================================================ -->
+<div class="section" id="ecl">
+  <div class="section-header">
+    <div class="section-num">3</div>
+    <div class="section-title">Chapter III – Expected Credit Loss (ECL) Framework</div>
+  </div>
+
+  <div class="card accent">
+    <div class="card-title">What is ECL?</div>
+    <p><strong>Expected Credit Loss (ECL)</strong> = the weighted average of credit losses under different scenarios, with the respective probability of each scenario as weights. It is a <strong>forward-looking, probability-weighted estimate</strong> of credit losses — neither the worst-case nor the best-case scenario.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Scope – Financial Instruments Covered Under ECL</div>
+    <div class="grid-2">
+      <ul>
+        <li>Loans</li>
+        <li>Debt securities (not FVTPL)</li>
+        <li>Trade receivables</li>
+        <li>Lease receivables</li>
+      </ul>
+      <ul>
+        <li>Loan commitments (including undrawn)</li>
+        <li>Off-balance-sheet credit exposures</li>
+        <li>Any other financial asset with contractual right to receive cash</li>
+      </ul>
+    </div>
+    <div style="margin-top:0.5rem; font-family:Arial,sans-serif; font-size:13px; color:var(--danger); font-weight:700;">EXCLUDED: Investments in subsidiaries, associates, and joint ventures</div>
+  </div>
+
+  <div class="card info">
+    <div class="card-title">Fair Valuation on Transition (April 1, 2027)</div>
+    <ul>
+      <li>Banks must <strong>fair value their entire loan portfolio</strong> on the transition date</li>
+      <li>Difference between fair value and carrying amount → adjusted against <strong>opening balance of retained earnings</strong> (NOT routed through P&amp;L)</li>
+      <li>If fair value is not materially different from carrying cost → carrying cost presumed to be best evidence of fair value</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Initial Recognition &amp; Subsequent Measurement</div>
+    <ul>
+      <li><strong>Loans originated on or after April 1, 2027:</strong> Measured at fair value ± transaction costs at initial recognition; subsequently at <strong>amortised cost using EIR method</strong></li>
+      <li><strong>Loans outstanding as on March 31, 2027:</strong> Brought under EIR regime by <strong>March 31, 2030</strong></li>
+      <li><strong>POCI assets (Purchased/Originated Credit-Impaired):</strong> Use credit-adjusted EIR; only cumulative changes in lifetime ECL recognised after initial recognition</li>
+    </ul>
+  </div>
+
+  <div class="highlight-box">
+    <h4>Key ECL Formula Components</h4>
+    <div class="grid-3">
+      <div style="text-align:center; padding:0.6rem; background:white; border-radius:6px; border:1px solid var(--border);">
+        <div style="font-size:1.5rem; font-weight:700; color:var(--accent2);">PD</div>
+        <div style="font-size:12px; font-family:Arial,sans-serif; font-weight:700;">Probability of Default</div>
+        <div style="font-size:11px; color:var(--muted); font-family:Arial,sans-serif;">12-month PD for Stage 1; Lifetime PD for Stage 2</div>
+      </div>
+      <div style="text-align:center; padding:0.6rem; background:white; border-radius:6px; border:1px solid var(--border);">
+        <div style="font-size:1.5rem; font-weight:700; color:var(--accent);">LGD</div>
+        <div style="font-size:12px; font-family:Arial,sans-serif; font-weight:700;">Loss Given Default</div>
+        <div style="font-size:11px; color:var(--muted); font-family:Arial,sans-serif;">Loss as % of exposure; based on collateral &amp; recovery</div>
+      </div>
+      <div style="text-align:center; padding:0.6rem; background:white; border-radius:6px; border:1px solid var(--border);">
+        <div style="font-size:1.5rem; font-weight:700; color:var(--success);">EAD</div>
+        <div style="font-size:12px; font-family:Arial,sans-serif; font-weight:700;">Exposure at Default</div>
+        <div style="font-size:11px; color:var(--muted); font-family:Arial,sans-serif;">Expected outstanding at the time of default</div>
+      </div>
+    </div>
+    <p style="font-family:Arial,sans-serif; font-size:13px; margin-top:0.75rem;">ECL = PD × LGD × EAD (present value of expected shortfall discounted at EIR)</p>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PART 4: THREE-STAGE MODEL -->
+<!-- ============================================================ -->
+<div class="section" id="stages">
+  <div class="section-header">
+    <div class="section-num">4</div>
+    <div class="section-title">The Three-Stage (Staging) Framework</div>
+  </div>
+
+  <div class="stage-box stage1">
+    <div class="stage-label">Stage 1</div>
+    <div class="stage-title">Performing / No Significant Increase in Credit Risk (SICR)</div>
+    <ul>
+      <li>Financial instrument has NOT experienced SICR since initial recognition, OR has low credit risk</li>
+      <li><strong>Provision: 12-month ECL</strong> (ECL from defaults possible within 12 months)</li>
+      <li>Interest income: Recognised on gross carrying amount using EIR</li>
+      <li>Provisioning floor: Similar to existing standard asset norms</li>
+    </ul>
+  </div>
+
+  <div class="stage-box stage2">
+    <div class="stage-label">Stage 2</div>
+    <div class="stage-title">Underperforming / SICR Occurred but Not Credit-Impaired</div>
+    <ul>
+      <li>Financial instrument has experienced <strong>SICR since initial recognition</strong> but is not credit-impaired</li>
+      <li><strong>Provision: Lifetime ECL</strong> (ECL from all possible default events over life of instrument)</li>
+      <li>Interest income: Recognised on gross carrying amount using EIR</li>
+      <li>Provisioning floor: <strong>Minimum 5%</strong> (significant increase from existing ~0.4%)</li>
+      <li><strong>Rebuttable presumption:</strong> If contractual payments are <strong>more than 30 days past due</strong> → SICR assumed (lifetime ECL)</li>
+      <li>For revolving facilities: Outstanding continuously &gt; sanctioned limit/drawing power for up to 60 days → lifetime ECL</li>
+    </ul>
+  </div>
+
+  <div class="stage-box stage3">
+    <div class="stage-label">Stage 3</div>
+    <div class="stage-title">Credit-Impaired / NPA</div>
+    <ul>
+      <li>Financial instrument is <strong>credit-impaired</strong> as at reporting date (includes all NPAs)</li>
+      <li><strong>Provision: Lifetime ECL</strong></li>
+      <li>Interest income: Recognised on <strong>net carrying amount</strong> (amortised cost less loss allowance) using EIR</li>
+      <li>Provisioning floor: Similar to existing NPA provisioning norms</li>
+      <li>Non-recognition of income on Stage 3 assets will <strong>NOT attract auditor qualifications</strong></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-title">SICR – Significant Increase in Credit Risk: Key Concepts</div>
+    <ul>
+      <li>SICR = Significant/material change in estimated <strong>Default Risk</strong> over remaining expected life</li>
+      <li>Bank must compare risk of default at reporting date vs. date of initial recognition</li>
+      <li>Banks must consider <strong>reasonable and supportable forward-looking information</strong></li>
+      <li>SICR criteria must be <strong>documented</strong> and applied <strong>consistently</strong></li>
+      <li><strong>Collective assessment</strong> allowed for portfolios with shared credit risk characteristics</li>
+    </ul>
+
+    <div style="margin-top:0.75rem;">
+      <div class="badge badge-amber">Rebuttable Presumption</div>
+      <span style="font-family:Arial,sans-serif; font-size:13px; margin-left:0.5rem;">More than <strong>30 days past due</strong> = SICR assumed (Stage 2 → Lifetime ECL). Banks may rebut only with specific documented evidence that credit risk has not increased significantly.</span>
+    </div>
+  </div>
+
+  <div class="card info">
+    <div class="card-title">Exemptions – Instruments NOT Requiring SICR Testing</div>
+    <ul>
+      <li>SLR eligible investments</li>
+      <li>Direct claims on Central Government</li>
+      <li>Exposures fully guaranteed by Central Government</li>
+      <li>Exposures to Foreign Sovereigns, Foreign Central Banks, Multilateral Development Banks, BIS, and IMF — attracting 0% risk weight</li>
+    </ul>
+    <p style="margin-top:0.5rem; font-family:Arial,sans-serif; font-size:13px; color:var(--accent2);">These instruments also do NOT require Stage 1 ECL provisioning.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Mapping: Old NPA Categories ↔ New ECL Stages</div>
+    <table>
+      <thead>
+        <tr><th>Old Classification</th><th>New Stage</th><th>ECL Type</th><th>Min. Provision Floor</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Standard Assets</td><td><span class="badge badge-blue">Stage 1</span></td><td>12-month ECL</td><td>~Standard asset norms (0.25%–1%)</td></tr>
+        <tr><td>Special Mention Accounts / Early warning</td><td><span class="badge badge-amber">Stage 2</span></td><td>Lifetime ECL</td><td>Minimum 5%</td></tr>
+        <tr><td>Sub-Standard / Doubtful / Loss</td><td><span class="badge badge-red">Stage 3</span></td><td>Lifetime ECL</td><td>~Existing NPA norms (15%–100%)</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PART 5: PROVISIONING -->
+<!-- ============================================================ -->
+<div class="section" id="provisioning">
+  <div class="section-header">
+    <div class="section-num">5</div>
+    <div class="section-title">Provisioning Norms (Existing + New ECL Floors)</div>
+  </div>
+
+  <div class="card accent">
+    <div class="card-title">Standard Asset Provisioning (Stage 1 equivalent)</div>
+    <table>
+      <thead>
+        <tr><th>Category</th><th>Provision Rate</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Agriculture &amp; SME sectors</td><td><strong>0.25%</strong></td></tr>
+        <tr><td>Residential Housing sector (standard)</td><td><strong>0.75%</strong></td></tr>
+        <tr><td>Commercial Real Estate (CRE)</td><td><strong>1.00%</strong></td></tr>
+        <tr><td>All other standard assets</td><td><strong>0.40%</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card warning">
+    <div class="card-title">Sub-Standard Asset Provisioning (Stage 3 – initial NPA)</div>
+    <table>
+      <thead>
+        <tr><th>Category</th><th>Provision Rate</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Secured sub-standard (on total outstanding)</td><td><strong>15%</strong> (no deduction for ECGC/security)</td></tr>
+        <tr><td>Unsecured sub-standard exposures (additional)</td><td><strong>+10% → Total 25%</strong></td></tr>
+        <tr><td>Infrastructure lending – secured (with escrow)</td><td><strong>20%</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card danger">
+    <div class="card-title">Doubtful Asset Provisioning</div>
+    <table>
+      <thead>
+        <tr><th>Period in Doubtful Category</th><th>Secured Portion</th><th>Unsecured Portion</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Up to 1 year (D1)</td><td><strong>25%</strong></td><td><strong>100%</strong></td></tr>
+        <tr><td>1 to 3 years (D2)</td><td><strong>40%</strong></td><td><strong>100%</strong></td></tr>
+        <tr><td>More than 3 years (D3)</td><td><strong>100%</strong></td><td><strong>100%</strong></td></tr>
+      </tbody>
+    </table>
+    <div class="note-box" style="margin-top:0.5rem;">"Secured portion" = extent covered by realisable value of tangible security to which bank has valid recourse, estimated on realistic basis.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Loss Asset Provisioning</div>
+    <div style="text-align:center; padding:1rem; background:var(--highlight4); border-radius:8px;">
+      <div style="font-size:2rem; font-weight:700; color:var(--danger);">100%</div>
+      <div style="font-family:Arial,sans-serif; font-size:14px; color:var(--danger);">of outstanding amount must be provisioned for all Loss Assets</div>
+    </div>
+  </div>
+
+  <div class="card info">
+    <div class="card-title">New ECL Provisioning Floors (From April 1, 2027)</div>
+    <table>
+      <thead>
+        <tr><th>Stage</th><th>Minimum Provisioning Floor</th><th>Key Change</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge badge-blue">Stage 1</span></td>
+          <td>~Same as existing standard asset norms (0.25%–1%)</td>
+          <td>No major change for well-performing assets</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-amber">Stage 2</span></td>
+          <td><strong>Minimum 5%</strong> across most loan categories</td>
+          <td>SIGNIFICANT INCREASE – up from ~0.4%. Industry-wide impact expected.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-red">Stage 3</span></td>
+          <td>Largely aligned with existing NPA norms (15%–100%)</td>
+          <td>Broadly consistent with sub-standard, doubtful, loss norms</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Probability-Weighted Scenarios for ECL</div>
+    <ul>
+      <li>Banks must use <strong>multiple scenarios</strong> (not just base case)</li>
+      <li>Each scenario reflects relationship between key ECL components and macroeconomic variables</li>
+      <li>Probability weights determined through historical experience + expert judgement</li>
+      <li>Subject to Board-approved governance framework</li>
+    </ul>
+  </div>
+
+  <div class="card success">
+    <div class="card-title">Simplified Approach – Lease Receivables &amp; Trade Receivables</div>
+    <p>For lease receivables and trade receivables: Loss allowances measured at <strong>Lifetime ECL always</strong>, irrespective of stage. Banks may use the "Simplified Approach" (as per Annex 2 of the Directions).</p>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PART 6: EFFECTIVE INTEREST RATE (EIR) -->
+<!-- ============================================================ -->
+<div class="section" id="eir">
+  <div class="section-header">
+    <div class="section-num">6</div>
+    <div class="section-title">Effective Interest Rate (EIR) Method</div>
+  </div>
+
+  <div class="card accent">
+    <div class="card-title">What is EIR?</div>
+    <p><strong>Effective Interest Rate (EIR)</strong> = the rate that exactly discounts estimated future cash flows through the expected life of the financial instrument to the <strong>gross carrying amount</strong> of the financial asset.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Key EIR Rules</div>
+    <ul>
+      <li>EIR is determined at <strong>initial recognition</strong></li>
+      <li>EIR calculation includes: all contractual terms (prepayment, extension options), transaction costs, fees paid/received, premiums/discounts</li>
+      <li>EIR calculation <strong>excludes expected credit losses</strong></li>
+      <li>ECL for financial instruments originated on/after April 1, 2027 → discounted using <strong>EIR</strong></li>
+      <li>For POCI assets → use <strong>Credit-adjusted EIR</strong></li>
+      <li>Opening ECL (as at April 1, 2027) may use contractual interest rate as discounting factor in interim</li>
+      <li>All outstanding loans to migrate to EIR by <strong>March 31, 2030</strong></li>
+    </ul>
+  </div>
+
+  <div class="grid-2">
+    <div class="card info">
+      <div class="card-title">EIR – Normal Assets (Stage 1 &amp; 2)</div>
+      <p style="font-family:Arial,sans-serif; font-size:13px;">Interest income recognised on <strong>gross carrying amount</strong> of the financial asset × EIR</p>
+    </div>
+    <div class="card danger">
+      <div class="card-title">EIR – Credit-Impaired Assets (Stage 3)</div>
+      <p style="font-family:Arial,sans-serif; font-size:13px;">Interest income recognised on <strong>net carrying amount</strong> (= gross carrying amount − loss allowance) × EIR</p>
+    </div>
+  </div>
+
+  <div class="card warning">
+    <div class="card-title">POCI – Purchased or Originated Credit-Impaired Financial Assets</div>
+    <ul>
+      <li>Assets that are credit-impaired at initial recognition</li>
+      <li>Use <strong>Credit-adjusted EIR</strong> (rate that discounts estimated future cash flows to amortised cost at initial recognition, already considering ECL)</li>
+      <li>No separate impairment allowance at initial recognition</li>
+      <li>Only cumulative changes in lifetime ECL (relative to estimate at initial recognition) are recognised as impairment gain/loss</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PART 7: INCOME RECOGNITION -->
+<!-- ============================================================ -->
+<div class="section" id="income">
+  <div class="section-header">
+    <div class="section-num">7</div>
+    <div class="section-title">Income Recognition Norms</div>
+  </div>
+
+  <div class="card accent">
+    <div class="card-title">Core Principle</div>
+    <p>Income on NPAs (Stage 3 assets) is <strong>NOT recognised</strong> on accrual basis. Only actual cash received may be recognised as income. This applies to interest as well as other charges like fees.</p>
+  </div>
+
+  <table>
+    <thead>
+      <tr><th>Stage / Category</th><th>Income Recognition Method</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Stage 1 – Performing</strong></td>
+        <td>Interest on <strong>gross carrying amount</strong> using EIR; accrual basis</td>
+      </tr>
+      <tr>
+        <td><strong>Stage 2 – SICR occurred</strong></td>
+        <td>Interest on <strong>gross carrying amount</strong> using EIR; accrual basis</td>
+      </tr>
+      <tr>
+        <td><strong>Stage 3 – Credit-impaired / NPA</strong></td>
+        <td>Interest on <strong>net carrying amount</strong> (gross − loss allowance) using EIR; <strong>NOT on accrual basis</strong>; only actual cash receipts recognised</td>
+      </tr>
+      <tr>
+        <td><strong>Standard assets (general)</strong></td>
+        <td>Accrual basis; income recognised on regular basis</td>
+      </tr>
+      <tr>
+        <td><strong>Govt-guaranteed advances (overdue)</strong></td>
+        <td>Exemption from NPA classification does <strong>NOT</strong> extend to income recognition; income recognised only on cash basis if overdue</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="card info">
+    <div class="card-title">Disclosure Requirements for Income Recognition (New)</div>
+    <ul>
+      <li>Separate disclosure of provisions for Stage 1 and Stage 2 assets (not netted with advances)</li>
+      <li>Non-recognition of income on Stage 3 assets will <strong>not attract auditor qualifications</strong></li>
+      <li>Detailed credit quality tables for investments, loans, guarantees, and commitments</li>
+      <li>Reconciliation of loss allowances required</li>
+      <li>Fraud reporting requirements mandated</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PART 8: GOVERNANCE -->
+<!-- ============================================================ -->
+<div class="section" id="governance">
+  <div class="section-header">
+    <div class="section-num">8</div>
+    <div class="section-title">Governance, Model Risk &amp; Operational Requirements</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Governance Framework Requirements</div>
+    <ul>
+      <li>ECL framework must have <strong>Board-approved governance</strong></li>
+      <li>Policy, criteria, and methodology for SICR determination must be <strong>Board-approved</strong></li>
+      <li>Rebuttal of the 30-day-past-due presumption requires Board or Board-committee approval</li>
+      <li>Probability weights in multi-scenario ECL subject to approved governance framework oversight</li>
+    </ul>
+  </div>
+
+  <div class="card warning">
+    <div class="card-title">Model Risk Management (Chapter V Principles)</div>
+    <ul>
+      <li>Broad principles for ECL model use to ensure <strong>prudence and robustness</strong></li>
+      <li>Banks must maintain adequate documentation for each instance of SICR rebuttal</li>
+      <li>Periodic review and validation of SICR rebuttal rationale required</li>
+      <li>Where rebuttal basis is found inadequate → bank must cease rebuttal immediately and recognise SICR</li>
+      <li>Stage 2 lifetime PD must NOT be mechanically derived from Stage 1 PD parameters — must reflect higher risk profile</li>
+    </ul>
+  </div>
+
+  <div class="card info">
+    <div class="card-title">Data &amp; Technology Requirements</div>
+    <ul>
+      <li>Banks must build robust data systems to implement ECL framework</li>
+      <li>Technology-enabled automation of NPA/SMA classification (day-end process)</li>
+      <li>Near-real-time information sharing in Co-Lending Arrangements</li>
+      <li>Loan contracts must contain exact due dates, principal/interest breakup, SMA/NPA illustration</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Transition Timeline Summary</div>
+    <table>
+      <thead>
+        <tr><th>Date</th><th>Milestone</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>April 27, 2026</strong></td><td>Directions issued by RBI</td></tr>
+        <tr><td><strong>April 1, 2027</strong></td><td>Directions come into force; Old IRACP 2025 repealed; ECL framework begins; Fair valuation of entire loan portfolio</td></tr>
+        <tr><td><strong>April 1, 2027 onwards</strong></td><td>New loans: measured at amortised cost using EIR; ECL computed using EIR</td></tr>
+        <tr><td><strong>By March 31, 2030</strong></td><td>All outstanding loans (as at March 31, 2027) migrated to EIR regime</td></tr>
+        <tr><td><strong>5-year period</strong></td><td>Full transition timeline prescribed for smooth implementation</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card success">
+    <div class="card-title">Key Definitions to Remember for Exam</div>
+    <table>
+      <thead>
+        <tr><th>Term</th><th>Meaning</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Amortised Cost</td><td>Carrying amount after principal repayments and EIR amortisation, adjusted for loss allowance</td></tr>
+        <tr><td>Gross Carrying Amount</td><td>Amortised cost of financial asset BEFORE adjusting for loss allowance</td></tr>
+        <tr><td>Loss Allowance</td><td>Accounting provision for ECL on financial instruments</td></tr>
+        <tr><td>Default</td><td>Financial asset classified as NPA (for purposes of these Directions only)</td></tr>
+        <tr><td>POCI</td><td>Purchased or Originated Credit-Impaired financial asset — credit-impaired at initial recognition</td></tr>
+        <tr><td>SICR</td><td>Significant Increase in Credit Risk — significant change in estimated Default Risk over remaining life</td></tr>
+        <tr><td>Overdue</td><td>Any amount due to bank (principal or interest) not paid on due date fixed by bank</td></tr>
+        <tr><td>Out of Order (OD/CC)</td><td>Outstanding &gt; limit/DP for 90 days; OR no credits for 90 days; OR credits insufficient to cover interest for 90 days</td></tr>
+        <tr><td>12-Month ECL</td><td>Portion of Lifetime ECL from default events possible within 12 months</td></tr>
+        <tr><td>Lifetime ECL</td><td>ECL from all possible default events over expected life of instrument</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- CHEAT SHEET -->
+<!-- ============================================================ -->
+<hr>
+<div class="separator-title" id="cheatsheet">⚡ QUICK REFERENCE CHEAT SHEET</div>
+
+<div class="grid-2">
+  <div class="cheat-section">
+    <div class="cheat-title">Direction Basics</div>
+    <div class="cheat-row"><span class="cheat-key">Circular Ref</span><span class="cheat-val">DOR.STR.REC.No.6/21.06.011/2026-27</span></div>
+    <div class="cheat-row"><span class="cheat-key">Issued</span><span class="cheat-val">April 27, 2026</span></div>
+    <div class="cheat-row"><span class="cheat-key">Effective</span><span class="cheat-val">April 1, 2027</span></div>
+    <div class="cheat-row"><span class="cheat-key">Legal Basis</span><span class="cheat-val">Sections 21 &amp; 35A, BR Act 1949</span></div>
+    <div class="cheat-row"><span class="cheat-key">Replaces</span><span class="cheat-val">IRACP Directions 2025</span></div>
+    <div class="cheat-row"><span class="cheat-key">Applicable to</span><span class="cheat-val">SCBs (excl. SFB, PB, LAB)</span></div>
+    <div class="cheat-row"><span class="cheat-key">EIR full migration</span><span class="cheat-val">By March 31, 2030</span></div>
+  </div>
+
+  <div class="cheat-section">
+    <div class="cheat-title">NPA Triggers – 90-Day Rule</div>
+    <div class="cheat-row"><span class="cheat-key">Term Loan / Bills</span><span class="cheat-val">90 days overdue</span></div>
+    <div class="cheat-row"><span class="cheat-key">OD / CC out of order</span><span class="cheat-val">90 days (3 conditions)</span></div>
+    <div class="cheat-row"><span class="cheat-key">Credit Cards</span><span class="cheat-val">90 days from payment due date</span></div>
+    <div class="cheat-row"><span class="cheat-key">Short duration crops</span><span class="cheat-val">2 crop seasons overdue</span></div>
+    <div class="cheat-row"><span class="cheat-key">Long duration crops</span><span class="cheat-val">1 crop season overdue</span></div>
+    <div class="cheat-row"><span class="cheat-key">Short duration = </span><span class="cheat-val">Up to 12 months sowing-marketing</span></div>
+    <div class="cheat-row"><span class="cheat-key">Long duration = </span><span class="cheat-val">&gt;12 months to 18 months</span></div>
+    <div class="cheat-row"><span class="cheat-key">Bonds / Debentures</span><span class="cheat-val">Interest unpaid &gt; 90 days</span></div>
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="cheat-section">
+    <div class="cheat-title">NPA Sub-Classification</div>
+    <div class="cheat-row"><span class="cheat-key">Sub-Standard</span><span class="cheat-val">NPA ≤ 12 months</span></div>
+    <div class="cheat-row"><span class="cheat-key">Doubtful</span><span class="cheat-val">Sub-Std &gt; 12 months</span></div>
+    <div class="cheat-row"><span class="cheat-key">Loss</span><span class="cheat-val">Loss identified; uncollectible</span></div>
+    <div class="cheat-row"><span class="cheat-key">Upgrade condition</span><span class="cheat-val">Entire arrears of interest + principal paid</span></div>
+    <div class="cheat-row"><span class="cheat-key">Borrower-level</span><span class="cheat-val">1 NPA → ALL facilities NPA</span></div>
+  </div>
+
+  <div class="cheat-section">
+    <div class="cheat-title">ECL Stages</div>
+    <div class="cheat-row"><span class="cheat-key">Stage 1</span><span class="cheat-val">No SICR → 12-month ECL</span></div>
+    <div class="cheat-row"><span class="cheat-key">Stage 2</span><span class="cheat-val">SICR but not impaired → Lifetime ECL</span></div>
+    <div class="cheat-row"><span class="cheat-key">Stage 3</span><span class="cheat-val">Credit-impaired/NPA → Lifetime ECL</span></div>
+    <div class="cheat-row"><span class="cheat-key">30-day rule</span><span class="cheat-val">&gt;30 DPD = SICR presumed (Stage 2)</span></div>
+    <div class="cheat-row"><span class="cheat-key">Revolving (OD/CC)</span><span class="cheat-val">60 days continuously over limit = SICR</span></div>
+    <div class="cheat-row"><span class="cheat-key">ECL formula</span><span class="cheat-val">PD × LGD × EAD (PV discounted at EIR)</span></div>
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="cheat-section">
+    <div class="cheat-title">Standard Asset Provisioning</div>
+    <div class="cheat-row"><span class="cheat-key">Agriculture / SME</span><span class="cheat-val">0.25%</span></div>
+    <div class="cheat-row"><span class="cheat-key">Residential Housing</span><span class="cheat-val">0.75%</span></div>
+    <div class="cheat-row"><span class="cheat-key">CRE</span><span class="cheat-val">1.00%</span></div>
+    <div class="cheat-row"><span class="cheat-key">Others</span><span class="cheat-val">0.40%</span></div>
+  </div>
+
+  <div class="cheat-section">
+    <div class="cheat-title">NPA Provisioning Rates</div>
+    <div class="cheat-row"><span class="cheat-key">Sub-Standard (secured)</span><span class="cheat-val">15% of total outstanding</span></div>
+    <div class="cheat-row"><span class="cheat-key">Sub-Standard (unsecured)</span><span class="cheat-val">25% total (extra 10%)</span></div>
+    <div class="cheat-row"><span class="cheat-key">Doubtful D1 (≤1yr)</span><span class="cheat-val">25% secured + 100% unsecured</span></div>
+    <div class="cheat-row"><span class="cheat-key">Doubtful D2 (1-3yr)</span><span class="cheat-val">40% secured + 100% unsecured</span></div>
+    <div class="cheat-row"><span class="cheat-key">Doubtful D3 (&gt;3yr)</span><span class="cheat-val">100% secured + 100% unsecured</span></div>
+    <div class="cheat-row"><span class="cheat-key">Loss Asset</span><span class="cheat-val">100% of outstanding</span></div>
+    <div class="cheat-row"><span class="cheat-key">Stage 2 (new floor)</span><span class="cheat-val">Minimum 5%</span></div>
+  </div>
+</div>
+
+<div class="cheat-section">
+  <div class="cheat-title">Special Rules – Quick Recall</div>
+  <div class="grid-2">
+    <div>
+      <div class="cheat-row"><span class="cheat-key">Central Govt Securities</span><span class="cheat-val">Never NPI</span></div>
+      <div class="cheat-row"><span class="cheat-key">Central Govt guarantee</span><span class="cheat-val">NPA only if Govt repudiates</span></div>
+      <div class="cheat-row"><span class="cheat-key">Term Deposits (same bank)</span><span class="cheat-val">Not NPA if margin ≥ 100%</span></div>
+      <div class="cheat-row"><span class="cheat-key">Export project finance</span><span class="cheat-val">1-yr deferral if funds blocked abroad</span></div>
+    </div>
+    <div>
+      <div class="cheat-row"><span class="cheat-key">POCI</span><span class="cheat-val">Credit-impaired at initial recognition</span></div>
+      <div class="cheat-row"><span class="cheat-key">Transition fair valuation</span><span class="cheat-val">Adj. to retained earnings (not P&amp;L)</span></div>
+      <div class="cheat-row"><span class="cheat-key">Stage 3 interest income</span><span class="cheat-val">On net carrying amount (EIR)</span></div>
+      <div class="cheat-row"><span class="cheat-key">Simplified approach</span><span class="cheat-val">For lease &amp; trade receivables</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- MCQ SECTION -->
+<!-- ============================================================ -->
+<hr>
+<div class="separator-title" id="mcq">🎯 MOST PROBABLE MCQ QUESTIONS</div>
+<div style="font-family:Arial,sans-serif; font-size:13px; color:var(--muted); margin-bottom:1.5rem; text-align:center;">Based on RBI (Commercial Banks – Asset Classification, Provisioning and Income Recognition) Directions, 2026 | Focus: Branch Head – General Banking Paper</div>
+
+<div class="mcq-card">
+  <div class="mcq-num">Q 1</div>
+  <div class="mcq-q">The RBI (Commercial Banks – Asset Classification, Provisioning and Income Recognition) Directions, 2026 shall come into force with effect from:</div>
+  <div class="mcq-opt"><span class="opt-key">A</span><span>April 27, 2026</span></div>
+  <div class="mcq-opt correct"><span class="opt-key">B</span><span><strong>April 1, 2027</strong></span></div>
+  <div class="mcq-opt"><span class="opt-key">C</span><span>April 1, 2026</span></div>
+  <div class="mcq-opt"><span class="opt-key">D</span><span>March 31, 2027</span></div>
+  <div class="mcq-answer"><strong>Answer: B</strong> – The Directions were issued on April 27, 2026, but are effective from April 1, 2027. Until then, the 2025 IRACP Directions continue to govern banks.</div>
+</div>
+
+<div class="mcq-card">
+  <div class="mcq-num">Q 2</div>
+  <div class="mcq-q">Under the new 2026 Directions, the provisioning approach is shifting from:</div>
+  <div class="mcq-opt"><span class="opt-key">A</span><span>Forward-looking model to incurred loss model</span></div>
+  <div class="mcq-opt"><span class="opt-key">B</span><span>Expected credit loss model to fair value model</span></div>
+  <div class="mcq-opt correct"><span class="opt-key">C</span><span><strong>Incurred loss model to Expected Credit Loss (ECL) model</strong></span></div>
+  <div class="mcq-opt"><span class="opt-key">D</span><span>Simplified approach to complex internal rating approach</span></div>
+  <div class="mcq-answer"><strong>Answer: C</strong> – The old IRACP norms used an incurred loss model (provisions only after default). The 2026 Directions shift to a forward-looking ECL model (provisions based on expected future losses).</div>
+</div>
+
+<div class="mcq-card">
+  <div class="mcq-num">Q 3</div>
+  <div class="mcq-q">Which of the following entities is NOT covered under the RBI (Commercial Banks – Asset Classification, Provisioning and Income Recognition) Directions, 2026?</div>
+  <div class="mcq-opt correct"><span class="opt-key">A</span><span><strong>Small Finance Banks</strong></span></div>
+  <div class="mcq-opt"><span class="opt-key">B</span><span>State Bank of India</span></div>
+  <div class="mcq-opt"><span class="opt-key">C</span><span>Nationalised banks (Corresponding New Banks)</span></div>
+  <div class="mcq-opt"><span class="opt-key">D</span><span>Private sector banking companies (excluding SFBs and Payment Banks)</span></div>
+  <div class="mcq-answer"><strong>Answer: A</strong> – SFBs (Small Finance Banks), Payment Banks, and Local Area Banks are EXCLUDED. SBI, nationalised banks, and private sector banks (other than excluded ones) are covered.</div>
+</div>
+
+<div class="mcq-card">
+  <div class="mcq-num">Q 4</div>
+  <div class="mcq-q">A term loan account remains overdue for 91 days. The NPA date is correctly identified as:</div>
+  <div class="mcq-opt"><span class="opt-key">A</span><span>The date the bank notices the overdue status</span></div>
+  <div class="mcq-opt"><span class="opt-key">B</span><span>The 91st day from the due date as per banker's convenience</span></div>
+  <div class="mcq-opt correct"><span class="opt-key">C</span><span><strong>The calendar date for which the day-end process is run on the 91st day of overdue</strong></span></div>
+  <div class="mcq-opt"><span class="opt-key">D</span><span>The next quarterly reporting date</span></div>
+  <div class="mcq-answer"><strong>Answer: C</strong> – NPA classification must be done as part of day-end process. The NPA date is the calendar date for which the day-end process is run. If due date is March 31 → overdue from March 31 → NPA classification date is June 29 (day-end of 91st day).</div>
+</div>
+
+<div class="mcq-card">
+  <div class="mcq-num">Q 5</div>
+  <div class="mcq-q">Under the ECL three-stage framework, a financial instrument classified in Stage 2 would require provisioning for:</div>
+  <div class="mcq-opt"><span class="opt-key">A</span><span>12-month ECL only</span></div>
+  <div class="mcq-opt correct"><span class="opt-key">B</span><span><strong>Lifetime ECL</strong></span></div>
+  <div class="mcq-opt"><span class="opt-key">C</span><span>50% of Lifetime ECL</span></div>
+  <div class="mcq-opt"><span class="opt-key">D</span><span>No provisioning required as asset is not yet impaired</span></div>
+  <div class="mcq-answer"><strong>Answer: B</strong> – Stage 2 = SICR occurred but not credit-impaired. Lifetime ECL must be provisioned. Stage 1 requires only 12-month ECL.</div>
+</div>
+
+<div class="mcq-card">
+  <div class="mcq-num">Q 6</div>
+  <div class="mcq-q">As per the new 2026 Directions, there is a rebuttable presumption that SICR (Significant Increase in Credit Risk) has occurred when contractual payments are past due by more than:</div>
+  <div class="mcq-opt"><span class="opt-key">A</span><span>90 days</span></div>
+  <div class="mcq-opt"><span class="opt-key">B</span><span>60 days</span></div>
+  <div class="mcq-opt correct"><span class="opt-key">C</span><span><strong>30 days</strong></span></div>
+  <div class="mcq-opt"><span class="opt-key">D</span><span>45 days</span></div>
+  <div class="mcq-answer"><strong>Answer: C</strong> – More than 30 days past due creates a rebuttable presumption of SICR (Stage 2). For revolving facilities (OD/CC), SICR is presumed when outstanding remains continuously over limit for up to 60 days.</div>
+</div>
+
+<div class="mcq-card">
+  <div class="mcq-num">Q 7</div>
+  <div class="mcq-q">An asset is classified as a Sub-standard NPA when it has remained as NPA for a period of:</div>
+  <div class="mcq-opt"><span class="opt-key">A</span><span>More than 12 months</span></div>
+  <div class="mcq-opt"><span class="opt-key">B</span><span>More than 18 months</span></div>
+  <div class="mcq-opt correct"><span class="opt-key">C</span><span><strong>Less than or equal to 12 months</strong></span></div>
+  <div class="mcq-opt"><span class="opt-key">D</span><span>More than 6 months but less than 12 months</span></div>
+  <div class="mcq-answer"><strong>Answer: C</strong> – Sub-standard = NPA for ≤ 12 months. Doubtful = remained in sub-standard for &gt;12 months. Loss = loss identified, considered uncollectible.</div>
+</div>
+
+<div class="mcq-card">
+  <div class="mcq-num">Q 8</div>
+  <div class="mcq-q">The minimum provisioning requirement for a Doubtful asset (D2 category – 1 to 3 years in doubtful) on the secured portion is:</div>
+  <div class="mcq-opt"><span class="opt-key">A</span><span>25%</span></div>
+  <div class="mcq-opt correct"><span class="opt-key">B</span><span><strong>40%</strong></span></div>
+  <div class="mcq-opt"><span class="opt-key">C</span><span>100%</span></div>
+  <div class="mcq-opt"><span class="opt-key">D</span><span>20%</span></div>
+  <div class="mcq-answer"><strong>Answer: B</strong> – D1 (up to 1 yr): 25% secured; D2 (1-3 yrs): 40% secured; D3 (&gt;3 yrs): 100% secured. Unsecured portion always 100% for all doubtful categories.</div>
+</div>
+
+<div class="mcq-card">
+  <div class="mcq-num">Q 9</div>
+  <div class="mcq-q">In a Cash Credit account, which condition does NOT lead to "Out of Order" status?</div>
+  <div class="mcq-opt"><span class="opt-key">A</span><span>Outstanding continuously exceeds sanctioned limit for 90 days</span></div>
+  <div class="mcq-opt"><span class="opt-key">B</span><span>No credits in the account for 90 days</span></div>
+  <div class="mcq-opt"><span class="opt-key">C</span><span>Credits insufficient to cover interest for previous 90 days</span></div>
+  <div class="mcq-opt correct"><span class="opt-key">D</span><span><strong>Account shows debit balance equal to (not exceeding) drawing power for 90 days</strong></span></div>
+  <div class="mcq-answer"><strong>Answer: D</strong> – "Out of order" requires the outstanding to be IN EXCESS of sanctioned limit/drawing power. An account at exactly the DP level is not "out of order" on that count alone.</div>
+</div>
+
+<div class="mcq-card">
+  <div class="mcq-num">Q 10</div>
+  <div class="mcq-q">Under the ECL framework, which of the following is CORRECT regarding the transition fair valuation on April 1, 2027?</div>
+  <div class="mcq-opt"><span class="opt-key">A</span><span>Difference between fair value and carrying amount is charged to P&amp;L account</span></div>
+  <div class="mcq-opt correct"><span class="opt-key">B</span><span><strong>Difference between fair value and carrying amount is adjusted against opening balance of retained earnings</strong></span></div>
+  <div class="mcq-opt"><span class="opt-key">C</span><span>Only new loans originated after April 1, 2027 need to be fair valued</span></div>
+  <div class="mcq-opt"><span class="opt-key">D</span><span>Fair value must be certified by an external valuer for every loan</span></div>
+  <div class="mcq-answer"><strong>Answer: B</strong> – The entire loan portfolio must be fair valued on April 1, 2027. Any difference between fair value and carrying amount is adjusted to opening retained earnings, NOT through P&amp;L.</div>
+</div>
+
+<div class="mcq-card">
+  <div class="mcq-num">Q 11</div>
+  <div class="mcq-q">For agricultural loans to individual farmers (not corporate farmers), the crop season-based NPA norms apply for short duration crops requiring:</div>
+  <div class="mcq-opt"><span class="opt-key">A</span><span>1 crop season overdue to classify as NPA</span></div>
+  <div class="mcq-opt correct"><span class="opt-key">B</span><span><strong>2 crop seasons overdue (same crop type) to classify as NPA</strong></span></div>
+  <div class="mcq-opt"><span class="opt-key">C</span><span>90 days overdue same as other loans</span></div>
+  <div class="mcq-opt"><span class="opt-key">D</span><span>3 crop seasons overdue to classify as NPA</span></div>
+  <div class="mcq-answer"><strong>Answer: B</strong> – Short duration crops (≤12 months): 2 crop seasons overdue. Long duration crops (&gt;12 months to 18 months): 1 crop season overdue. These are the special agricultural NPA norms.</div>
+</div>
+
+<div class="mcq-card">
+  <div class="mcq-num">Q 12</div>
+  <div class="mcq-q">Under the new 2026 Directions, how is interest income recognised on Stage 3 (credit-impaired) financial assets?</div>
+  <div class="mcq-opt"><span class="opt-key">A</span><span>On gross carrying amount using EIR – same as Stage 1 and Stage 2</span></div>
+  <div class="mcq-opt"><span class="opt-key">B</span><span>Not recognised at all – all interest on NPA accounts is waived</span></div>
+  <div class="mcq-opt correct"><span class="opt-key">C</span><span><strong>On net carrying amount (gross carrying amount minus loss allowance) using EIR</strong></span></div>
+  <div class="mcq-opt"><span class="opt-key">D</span><span>On contractual outstanding balance using prime lending rate</span></div>
+  <div class="mcq-answer"><strong>Answer: C</strong> – Stage 1 &amp; 2: interest on gross carrying amount. Stage 3: interest on net carrying amount (after deducting loss allowance). Non-recognition of income on Stage 3 will not attract auditor qualifications.</div>
+</div>
+
+<div class="mcq-card">
+  <div class="mcq-num">Q 13</div>
+  <div class="mcq-q">The standard asset provisioning rate for a Commercial Real Estate (CRE) loan is:</div>
+  <div class="mcq-opt"><span class="opt-key">A</span><span>0.25%</span></div>
+  <div class="mcq-opt"><span class="opt-key">B</span><span>0.40%</span></div>
+  <div class="mcq-opt"><span class="opt-key">C</span><span>0.75%</span></div>
+  <div class="mcq-opt correct"><span class="opt-key">D</span><span><strong>1.00%</strong></span></div>
+  <div class="mcq-answer"><strong>Answer: D</strong> – CRE standard asset provisioning = 1.00%. Others: Agriculture/SME = 0.25%; Residential Housing = 0.75%; All other standard assets = 0.40%.</div>
+</div>
+
+<div class="mcq-card">
+  <div class="mcq-num">Q 14</div>
+  <div class="mcq-q">A bank has two facilities to Borrower X: a term loan and a CC limit. The CC limit is classified as NPA. What happens to the term loan?</div>
+  <div class="mcq-opt"><span class="opt-key">A</span><span>Term loan continues as standard as it is performing</span></div>
+  <div class="mcq-opt"><span class="opt-key">B</span><span>Term loan is put on watch list (SMA-2) only</span></div>
+  <div class="mcq-opt correct"><span class="opt-key">C</span><span><strong>Term loan is also classified as NPA along with the CC limit</strong></span></div>
+  <div class="mcq-opt"><span class="opt-key">D</span><span>Term loan is put on SMA-1 but not NPA</span></div>
+  <div class="mcq-answer"><strong>Answer: C</strong> – NPA classification is at borrower level. If any exposure to a borrower is NPA, ALL exposures to that borrower are classified as NPA. The only exception is LC-backed bills discounting under specific conditions.</div>
+</div>
+
+<div class="mcq-card">
+  <div class="mcq-num">Q 15</div>
+  <div class="mcq-q">For purposes of the ECL framework, lease receivables and trade receivables shall always be measured at:</div>
+  <div class="mcq-opt"><span class="opt-key">A</span><span>12-month ECL</span></div>
+  <div class="mcq-opt"><span class="opt-key">B</span><span>Stage-appropriate ECL (12-month for Stage 1, Lifetime for Stage 2 &amp; 3)</span></div>
+  <div class="mcq-opt correct"><span class="opt-key">C</span><span><strong>Lifetime ECL irrespective of the stage</strong></span></div>
+  <div class="mcq-opt"><span class="opt-key">D</span><span>Zero ECL as these are fully secured</span></div>
+  <div class="mcq-answer"><strong>Answer: C</strong> – For lease receivables and trade receivables, banks shall always measure loss allowances at lifetime ECL, irrespective of stage. Banks may use the "Simplified Approach" (Annex 2).</div>
+</div>
+
+<div class="mcq-card">
+  <div class="mcq-num">Q 16</div>
+  <div class="mcq-q">The minimum provisioning floor for Stage 2 assets under the new ECL framework is:</div>
+  <div class="mcq-opt"><span class="opt-key">A</span><span>0.40%</span></div>
+  <div class="mcq-opt"><span class="opt-key">B</span><span>2.50%</span></div>
+  <div class="mcq-opt correct"><span class="opt-key">C</span><span><strong>5%</strong></span></div>
+  <div class="mcq-opt"><span class="opt-key">D</span><span>10%</span></div>
+  <div class="mcq-answer"><strong>Answer: C</strong> – Stage 2 minimum provisioning floor = 5% for most loan categories. This is a significant jump from the existing ~0.4% for standard assets, making Stage 2 classification financially significant for banks.</div>
+</div>
+
+<div class="mcq-card">
+  <div class="mcq-num">Q 17</div>
+  <div class="mcq-q">An NPA borrower repays the overdue principal and interest on his term loan. Which of the following is TRUE regarding upgrade to standard asset?</div>
+  <div class="mcq-opt"><span class="opt-key">A</span><span>The account is immediately upgraded to standard</span></div>
+  <div class="mcq-opt correct"><span class="opt-key">B</span><span><strong>The account is upgraded only if entire arrears of interest AND principal across ALL credit facilities to that borrower are repaid</strong></span></div>
+  <div class="mcq-opt"><span class="opt-key">C</span><span>Account upgraded after 3 months of regular repayment</span></div>
+  <div class="mcq-opt"><span class="opt-key">D</span><span>Account upgraded on payment of 50% of dues</span></div>
+  <div class="mcq-answer"><strong>Answer: B</strong> – Upgrade requires repayment of ENTIRE arrears of both interest and principal. For multi-facility borrowers, ALL facilities must be cleared. Both borrower and co-borrower are jointly and severally liable.</div>
+</div>
+
+<div class="mcq-card">
+  <div class="mcq-num">Q 18</div>
+  <div class="mcq-q">The Effective Interest Rate (EIR) method excludes which of the following in its calculation?</div>
+  <div class="mcq-opt"><span class="opt-key">A</span><span>Transaction costs</span></div>
+  <div class="mcq-opt"><span class="opt-key">B</span><span>Fees paid or received between parties</span></div>
+  <div class="mcq-opt correct"><span class="opt-key">C</span><span><strong>Expected credit losses</strong></span></div>
+  <div class="mcq-opt"><span class="opt-key">D</span><span>Premiums and discounts</span></div>
+  <div class="mcq-answer"><strong>Answer: C</strong> – EIR calculation includes transaction costs, fees, premiums/discounts, and contractual terms (prepayment options, etc.) but explicitly EXCLUDES expected credit losses. ECL is a separate component.</div>
+</div>
+
+<div class="mcq-card">
+  <div class="mcq-num">Q 19</div>
+  <div class="mcq-q">Under the 2026 Directions, investment in Central Government Securities is:</div>
+  <div class="mcq-opt correct"><span class="opt-key">A</span><span><strong>Not required to be tested for SICR and not classified as NPI</strong></span></div>
+  <div class="mcq-opt"><span class="opt-key">B</span><span>Classified as NPI if interest is overdue beyond 90 days</span></div>
+  <div class="mcq-opt"><span class="opt-key">C</span><span>Subject to Stage 1 ECL provisioning only</span></div>
+  <div class="mcq-opt"><span class="opt-key">D</span><span>Treated at par with corporate bond investments for NPI classification</span></div>
+  <div class="mcq-answer"><strong>Answer: A</strong> – SLR eligible investments, direct claims on Central Govt, Central Govt guaranteed exposures, and exposures to foreign sovereigns/MDBs/BIS/IMF (0% risk weight) are exempt from SICR testing and Stage 1 ECL provisioning.</div>
+</div>
+
+<div class="mcq-card">
+  <div class="mcq-num">Q 20</div>
+  <div class="mcq-q">The old IRACP Directions 2025 governing commercial banks will be repealed on:</div>
+  <div class="mcq-opt"><span class="opt-key">A</span><span>April 27, 2026 (date of issue of new Directions)</span></div>
+  <div class="mcq-opt"><span class="opt-key">B</span><span>March 31, 2027</span></div>
+  <div class="mcq-opt correct"><span class="opt-key">C</span><span><strong>April 1, 2027 (date of commencement of new Directions)</strong></span></div>
+  <div class="mcq-opt"><span class="opt-key">D</span><span>The old Directions continue alongside the new Directions</span></div>
+  <div class="mcq-answer"><strong>Answer: C</strong> – Banks continue to be governed by the 2025 IRACP Directions until April 1, 2027. On commencement of the 2026 Directions (April 1, 2027), the 2025 Directions stand repealed.</div>
+</div>
+
+<div class="mcq-card">
+  <div class="mcq-num">Q 21</div>
+  <div class="mcq-q">Under the new ECL framework, all outstanding loans as on March 31, 2027 must be brought under the EIR regime by:</div>
+  <div class="mcq-opt"><span class="opt-key">A</span><span>April 1, 2027 itself</span></div>
+  <div class="mcq-opt"><span class="opt-key">B</span><span>March 31, 2028</span></div>
+  <div class="mcq-opt"><span class="opt-key">C</span><span>March 31, 2029</span></div>
+  <div class="mcq-opt correct"><span class="opt-key">D</span><span><strong>March 31, 2030</strong></span></div>
+  <div class="mcq-answer"><strong>Answer: D</strong> – New loans from April 1, 2027 are immediately under EIR. For existing loans (outstanding as at March 31, 2027), the deadline for full EIR migration is March 31, 2030 — a 3-year transition period.</div>
+</div>
+
+<div class="mcq-card">
+  <div class="mcq-num">Q 22</div>
+  <div class="mcq-q">A bank has an advance to a borrower against term deposits with the same bank. The loan becomes overdue. What is the correct classification?</div>
+  <div class="mcq-opt"><span class="opt-key">A</span><span>Must be classified as NPA regardless of margin</span></div>
+  <div class="mcq-opt"><span class="opt-key">B</span><span>Always exempt from NPA classification</span></div>
+  <div class="mcq-opt correct"><span class="opt-key">C</span><span><strong>Need not be classified as NPA, provided margin (value of TDR ≥ 100% of loan outstanding) is available – UNLESS classified NPA due to borrower-level rule</strong></span></div>
+  <div class="mcq-opt"><span class="opt-key">D</span><span>Exempt from NPA classification for 1 year from due date</span></div>
+  <div class="mcq-answer"><strong>Answer: C</strong> – Advances against term deposits with the same bank need not be NPA if margin is maintained at 100%. However, the borrower-level NPA classification rule (if any other facility is NPA) overrides this exemption.</div>
+</div>
+
+<div class="mcq-card">
+  <div class="mcq-num">Q 23</div>
+  <div class="mcq-q">In a Co-Lending Arrangement (CLA), if Regulated Entity A classifies its exposure to a borrower as NPA, what happens to the exposure of Regulated Entity B?</div>
+  <div class="mcq-opt"><span class="opt-key">A</span><span>No impact; each RE independently classifies based on its own records</span></div>
+  <div class="mcq-opt correct"><span class="opt-key">B</span><span><strong>RE B must also classify its exposure to the same borrower under CLA as NPA</strong></span></div>
+  <div class="mcq-opt"><span class="opt-key">C</span><span>RE B classifies as SMA-2 (one level below NPA)</span></div>
+  <div class="mcq-opt"><span class="opt-key">D</span><span>RE B has 30 days to independently assess and classify</span></div>
+  <div class="mcq-answer"><strong>Answer: B</strong> – In Co-Lending Arrangements, borrower-level SMA/NPA classification applies to both REs. Information must be shared on near-real-time basis (latest by end of next working day).</div>
+</div>
+
+<div class="mcq-card">
+  <div class="mcq-num">Q 24</div>
+  <div class="mcq-q">Which of the following is NOT included in the scope of ECL-based provisioning?</div>
+  <div class="mcq-opt"><span class="opt-key">A</span><span>Loan commitments including undrawn commitments</span></div>
+  <div class="mcq-opt correct"><span class="opt-key">B</span><span><strong>Investments in subsidiaries</strong></span></div>
+  <div class="mcq-opt"><span class="opt-key">C</span><span>Off-balance-sheet credit exposures</span></div>
+  <div class="mcq-opt"><span class="opt-key">D</span><span>Debt securities other than FVTPL</span></div>
+  <div class="mcq-answer"><strong>Answer: B</strong> – Investments in subsidiaries, associates, and joint ventures are explicitly outside the purview of ECL-based provisioning. All loans, debt securities (non-FVTPL), trade/lease receivables, loan commitments, and OBS exposures are within scope.</div>
+</div>
+
+<div class="mcq-card">
+  <div class="mcq-num">Q 25</div>
+  <div class="mcq-q">The provisioning requirement for Sub-standard assets (on infrastructure loans with escrow account arrangement) is:</div>
+  <div class="mcq-opt"><span class="opt-key">A</span><span>15% of total outstanding</span></div>
+  <div class="mcq-opt"><span class="opt-key">B</span><span>25% of total outstanding</span></div>
+  <div class="mcq-opt correct"><span class="opt-key">C</span><span><strong>20% of total outstanding</strong></span></div>
+  <div class="mcq-opt"><span class="opt-key">D</span><span>10% of total outstanding</span></div>
+  <div class="mcq-answer"><strong>Answer: C</strong> – Infrastructure lending classified as sub-standard requires 20% provisioning (where an escrow account is available). Regular sub-standard: 15% secured, 25% for unsecured. This is an important nuance often tested.</div>
+</div>
+
+<!-- FOOTER -->
+<div style="margin-top:3rem; padding:1.5rem; background:var(--primary); border-radius:8px; text-align:center; color:white; font-family:Arial,sans-serif;">
+  <div style="font-size:14px; font-weight:700; margin-bottom:0.4rem;">Bank of Baroda – International Banking Officer (IBO) Selection Exam 2026-27</div>
+  <div style="font-size:12px; color:rgba(255,255,255,0.7);">Study Material: RBI (Commercial Banks – Asset Classification, Provisioning &amp; Income Recognition) Directions, 2026 | Prepared for Branch Head Position</div>
+  <div style="font-size:11px; color:rgba(255,255,255,0.5); margin-top:0.5rem;">Source: RBI Master Directions DOR.STR.REC.No.6/21.06.011/2026-27 dated April 27, 2026 | Effective April 1, 2027</div>
+</div>
+
+</div><!-- end container -->
+</body>
+</html>
