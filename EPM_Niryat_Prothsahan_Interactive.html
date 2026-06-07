@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EPM — Niryat Prothsahan | IBO Study Module</title>
+<style>
+/* ══════════════════════════════════════════════
+   ROOT & RESET
+══════════════════════════════════════════════ */
+:root {
+  --navy:#1F4E79; --blue:#2563EB; --lblue:#DBEAFE; --sky:#EFF6FF;
+  --green:#166534; --lgreen:#DCFCE7; --midgreen:#22C55E;
+  --amber:#92400E; --lamber:#FEF3C7; --gold:#F59E0B;
+  --red:#991B1B; --lred:#FEE2E2; --rose:#EF4444;
+  --gray:#374151; --lgray:#F9FAFB; --mgray:#E5E7EB; --dgray:#6B7280;
+  --white:#FFFFFF; --black:#111827;
+  --shadow:0 4px 24px rgba(0,0,0,.10);
+  --radius:12px; --radius-sm:8px;
+  --font:"Segoe UI",system-ui,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--lgray);color:var(--black);line-height:1.6;min-height:100vh}
+a{color:var(--blue);text-decoration:none}
+button{cursor:pointer;font-family:var(--font)}
+
+/* ══ HEADER ══ */
+.site-header{background:linear-gradient(135deg,var(--navy) 0%,#1e3a5f 60%,#2563EB 100%);color:#fff;padding:0}
+.header-inner{max-width:1200px;margin:0 auto;padding:28px 24px 0}
+.header-badge{display:inline-block;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);
+  border-radius:20px;padding:4px 14px;font-size:.75rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:12px}
+.header-inner h1{font-size:clamp(1.5rem,3vw,2.4rem);font-weight:800;line-height:1.2;margin-bottom:6px}
+.header-inner .sub{font-size:1rem;opacity:.85;margin-bottom:4px}
+.header-meta{display:flex;gap:20px;flex-wrap:wrap;padding:10px 0 0;font-size:.78rem;opacity:.75}
+.header-meta span{display:flex;align-items:center;gap:6px}
+
+/* ══ TAB NAV ══ */
+.tab-nav{background:rgba(255,255,255,.12);backdrop-filter:blur(8px);border-top:1px solid rgba(255,255,255,.2)}
+.tab-nav-inner{max-width:1200px;margin:0 auto;display:flex;gap:0;overflow-x:auto;padding:0 16px}
+.tab-btn{flex-shrink:0;padding:14px 22px;border:none;background:transparent;color:rgba(255,255,255,.75);
+  font-size:.9rem;font-weight:600;border-bottom:3px solid transparent;transition:all .2s;cursor:pointer;white-space:nowrap}
+.tab-btn:hover{color:#fff;background:rgba(255,255,255,.08)}
+.tab-btn.active{color:#fff;border-bottom-color:#F59E0B}
+
+/* ══ MAIN ══ */
+.main{max-width:1200px;margin:0 auto;padding:24px 16px 60px}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* ══ CARDS & BOXES ══ */
+.card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);padding:28px;margin-bottom:20px}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;margin-bottom:20px}
+.stat-card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);
+  padding:22px;text-align:center;border-top:4px solid var(--blue)}
+.stat-card .val{font-size:2.4rem;font-weight:800;color:var(--navy);line-height:1}
+.stat-card .lbl{font-size:.82rem;color:var(--dgray);margin-top:6px;font-weight:500}
+.stat-card.green{border-top-color:var(--midgreen)} .stat-card.green .val{color:var(--green)}
+.stat-card.amber{border-top-color:var(--gold)} .stat-card.amber .val{color:var(--amber)}
+.stat-card.red{border-top-color:var(--rose)} .stat-card.red .val{color:var(--red)}
+
+/* ══ CALLOUT BOXES ══ */
+.box{border-radius:var(--radius-sm);padding:16px 20px;margin:16px 0;border-left:5px solid}
+.box-blue{background:var(--sky);border-color:var(--blue)}
+.box-green{background:var(--lgreen);border-color:var(--midgreen)}
+.box-amber{background:var(--lamber);border-color:var(--gold)}
+.box-red{background:var(--lred);border-color:var(--rose)}
+.box-title{font-weight:700;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.box-blue .box-title{color:var(--blue)} .box-green .box-title{color:var(--green)}
+.box-amber .box-title{color:var(--amber)} .box-red .box-title{color:var(--red)}
+
+/* ══ TABLES ══ */
+.tbl-wrap{overflow-x:auto;margin:12px 0}
+table{width:100%;border-collapse:collapse;font-size:.88rem}
+thead tr{background:var(--navy);color:#fff}
+th{padding:10px 14px;text-align:left;font-weight:600}
+td{padding:9px 14px;border-bottom:1px solid var(--mgray)}
+tr:nth-child(even) td{background:var(--lgray)}
+tr:hover td{background:var(--sky)}
+.td-green{background:var(--lgreen)!important;font-weight:600;color:var(--green)}
+.td-amber{background:var(--lamber)!important;font-weight:600;color:var(--amber)}
+.td-red{background:var(--lred)!important;font-weight:600;color:var(--red)}
+
+/* ══ ACCORDION ══ */
+.acc-item{border:1px solid var(--mgray);border-radius:var(--radius-sm);margin-bottom:10px;overflow:hidden}
+.acc-hdr{background:var(--white);padding:16px 20px;cursor:pointer;display:flex;justify-content:space-between;
+  align-items:center;font-weight:700;font-size:.97rem;color:var(--navy);transition:background .15s}
+.acc-hdr:hover{background:var(--sky)}
+.acc-hdr.open{background:var(--navy);color:#fff}
+.acc-icon{font-size:1.2rem;transition:transform .25s;flex-shrink:0}
+.acc-hdr.open .acc-icon{transform:rotate(45deg)}
+.acc-body{display:none;padding:20px;border-top:1px solid var(--mgray);font-size:.93rem;line-height:1.75}
+.acc-body.open{display:block}
+.acc-body h4{color:var(--navy);margin:14px 0 6px;font-size:.95rem}
+.acc-body ul{padding-left:22px;margin:6px 0}
+.acc-body li{margin-bottom:5px}
+
+/* ══ BADGES ══ */
+.badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:.75rem;font-weight:700;letter-spacing:.04em}
+.badge-blue{background:var(--lblue);color:var(--navy)}
+.badge-green{background:var(--lgreen);color:var(--green)}
+.badge-amber{background:var(--lamber);color:var(--amber)}
+.badge-red{background:var(--lred);color:var(--red)}
+
+/* ══ SECTION HERO ══ */
+.section-hero{background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;
+  border-radius:var(--radius);padding:28px;margin-bottom:24px}
+.hero-badge{display:inline-block;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);
+  border-radius:20px;padding:3px 12px;font-size:.75rem;font-weight:700;letter-spacing:.06em;margin-bottom:10px}
+.section-hero h2{font-size:1.6rem;font-weight:800;margin-bottom:8px}
+.section-hero p{opacity:.9;font-size:.95rem}
+
+/* ══ CHEAT SHEET ══ */
+.cheat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-bottom:20px}
+.cheat-card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.cheat-hdr{padding:12px 16px;font-weight:700;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em;color:#fff}
+.cheat-body{padding:14px 16px}
+.cheat-row{display:flex;justify-content:space-between;align-items:flex-start;padding:6px 0;
+  border-bottom:1px solid var(--mgray);font-size:.87rem;gap:12px}
+.cheat-row:last-child{border:none}
+.cheat-key{color:var(--dgray);font-weight:500;flex-shrink:0;max-width:55%}
+.cheat-val{font-weight:700;color:var(--navy);text-align:right}
+.cheat-val.green{color:var(--green)} .cheat-val.red{color:var(--red)} .cheat-val.amber{color:var(--amber)}
+
+/* ══ INTERACTIVE TOOLS ══ */
+.tool-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:20px;margin-bottom:24px}
+.tool-card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.tool-hdr{background:var(--navy);color:#fff;padding:14px 18px;font-weight:700;font-size:.95rem;display:flex;align-items:center;gap:8px}
+.tool-body{padding:20px}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:.83rem;font-weight:600;color:var(--gray);margin-bottom:5px}
+.form-group select,.form-group input{width:100%;padding:9px 12px;border:1.5px solid var(--mgray);
+  border-radius:var(--radius-sm);font-family:var(--font);font-size:.9rem;transition:border .2s;background:#fff}
+.form-group select:focus,.form-group input:focus{outline:none;border-color:var(--blue)}
+.btn-primary{background:var(--blue);color:#fff;border:none;padding:10px 22px;border-radius:var(--radius-sm);
+  font-weight:700;font-size:.9rem;transition:background .2s;width:100%}
+.btn-primary:hover{background:var(--navy)}
+.result-box{margin-top:14px;padding:14px;border-radius:var(--radius-sm);display:none;font-size:.9rem;line-height:1.65}
+.result-box.show{display:block}
+.result-eligible{background:var(--lgreen);border:1.5px solid var(--midgreen);color:var(--green)}
+.result-ineligible{background:var(--lred);border:1.5px solid var(--rose);color:var(--red)}
+.result-info{background:var(--sky);border:1.5px solid var(--blue);color:var(--navy)}
+.result-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(0,0,0,.08);font-size:.88rem}
+.result-row:last-child{border:none;padding-top:8px;font-weight:700;font-size:.95rem}
+
+/* ══ TIMELINE ══ */
+.timeline{position:relative;padding-left:36px;margin:16px 0}
+.timeline::before{content:'';position:absolute;left:10px;top:0;bottom:0;width:2px;background:var(--mgray)}
+.tl-item{position:relative;margin-bottom:22px}
+.tl-dot{position:absolute;left:-30px;top:4px;width:16px;height:16px;border-radius:50%;
+  background:var(--blue);border:3px solid var(--white);box-shadow:0 0 0 2px var(--blue)}
+.tl-dot.green{background:var(--midgreen);box-shadow:0 0 0 2px var(--midgreen)}
+.tl-dot.amber{background:var(--gold);box-shadow:0 0 0 2px var(--gold)}
+.tl-dot.red{background:var(--rose);box-shadow:0 0 0 2px var(--rose)}
+.tl-date{font-size:.77rem;font-weight:700;color:var(--dgray);margin-bottom:2px;text-transform:uppercase;letter-spacing:.05em}
+.tl-title{font-weight:700;color:var(--navy);margin-bottom:3px}
+.tl-desc{font-size:.87rem;color:var(--gray)}
+
+/* ══ QUIZ ENGINE ══ */
+.quiz-wrap{max-width:820px;margin:0 auto}
+.quiz-mode-bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.btn-mode{padding:8px 18px;border:2px solid var(--mgray);background:var(--white);border-radius:20px;
+  font-size:.83rem;font-weight:600;color:var(--dgray);transition:all .2s}
+.btn-mode.active{background:var(--navy);border-color:var(--navy);color:#fff}
+.btn-mode:hover{border-color:var(--blue);color:var(--blue)}
+.quiz-progress{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.q-counter{font-weight:700;font-size:.9rem;color:var(--navy);white-space:nowrap}
+.progress-bar{flex:1;height:8px;background:var(--mgray);border-radius:4px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--midgreen));border-radius:4px;transition:width .4s}
+.score-badge{background:var(--navy);color:#fff;padding:4px 12px;border-radius:12px;font-size:.82rem;font-weight:700;white-space:nowrap}
+.quiz-card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.q-topic-bar{background:var(--lblue);padding:8px 20px;font-size:.78rem;font-weight:700;color:var(--navy);
+  text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--mgray)}
+.q-body{padding:24px}
+.q-text{font-size:1.05rem;font-weight:600;color:var(--black);line-height:1.6;margin-bottom:20px}
+.options{display:flex;flex-direction:column;gap:10px;margin-bottom:18px}
+.option-btn{display:flex;align-items:flex-start;gap:12px;padding:13px 16px;border:2px solid var(--mgray);
+  border-radius:var(--radius-sm);background:var(--white);text-align:left;font-size:.92rem;
+  color:var(--black);transition:all .2s;line-height:1.5}
+.option-btn:hover:not(:disabled){border-color:var(--blue);background:var(--sky)}
+.option-btn .opt-letter{flex-shrink:0;width:26px;height:26px;border-radius:50%;background:var(--mgray);
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;transition:all .2s}
+.option-btn.correct{border-color:var(--midgreen);background:var(--lgreen)}
+.option-btn.correct .opt-letter{background:var(--midgreen);color:#fff}
+.option-btn.wrong{border-color:var(--rose);background:var(--lred)}
+.option-btn.wrong .opt-letter{background:var(--rose);color:#fff}
+.option-btn.missed{border-color:var(--gold);background:var(--lamber)}
+.option-btn:disabled{cursor:default}
+.explanation{background:var(--sky);border-left:4px solid var(--blue);border-radius:0 var(--radius-sm) var(--radius-sm) 0;
+  padding:14px 16px;margin:14px 0 0;font-size:.9rem;line-height:1.65;display:none}
+.explanation.show{display:block}
+.explanation strong{color:var(--navy)}
+.quiz-actions{display:flex;gap:10px;margin-top:18px;padding:0 24px 24px}
+.btn-submit{background:var(--blue);color:#fff;border:none;padding:11px 28px;border-radius:var(--radius-sm);font-weight:700;font-size:.95rem}
+.btn-submit:hover{background:var(--navy)}
+.btn-next{background:var(--green);color:#fff;border:none;padding:11px 28px;border-radius:var(--radius-sm);font-weight:700;font-size:.95rem;display:none}
+.btn-next:hover{background:#14532d}
+.btn-restart{background:var(--navy);color:#fff;border:none;padding:11px 24px;border-radius:var(--radius-sm);font-weight:700;font-size:.9rem}
+.final-screen{text-align:center;padding:40px 20px;display:none}
+.final-screen.show{display:block}
+.final-score-ring{width:130px;height:130px;border-radius:50%;border:8px solid var(--blue);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 20px;background:var(--sky)}
+.final-pct{font-size:2.2rem;font-weight:800;color:var(--navy)}
+.final-label{font-size:.75rem;color:var(--dgray);font-weight:600}
+.final-grade{font-size:1.2rem;font-weight:700;margin:10px 0 20px}
+
+/* ══ PRINT BUTTON ══ */
+.print-btn{background:var(--navy);color:#fff;border:none;padding:10px 22px;border-radius:var(--radius-sm);
+  font-weight:700;font-size:.88rem;display:flex;align-items:center;gap:8px;margin-bottom:18px;float:right}
+.print-btn:hover{background:var(--blue)}
+@media print{.tab-nav,.tab-btn:not(.active),.print-btn{display:none!important}.tab-panel{display:block!important}}
+
+/* ══ PROCESS STEPS ══ */
+.steps{counter-reset:step;display:flex;flex-direction:column;gap:0}
+.step{display:flex;gap:16px;position:relative;padding-bottom:20px}
+.step:last-child{padding-bottom:0}
+.step::after{content:'';position:absolute;left:18px;top:40px;bottom:0;width:2px;background:var(--mgray)}
+.step:last-child::after{display:none}
+.step-num{flex-shrink:0;width:36px;height:36px;border-radius:50%;background:var(--navy);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.9rem;z-index:1}
+.step-content{flex:1;padding-top:6px}
+.step-title{font-weight:700;color:var(--navy);margin-bottom:4px}
+.step-desc{font-size:.88rem;color:var(--gray);line-height:1.6}
+
+/* ══ UIN DIAGRAM ══ */
+.flow-diagram{display:flex;flex-wrap:wrap;gap:0;align-items:stretch;margin:16px 0}
+.flow-box{flex:1;min-width:130px;background:var(--sky);border:2px solid var(--blue);border-radius:var(--radius-sm);
+  padding:12px 10px;text-align:center;font-size:.83rem;font-weight:600;color:var(--navy);position:relative}
+.flow-arrow{display:flex;align-items:center;padding:0 4px;color:var(--blue);font-size:1.3rem;font-weight:700;flex-shrink:0}
+.flow-box.green{background:var(--lgreen);border-color:var(--midgreen);color:var(--green)}
+.flow-box.amber{background:var(--lamber);border-color:var(--gold);color:var(--amber)}
+
+/* ══ COMPARISON PILLS ══ */
+.compare-row{display:grid;grid-template-columns:1fr 1px 1fr;gap:0;margin-bottom:12px;border:1.5px solid var(--mgray);border-radius:var(--radius-sm);overflow:hidden}
+.compare-col{padding:12px 16px;font-size:.88rem;line-height:1.55}
+.compare-col.rbi{background:var(--sky)} .compare-col.bob{background:var(--lgreen)}
+.compare-divider{background:var(--mgray)}
+.compare-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.compare-col.rbi .compare-label{color:var(--blue)} .compare-col.bob .compare-label{color:var(--green)}
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:640px){
+  .header-inner h1{font-size:1.4rem}
+  .card-grid{grid-template-columns:1fr}
+  .tool-grid{grid-template-columns:1fr}
+  .cheat-grid{grid-template-columns:1fr}
+  .compare-row{grid-template-columns:1fr;border-bottom:1.5px solid var(--mgray)}
+  .compare-divider{display:none}
+  .flow-diagram{flex-direction:column}
+  .flow-arrow{transform:rotate(90deg);justify-content:center}
+}
+</style>
+</head>
+<body>
+
+<!-- ════════ HEADER ════════ -->
+<header class="site-header">
+  <div class="header-inner">
+    <div class="header-badge">IBO FY 2026-27 · Branch Head · Export Finance</div>
+    <h1>Export Promotion Mission (EPM)<br>Niryat Prothsahan — Interest Subvention Scheme</h1>
+    <div class="sub">Pre & Post Shipment Export Credit for MSME Exporters</div>
+    <div class="header-meta">
+      <span>📌 RBI/2025-26/195 | 19.01.2026</span>
+      <span>📌 BoB:BR:118:090, 158, 395</span>
+      <span>📌 DGFT Trade Notices 20, 22/2025-26 | 03/2026-27</span>
+      <span>👤 Mallikarjunagowda S Gowdara, Chief Manager</span>
+    </div>
+  </div>
+  <nav class="tab-nav">
+    <div class="tab-nav-inner">
+      <button class="tab-btn active" onclick="openTab('study',this)">📖 Study Guide</button>
+      <button class="tab-btn" onclick="openTab('cheat',this)">📋 Cheat Sheet</button>
+      <button class="tab-btn" onclick="openTab('tools',this)">🛠 Interactive Tools</button>
+      <button class="tab-btn" onclick="openTab('quiz',this)">🎯 Quiz Engine</button>
+    </div>
+  </nav>
+</header>
+
+<main class="main">
+
+<!-- ══════════════════════════════════════════════════
+     TAB 1: STUDY GUIDE
+══════════════════════════════════════════════════ -->
+<div id="tab-study" class="tab-panel active">
+
+  <div class="section-hero">
+    <div class="hero-badge">Part A · Study Guide</div>
+    <h2>EPM — Niryat Prothsahan: Complete Study Notes</h2>
+    <p>Covers all regulatory layers — DGFT Trade Notices → RBI Notification → BoB Circulars — with BoB internal overlays highlighted at every step.</p>
+  </div>
+
+  <!-- GOLDEN NUMBERS ROW -->
+  <div class="card-grid">
+    <div class="stat-card green"><div class="val">2.75%</div><div class="lbl">Interest Subvention Rate (p.a.)</div></div>
+    <div class="stat-card amber"><div class="val">₹50L</div><div class="lbl">Max Annual Cap per MSME Exporter</div></div>
+    <div class="stat-card"><div class="val">15 Days</div><div class="lbl">UIN Window from Disbursal (FY 2026-27+)</div></div>
+    <div class="stat-card red"><div class="val">0</div><div class="lbl">UIN Portability — Zero if Bank Changes</div></div>
+  </div>
+
+  <!-- ACCORDIONS -->
+  <div id="acc-study">
+
+    <!-- CH 1 -->
+    <div class="acc-item">
+      <div class="acc-hdr" onclick="toggleAcc(this)">
+        <span>Chapter 1 · Background & Policy Genesis</span><span class="acc-icon">+</span>
+      </div>
+      <div class="acc-body">
+        <p>India's MSME export sector faced a structural cost-of-credit disadvantage vs global competitors. To bridge this gap, Government of India launched the <strong>Export Promotion Mission (EPM)</strong> in January 2026 as part of its 'Viksit Bharat' export strategy.</p>
+        <h4>What is Niryat Prothsahan?</h4>
+        <p>'Niryat Prothsahan' = 'Export Encouragement' in Hindi. It is an <strong>interest subvention (interest subsidy)</strong> scheme that reduces the effective borrowing cost for eligible MSME exporters. The bank extends the benefit upfront and then claims reimbursement from RBI monthly.</p>
+        <h4>Regulatory Architecture — Chronology</h4>
+        <div class="timeline">
+          <div class="tl-item"><div class="tl-dot"></div><div class="tl-date">02 Jan 2026</div><div class="tl-title">DGFT Trade Notice 20/2025-26</div><div class="tl-desc">Scheme launched on PILOT BASIS — operative instructions, UIN process, HSN positive list, 2.75% rate, ₹50L cap</div></div>
+          <div class="tl-item"><div class="tl-dot"></div><div class="tl-date">16 Jan 2026</div><div class="tl-title">DGFT Trade Notice 22/2025-26</div><div class="tl-desc">Supplementary clarifications to Trade Notice 20</div></div>
+          <div class="tl-item"><div class="tl-dot green"></div><div class="tl-date">19 Jan 2026</div><div class="tl-title">RBI Notification RBI/2025-26/195</div><div class="tl-desc">Directs all SCBs (excl. RRBs), UCBs, State Co-op Banks & AIFIs to implement scheme per DGFT instructions. Signed by Vaibhav Chaturvedi, CGM</div></div>
+          <div class="tl-item"><div class="tl-dot amber"></div><div class="tl-date">27 Jan 2026</div><div class="tl-title">BoB Circular BOB:BR:118:090</div><div class="tl-desc">Internal launch circular — scheme features, claim timelines, undertaking format. Issued by Head (Trade & Forex)</div></div>
+          <div class="tl-item"><div class="tl-dot"></div><div class="tl-date">02 Mar 2026</div><div class="tl-title">BoB Circular BOB:BR:118:158</div><div class="tl-desc">SOP for system eligibility marking — INSTA Tool fields, BarodaINSTA TFBO procedures. Changes in both systems.</div></div>
+          <div class="tl-item"><div class="tl-dot red"></div><div class="tl-date">13 May 2026</div><div class="tl-title">DGFT Trade Notice 03/2026-27</div><div class="tl-desc">Amendment: UIN portability denied; 15-day window from FY 2026-27; FY 2025-26 special relaxation (UIN by 31.05.2026); subvention from disbursal date</div></div>
+          <div class="tl-item"><div class="tl-dot red"></div><div class="tl-date">14 May 2026</div><div class="tl-title">BoB Circular BOB:BR:118:395</div><div class="tl-desc">Incorporates DGFT 03/2026-27 amendments into BoB's internal framework</div></div>
+        </div>
+        <div class="box box-amber">
+          <div class="box-title">⚠ Key Exam Point</div>
+          The scheme was notified on <strong>02.01.2026</strong> — export credit sanctioned BEFORE this date is NOT eligible, even if disbursed later.
+        </div>
+      </div>
+    </div>
+
+    <!-- CH 2 -->
+    <div class="acc-item">
+      <div class="acc-hdr" onclick="toggleAcc(this)">
+        <span>Chapter 2 · Eligibility — Who Qualifies?</span><span class="acc-icon">+</span>
+      </div>
+      <div class="acc-body">
+        <h4>Eligible Exporters</h4>
+        <ul>
+          <li>Micro, Small and Medium Enterprises (MSMEs) — as per Udyam Registration</li>
+          <li>Both <strong>manufacturer-exporters</strong> and <strong>merchant exporters</strong> (trading exporters)</li>
+          <li>Exports must fall under DGFT notified <strong>positive list of 6-digit HSN tariff lines</strong></li>
+          <li>Valid, active IEC (Import Export Code) — not suspended, cancelled, or in Denied Entity List</li>
+          <li>Valid Udyam Registration Number</li>
+          <li>Valid UIN (Unique Identification Number) generated from DGFT portal BEFORE applying for export credit</li>
+        </ul>
+        <h4>Ineligibility Conditions</h4>
+        <div class="box box-red">
+          <div class="box-title">❌ Ineligibility — Six Conditions</div>
+          <ol style="padding-left:18px;margin-top:8px">
+            <li><strong>Deemed Exports</strong> (Chapter 7, FTP 2023) — branch must obtain undertaking confirming NOT covered</li>
+            <li>Export credit account turns <strong>NPA before completion</strong> of eligible export cycle</li>
+            <li>Exports under HSN lines <strong>NOT in DGFT positive list</strong></li>
+            <li>UIN not linked to IEC bank account</li>
+            <li>Export credit sanctioned <strong>before 02.01.2026</strong></li>
+            <li>No valid Udyam Registration</li>
+          </ol>
+        </div>
+        <h4>MSME Graduation Benefit</h4>
+        <p>Exporters who cross the MSME threshold due to increase in investment/turnover during the FY continue to remain eligible for <strong>3 years from the date of reclassification</strong> (per MoMSME Notification S.O. 4926(E) dated 18.10.2022), subject to all other conditions.</p>
+        <div class="box box-blue">
+          <div class="box-title">💡 Plain English</div>
+          Think of the 3-year grace period as an "MSME exit ramp" — your business can grow without suddenly losing the export subsidy umbrella for the next 3 years.
+        </div>
+      </div>
+    </div>
+
+    <!-- CH 3 -->
+    <div class="acc-item">
+      <div class="acc-hdr" onclick="toggleAcc(this)">
+        <span>Chapter 3 · Subvention Rate, Cap & Credit Products Covered</span><span class="acc-icon">+</span>
+      </div>
+      <div class="acc-body">
+        <h4>Key Figures</h4>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Parameter</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Subvention Rate</td><td class="td-green">2.75% per annum</td><td>On rupee export credit only</td></tr>
+            <tr><td>Maximum Annual Cap</td><td class="td-amber">₹50 Lakh per MSME exporter per FY</td><td>Across ALL lending institutions combined</td></tr>
+            <tr><td>Rate Applicability Date</td><td class="td-green">Date of loan disbursal</td><td>NOT date of UIN generation or shipment</td></tr>
+            <tr><td>Rate Review Frequency</td><td>Bi-annual</td><td>Last week of March & September each FY</td></tr>
+            <tr><td>Reimbursement to Banks</td><td>Monthly</td><td>RBI → Banks, based on verified claims</td></tr>
+          </tbody>
+        </table></div>
+        <h4>Credit Facilities Covered</h4>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Eligible Facility</th><th>BoB INSTA Product</th><th>Currency</th></tr></thead>
+          <tbody>
+            <tr><td>Pre-Shipment Credit (Packing Credit)</td><td>PC-INR</td><td class="td-green">Rupee only</td></tr>
+            <tr><td>Finance Export / Inland LC</td><td>Finance Export / Inland LC</td><td class="td-green">Rupee only</td></tr>
+            <tr><td>Finance Export / Outward Documentary Collection</td><td>Finance Export / Outward Documentary Collection</td><td class="td-green">Rupee only</td></tr>
+            <tr><td>Post-Shipment Rupee Credit</td><td>PS-INR via INSTA/BarodaINSTA</td><td class="td-green">Rupee only</td></tr>
+          </tbody>
+        </table></div>
+        <div class="box box-red">
+          <div class="box-title">❌ NOT Covered — Foreign Currency Facilities</div>
+          PCFC (Pre-Shipment Credit in Foreign Currency), FCNR(B) Loans, FCTL, EPC in foreign currency — ALL excluded. This is a RUPEE-ONLY scheme.
+        </div>
+        <h4>Multi-Bank Cap — Critical Point</h4>
+        <p>When an exporter avails credit from more than one lending institution:</p>
+        <ul>
+          <li>Responsibility to ensure aggregate subvention ≤ ₹50 Lakh per FY rests <strong>solely with the beneficiary exporter</strong></li>
+          <li>Any excess claim is <strong>recoverable from the exporter</strong> as per applicable provisions</li>
+          <li>Bank must obtain a suitable <strong>undertaking</strong> from the exporter</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- CH 4 -->
+    <div class="acc-item">
+      <div class="acc-hdr" onclick="toggleAcc(this)">
+        <span>Chapter 4 · UIN — The Critical Operational Element</span><span class="acc-icon">+</span>
+      </div>
+      <div class="acc-body">
+        <h4>What is UIN?</h4>
+        <p>A <strong>Unique Identification Number</strong> generated by DGFT when the eligible MSME exporter files an online declaration of intent to avail interest subvention. Must be obtained BEFORE applying for export credit.</p>
+
+        <h4>UIN Process Flow</h4>
+        <div class="flow-diagram">
+          <div class="flow-box">Exporter files online declaration on DGFT portal</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-box green">DGFT generates UIN</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-box">UIN linked to IEC bank account electronically</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-box amber">Exporter furnishes UIN to lending bank</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-box">Bank disburses credit & captures UIN in system</div>
+        </div>
+
+        <h4>UIN Rules — Complete Reference</h4>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Rule</th><th>Detail</th></tr></thead>
+          <tbody>
+            <tr><td>Linkage</td><td>Electronically linked to bank account specified in exporter's IEC profile</td></tr>
+            <tr><td>Validity</td><td>Valid until end of relevant Financial Year (31 March)</td></tr>
+            <tr><td class="td-red">Portability</td><td class="td-red">ZERO — not permitted. Bank change = mandatory new UIN. Old UIN cannot be transferred.</td></tr>
+            <tr><td>Year-Specificity</td><td>UIN must be generated selecting the year of disbursement. Claim must relate to same year.</td></tr>
+            <tr><td>System Entry (BoB)</td><td>FREE TEXT field in INSTA — Branch Maker must take EXTRA CARE; no system validation</td></tr>
+          </tbody>
+        </table></div>
+
+        <h4>🔑 UIN TIMING RULES — FY 2025-26 vs FY 2026-27 Onwards</h4>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Aspect</th><th>FY 2025-26 (Special Relaxation)</th><th>FY 2026-27 Onwards</th></tr></thead>
+          <tbody>
+            <tr><td>UIN Timing</td><td>UIN generated AFTER disbursal acceptable</td><td class="td-green">UIN must be generated within 15 DAYS from original disbursal</td></tr>
+            <tr><td>UIN Deadline</td><td class="td-amber">UIN must be generated by 31.05.2026</td><td>Within 15 calendar days of original disbursal</td></tr>
+            <tr><td>Subvention From</td><td class="td-green">Date of DISBURSAL (not UIN generation)</td><td class="td-green">Date of DISBURSAL (not UIN generation)</td></tr>
+            <tr><td>Also Condition</td><td>Credit disbursed on or after 02.01.2026</td><td>Standard conditions apply</td></tr>
+          </tbody>
+        </table></div>
+        <div class="box box-amber">
+          <div class="box-title">⚠ Most Commonly Confused Point</div>
+          Subvention is admissible from the <strong>DATE OF DISBURSAL</strong> — NOT from the date UIN was generated. This distinction was introduced by DGFT Trade Notice 03/2026-27 (May 2026 amendment).
+        </div>
+      </div>
+    </div>
+
+    <!-- CH 5 -->
+    <div class="acc-item">
+      <div class="acc-hdr" onclick="toggleAcc(this)">
+        <span>Chapter 5 · Branch Operations — INSTA Tool & BarodaINSTA</span><span class="acc-icon">+</span>
+      </div>
+      <div class="acc-body">
+        <h4>Branch-Level Process (BoB:BR:118:158)</h4>
+        <div class="steps">
+          <div class="step"><div class="step-num">1</div><div class="step-content"><div class="step-title">Exporter approaches for Rupee Export Credit</div><div class="step-desc">For PC-INR, Finance Export/Inland LC, or Finance Export/Outward Documentary Collection</div></div></div>
+          <div class="step"><div class="step-num">2</div><div class="step-content"><div class="step-title">Branch Maker assesses eligibility</div><div class="step-desc">Against current Interest Subvention Scheme circulars issued by Trade & Forex dept from time to time</div></div></div>
+          <div class="step"><div class="step-num">3</div><div class="step-content"><div class="step-title">Enter fields in INSTA Tool</div><div class="step-desc">If eligible: enter all 6 fields. If NOT eligible: mark only Equalisation Eligible = 'N'; other fields not required</div></div></div>
+          <div class="step"><div class="step-num">4</div><div class="step-content"><div class="step-title">Branch Checker verifies & confirms</div><div class="step-desc">Checker must verify ALL details before submitting — especially the free-text UIN No. field</div></div></div>
+        </div>
+
+        <h4>INSTA Tool — System Fields (When Eligible)</h4>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Field</th><th>Type</th><th>Key Rules</th></tr></thead>
+          <tbody>
+            <tr><td><strong>UIN No.</strong></td><td class="td-amber">FREE TEXT</td><td class="td-amber">Extra care required — no auto-validation. Wrong entry cannot be system-corrected.</td></tr>
+            <tr><td>UIN Expiry Date</td><td>Calendar Date</td><td>Must be PRESENT or FUTURE date. Select from calendar — no manual typing.</td></tr>
+            <tr><td>HS Code</td><td>Numeric</td><td class="td-red">ONLY 6-digit numeric allowed. No 4-digit, no 8-digit.</td></tr>
+            <tr><td>Equalisation Eligible</td><td>Drop Down (Y/N)</td><td>Y = eligible | N = not eligible (only this field for ineligible)</td></tr>
+            <tr><td>Subvention Percentage</td><td>Drop Down</td><td>Currently only value '2.75' in drop-down — select when Equalisation Eligible = Y</td></tr>
+            <tr><td>MSME</td><td>Drop Down (Y/N)</td><td>Select 'Y' when Equalisation Eligible = Y</td></tr>
+          </tbody>
+        </table></div>
+
+        <h4>Finance Same Day — Special Handling</h4>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Situation</th><th>ODC (Finance Same Day)</th><th>ELC (Finance Same Day)</th></tr></thead>
+          <tbody>
+            <tr><td>How to capture subvention</td><td>Select 'Y' for Finance Same Day → All 6 subvention fields auto-activate</td><td class="td-amber">Enter subvention details in COMMENT SECTION; Branch Checker must confirm</td></tr>
+          </tbody>
+        </table></div>
+
+        <h4>TFBO Level — BarodaINSTA Interest Entry</h4>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Product</th><th>Interest Rate Page Entry</th><th>Subvention Capture</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Packing Credit (PC-INR)</strong></td><td class="td-green">NET rate = Actual ROI minus 2.75% (e.g., 10% - 2.75% = 7.25%)</td><td>Extra Data Tab</td></tr>
+            <tr><td><strong>Post-Shipment (PS-INR)</strong></td><td>ACTUAL interest rate (e.g., 9.5% — no netting)</td><td>Extra Data Tab (FOC Master Ref) / Subsidiary Ref (FEL)</td></tr>
+          </tbody>
+        </table></div>
+        <div class="box box-blue">
+          <div class="box-title">💡 BarodaINSTA Tip</div>
+          PC-INR and PS-INR are handled DIFFERENTLY at TFBO. PC shows the NET rate; PS shows the ACTUAL rate. This difference is a frequent exam trap.
+        </div>
+      </div>
+    </div>
+
+    <!-- CH 6 -->
+    <div class="acc-item">
+      <div class="acc-hdr" onclick="toggleAcc(this)">
+        <span>Chapter 6 · Claim Process & Timelines</span><span class="acc-icon">+</span>
+      </div>
+      <div class="acc-body">
+        <h4>Claim Chain — End to End</h4>
+        <div class="flow-diagram">
+          <div class="flow-box">Branch → RO<br><small>Before <strong>5th</strong> of next month</small></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-box amber">RO → ZO<br><small>Before <strong>7th</strong> of month</small></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-box">ZO → Corporate Office<br><small>Before <strong>9th</strong> of month</small></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-box green">CO → RBI<br><small>Monthly submission</small></div>
+        </div>
+        <div class="box box-amber">
+          <div class="box-title">⚠ BoB vs DGFT Instructions</div>
+          DGFT says: <em>Zone → RBI</em>. In BoB: <strong>Zone → Corporate Office → RBI</strong>. BoB adds Corporate Office as an intermediate layer. This is a BoB-specific overlay.
+        </div>
+
+        <h4>Claim Deadlines — Quick Reference</h4>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Level</th><th>Deadline</th><th>Submit To</th></tr></thead>
+          <tbody>
+            <tr><td><strong>BRANCH</strong></td><td class="td-green">Before 5th of NEXT month</td><td>Regional Office (RO)</td></tr>
+            <tr><td><strong>REGIONAL OFFICE</strong></td><td>Before 7th of the month</td><td>Zonal Office (ZO)</td></tr>
+            <tr><td><strong>ZONAL OFFICE</strong></td><td class="td-amber">Before 9th of the month</td><td>Corporate Office (CO)</td></tr>
+            <tr><td><strong>CORPORATE OFFICE</strong></td><td>As per schedule</td><td>RBI</td></tr>
+          </tbody>
+        </table></div>
+
+        <h4>Record Keeping — Mandatory</h4>
+        <div class="box box-red">
+          <div class="box-title">🗂 Branch Must Maintain</div>
+          Separate <strong>UIN-WISE records</strong> of ALL claims submitted under the scheme — for the purpose of audit by RBI or any competent authority. Repeatedly emphasised in circulars 090 and 395.
+        </div>
+
+        <h4>Early Foreclosure Rule</h4>
+        <p>If borrower repays entire loan amount BEFORE stipulated tenure → Branch must <strong>report early foreclosure to RBI</strong>. Bank stops computing subvention from that point.</p>
+      </div>
+    </div>
+
+    <!-- CH 7 -->
+    <div class="acc-item">
+      <div class="acc-hdr" onclick="toggleAcc(this)">
+        <span>Chapter 7 · Exporter Undertaking & Branch Obligations</span><span class="acc-icon">+</span>
+      </div>
+      <div class="acc-body">
+        <p>The branch must obtain and retain a signed undertaking from the exporter on their letterhead before extending the subvention. Key declarations required:</p>
+        <ul>
+          <li>Valid Udyam Registration (copy enclosed)</li>
+          <li>Exports under notified positive list of HSN 6-digit tariff lines</li>
+          <li>NOT covered under Deemed Exports (FTP 2023, Chapter 7)</li>
+          <li>Valid, active IEC — not in Denied Entity List</li>
+          <li>Valid UIN linked to IEC bank account</li>
+          <li>Account is <strong>STANDARD</strong> on date of claim</li>
+          <li>Aware of ₹50 Lakh annual cap — aggregate across all banks within cap</li>
+          <li>Responsible for excess claims and liable for recovery</li>
+          <li>Will reimburse / authorise BoB to recover subvention if claim rejected by DGFT</li>
+        </ul>
+        <div class="box box-blue">
+          <div class="box-title">📋 Telecom Products Special Declaration</div>
+          Exporters of telecom products must additionally declare eligibility per Department of Telecommunications notification in the undertaking.
+        </div>
+      </div>
+    </div>
+
+    <!-- CH 8 -->
+    <div class="acc-item">
+      <div class="acc-hdr" onclick="toggleAcc(this)">
+        <span>Chapter 8 · RBI vs BoB — The Gap Analysis</span><span class="acc-icon">+</span>
+      </div>
+      <div class="acc-body">
+        <p>The following maps RBI/DGFT regulatory instructions against BoB's internal operational overlays — the gap is where exam questions live.</p>
+
+        <div class="compare-row">
+          <div class="compare-col rbi"><div class="compare-label">RBI/DGFT Direction</div>Zone submits UIN-wise monthly consolidated IES details to RBI</div>
+          <div class="compare-divider"></div>
+          <div class="compare-col bob"><div class="compare-label">BoB Internal Practice</div>Zone → Corporate Office → RBI (CO is additional intermediate layer)</div>
+        </div>
+
+        <div class="compare-row">
+          <div class="compare-col rbi"><div class="compare-label">RBI/DGFT Direction</div>Bank determines interest rate at commercial discretion; subvention on cost borne by exporter</div>
+          <div class="compare-divider"></div>
+          <div class="compare-col bob"><div class="compare-label">BoB Internal Practice</div>PC-INR: system shows NET rate (ROI - 2.75%); PS-INR: actual rate, subvention captured separately in Extra Data Tab</div>
+        </div>
+
+        <div class="compare-row">
+          <div class="compare-col rbi"><div class="compare-label">RBI/DGFT Direction</div>UIN free-text provided by exporter to bank</div>
+          <div class="compare-divider"></div>
+          <div class="compare-col bob"><div class="compare-label">BoB Internal Practice</div>Free-text field in INSTA Tool — no system validation; extra care by Branch Maker & Checker mandatory</div>
+        </div>
+
+        <div class="compare-row">
+          <div class="compare-col rbi"><div class="compare-label">RBI/DGFT Direction</div>Maintain records for RBI audit (general obligation)</div>
+          <div class="compare-divider"></div>
+          <div class="compare-col bob"><div class="compare-label">BoB Internal Practice</div>Separate UIN-WISE records at branch level; BarodaINSTA generates month-end reports as supplementary tool</div>
+        </div>
+
+        <div class="compare-row">
+          <div class="compare-col rbi"><div class="compare-label">RBI/DGFT Direction</div>Subvention rate reviewed bi-annually; revised where necessary</div>
+          <div class="compare-divider"></div>
+          <div class="compare-col bob"><div class="compare-label">BoB Internal Practice</div>Same; currently only '2.75' value in system drop-down — field will update when rate changes</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CH 9 -->
+    <div class="acc-item">
+      <div class="acc-hdr" onclick="toggleAcc(this)">
+        <span>Chapter 9 · Scheme Governance & Special Features</span><span class="acc-icon">+</span>
+      </div>
+      <div class="acc-body">
+        <h4>Governance Features</h4>
+        <ul>
+          <li><strong>Pilot basis</strong> — Government will assess before mainstreaming</li>
+          <li>Subvention benefit is <strong>upfront to exporter</strong> — bank passes on first, then claims from RBI</li>
+          <li>Rate reviewed <strong>bi-annually</strong> — preferably last week of March and September</li>
+          <li>Additional support for MSMEs exporting to <strong>new geographies</strong> — detailed guidelines to follow from DGFT/RBI</li>
+          <li>Reimbursement to banks is <strong>monthly</strong> and limited to actual subvention extended</li>
+        </ul>
+        <h4>Special Populations</h4>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Situation</th><th>Treatment</th></tr></thead>
+          <tbody>
+            <tr><td>Exporter from multiple lending institutions</td><td>Cap of ₹50L is aggregate; exporter's sole responsibility; bank gets undertaking</td></tr>
+            <tr><td>MSME upgrades (crosses threshold)</td><td>3-year grace period from reclassification date continues eligibility</td></tr>
+            <tr><td>Exporter changes bank</td><td>New UIN mandatory; old UIN frozen to original bank</td></tr>
+            <tr><td>Export credit turns NPA before cycle completion</td><td>NO subvention — not even proportionate</td></tr>
+            <tr><td>Early full repayment</td><td>Foreclosure reported to RBI; subvention computation stops</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+  </div><!-- end acc-study -->
+</div><!-- end tab-study -->
+
+<!-- ══════════════════════════════════════════════════
+     TAB 2: CHEAT SHEET
+══════════════════════════════════════════════════ -->
+<div id="tab-cheat" class="tab-panel">
+  <button class="print-btn" onclick="window.print()">🖨 Print / Save PDF</button>
+  <div style="clear:both;margin-bottom:8px"></div>
+
+  <div class="section-hero">
+    <div class="hero-badge">Part B · Cheat Sheet</div>
+    <h2>EPM — Niryat Prothsahan: Quick Reference</h2>
+    <p>Golden numbers, exam traps and key comparisons — everything you need in one place.</p>
+  </div>
+
+  <div class="cheat-grid">
+
+    <!-- Card 1 — Golden Numbers -->
+    <div class="cheat-card">
+      <div class="cheat-hdr" style="background:var(--navy)">🔢 Golden Numbers — Must Memorise</div>
+      <div class="cheat-body">
+        <div class="cheat-row"><span class="cheat-key">Subvention Rate</span><span class="cheat-val green">2.75% p.a.</span></div>
+        <div class="cheat-row"><span class="cheat-key">Annual Cap per MSME Exporter</span><span class="cheat-val amber">₹50 Lakh per FY</span></div>
+        <div class="cheat-row"><span class="cheat-key">Scheme Launch Date</span><span class="cheat-val">02.01.2026</span></div>
+        <div class="cheat-row"><span class="cheat-key">RBI Notification Date</span><span class="cheat-val">19.01.2026</span></div>
+        <div class="cheat-row"><span class="cheat-key">BoB Internal Launch</span><span class="cheat-val">27.01.2026</span></div>
+        <div class="cheat-row"><span class="cheat-key">Amendment Circular Date</span><span class="cheat-val red">14.05.2026</span></div>
+        <div class="cheat-row"><span class="cheat-key">FY 2025-26 UIN Deadline</span><span class="cheat-val red">31.05.2026</span></div>
+        <div class="cheat-row"><span class="cheat-key">UIN Window (FY 2026-27+)</span><span class="cheat-val green">15 days from disbursal</span></div>
+        <div class="cheat-row"><span class="cheat-key">MSME Grace After Graduation</span><span class="cheat-val green">3 years</span></div>
+        <div class="cheat-row"><span class="cheat-key">HSN Code Level</span><span class="cheat-val">6 digits</span></div>
+        <div class="cheat-row"><span class="cheat-key">Rate Review Frequency</span><span class="cheat-val">Bi-annual</span></div>
+        <div class="cheat-row"><span class="cheat-key">UIN Portability</span><span class="cheat-val red">ZERO</span></div>
+      </div>
+    </div>
+
+    <!-- Card 2 — Claim Deadlines -->
+    <div class="cheat-card">
+      <div class="cheat-hdr" style="background:#166534">📅 Claim Submission Deadlines</div>
+      <div class="cheat-body">
+        <div class="cheat-row"><span class="cheat-key">Branch → Regional Office</span><span class="cheat-val green">Before 5th of NEXT month</span></div>
+        <div class="cheat-row"><span class="cheat-key">Regional Office → Zonal Office</span><span class="cheat-val">Before 7th of month</span></div>
+        <div class="cheat-row"><span class="cheat-key">Zonal Office → Corp Office</span><span class="cheat-val amber">Before 9th of month</span></div>
+        <div class="cheat-row"><span class="cheat-key">Corp Office → RBI</span><span class="cheat-val">As scheduled</span></div>
+        <div class="cheat-row"><span class="cheat-key">RBI Reimbursement Frequency</span><span class="cheat-val green">Monthly</span></div>
+        <div style="margin-top:12px" class="box box-amber" style="margin:0">
+          <div class="box-title">⚠ BoB vs DGFT</div>
+          DGFT says Zone → RBI. BoB adds <strong>Corporate Office</strong> as intermediate. Remember: Zone → CO → RBI in BoB's setup.
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 3 — UIN Rules -->
+    <div class="cheat-card">
+      <div class="cheat-hdr" style="background:#1D4ED8">🆔 UIN — Key Rules</div>
+      <div class="cheat-body">
+        <div class="cheat-row"><span class="cheat-key">Generated By</span><span class="cheat-val">DGFT Portal</span></div>
+        <div class="cheat-row"><span class="cheat-key">When to Generate</span><span class="cheat-val">BEFORE applying for export credit</span></div>
+        <div class="cheat-row"><span class="cheat-key">Linked To</span><span class="cheat-val">IEC bank account</span></div>
+        <div class="cheat-row"><span class="cheat-key">Validity</span><span class="cheat-val">End of Financial Year (31 Mar)</span></div>
+        <div class="cheat-row"><span class="cheat-key">Portability</span><span class="cheat-val red">ZERO — bank change = new UIN</span></div>
+        <div class="cheat-row"><span class="cheat-key">UIN field in INSTA</span><span class="cheat-val amber">Free Text (no validation)</span></div>
+        <div class="cheat-row"><span class="cheat-key">Subvention counted from</span><span class="cheat-val green">Date of Disbursal</span></div>
+        <div class="cheat-row"><span class="cheat-key">FY 25-26 UIN deadline</span><span class="cheat-val red">31.05.2026</span></div>
+        <div class="cheat-row"><span class="cheat-key">FY 26-27+ window</span><span class="cheat-val green">Within 15 days of disbursal</span></div>
+      </div>
+    </div>
+
+    <!-- Card 4 — Eligibility Quick Check -->
+    <div class="cheat-card">
+      <div class="cheat-hdr" style="background:#92400E">✅❌ Eligibility Quick Check</div>
+      <div class="cheat-body">
+        <div class="cheat-row"><span class="cheat-key">MSME manufacturer-exporter</span><span class="cheat-val green">✅ Eligible</span></div>
+        <div class="cheat-row"><span class="cheat-key">MSME merchant-exporter</span><span class="cheat-val green">✅ Eligible</span></div>
+        <div class="cheat-row"><span class="cheat-key">Non-MSME large exporter</span><span class="cheat-val red">❌ Not eligible</span></div>
+        <div class="cheat-row"><span class="cheat-key">Deemed exports</span><span class="cheat-val red">❌ Explicitly excluded</span></div>
+        <div class="cheat-row"><span class="cheat-key">Pre-Shipment Rupee Credit</span><span class="cheat-val green">✅ Covered</span></div>
+        <div class="cheat-row"><span class="cheat-key">Post-Shipment Rupee Credit</span><span class="cheat-val green">✅ Covered</span></div>
+        <div class="cheat-row"><span class="cheat-key">PCFC / Foreign Currency Credit</span><span class="cheat-val red">❌ Not covered</span></div>
+        <div class="cheat-row"><span class="cheat-key">NPA account (before cycle end)</span><span class="cheat-val red">❌ No subvention at all</span></div>
+        <div class="cheat-row"><span class="cheat-key">Credit sanctioned pre-02.01.2026</span><span class="cheat-val red">❌ Not eligible</span></div>
+        <div class="cheat-row"><span class="cheat-key">MSME post graduation (3yr grace)</span><span class="cheat-val green">✅ Eligible</span></div>
+      </div>
+    </div>
+
+    <!-- Card 5 — INSTA System Fields -->
+    <div class="cheat-card">
+      <div class="cheat-hdr" style="background:#374151">💻 INSTA Tool System Fields</div>
+      <div class="cheat-body">
+        <div class="cheat-row"><span class="cheat-key">UIN No.</span><span class="cheat-val amber">Free Text — Extra Care!</span></div>
+        <div class="cheat-row"><span class="cheat-key">UIN Expiry Date</span><span class="cheat-val">Calendar picker — future/present</span></div>
+        <div class="cheat-row"><span class="cheat-key">HS Code</span><span class="cheat-val red">6-digit numeric ONLY</span></div>
+        <div class="cheat-row"><span class="cheat-key">Equalisation Eligible</span><span class="cheat-val">Y / N drop-down</span></div>
+        <div class="cheat-row"><span class="cheat-key">Subvention Percentage</span><span class="cheat-val green">Currently 2.75 only</span></div>
+        <div class="cheat-row"><span class="cheat-key">MSME</span><span class="cheat-val">Y / N drop-down</span></div>
+        <div class="cheat-row"><span class="cheat-key">If NOT eligible</span><span class="cheat-val amber">Only mark Equalisation = N</span></div>
+        <div class="cheat-row"><span class="cheat-key">PC-INR rate in BarodaINSTA</span><span class="cheat-val green">NET (ROI minus 2.75%)</span></div>
+        <div class="cheat-row"><span class="cheat-key">PS-INR rate in BarodaINSTA</span><span class="cheat-val">ACTUAL rate, subvention separate</span></div>
+        <div class="cheat-row"><span class="cheat-key">Month-end reports</span><span class="cheat-val">Last working day via BarodaINSTA</span></div>
+      </div>
+    </div>
+
+    <!-- Card 6 — Exam Traps -->
+    <div class="cheat-card">
+      <div class="cheat-hdr" style="background:#991B1B">🚨 Common Exam Traps</div>
+      <div class="cheat-body" style="font-size:.85rem">
+        <p style="margin-bottom:8px"><strong style="color:var(--red)">TRAP 1:</strong> "Subvention from date of UIN generation" → <strong>WRONG. From date of DISBURSAL.</strong></p>
+        <p style="margin-bottom:8px"><strong style="color:var(--red)">TRAP 2:</strong> "UIN can be transferred if bank changes" → <strong>WRONG. Zero portability. New UIN mandatory.</strong></p>
+        <p style="margin-bottom:8px"><strong style="color:var(--red)">TRAP 3:</strong> "2.75% on PCFC / forex credit" → <strong>WRONG. Rupee credit ONLY.</strong></p>
+        <p style="margin-bottom:8px"><strong style="color:var(--red)">TRAP 4:</strong> "Partial subvention if account turns NPA" → <strong>WRONG. NO subvention at all.</strong></p>
+        <p style="margin-bottom:8px"><strong style="color:var(--red)">TRAP 5:</strong> "₹50L cap per bank" → <strong>WRONG. ₹50L cap per EXPORTER across ALL banks.</strong></p>
+        <p style="margin-bottom:8px"><strong style="color:var(--red)">TRAP 6:</strong> "Zone submits directly to RBI" → <strong>WRONG in BoB. Zone → CO → RBI.</strong></p>
+        <p style="margin-bottom:8px"><strong style="color:var(--red)">TRAP 7:</strong> "8-digit HS Code allowed" → <strong>WRONG. Only 6-digit in INSTA Tool.</strong></p>
+        <p style="margin-bottom:8px"><strong style="color:var(--red)">TRAP 8:</strong> "Reimbursement is quarterly" → <strong>WRONG. Monthly reimbursement by RBI.</strong></p>
+        <p style="margin-bottom:0"><strong style="color:var(--red)">TRAP 9:</strong> "Deemed exports eligible at reduced rate" → <strong>WRONG. Completely ineligible.</strong></p>
+      </div>
+    </div>
+
+  </div><!-- end cheat-grid -->
+
+  <!-- Summary Table -->
+  <div class="card">
+    <h3 style="color:var(--navy);margin-bottom:16px">Complete Quick-Reference Summary</h3>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Aspect</th><th>Key Point</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Scheme Name</strong></td><td>Export Promotion Mission (EPM) — Niryat Prothsahan</td></tr>
+        <tr><td><strong>Nature</strong></td><td>Pilot basis; Govt of India via DGFT; RBI implements via banks</td></tr>
+        <tr><td><strong>Beneficiary</strong></td><td>MSME exporters only (manufacturer + merchant both eligible)</td></tr>
+        <tr><td><strong>Credit Covered</strong></td><td>Pre-Shipment Rupee Export Credit + Post-Shipment Rupee Export Credit</td></tr>
+        <tr><td><strong>Subvention Rate</strong></td><td class="td-green">2.75% per annum</td></tr>
+        <tr><td><strong>Annual Cap</strong></td><td class="td-amber">₹50 Lakh per MSME exporter per FY (across all banks combined)</td></tr>
+        <tr><td><strong>HSN Coverage</strong></td><td>DGFT notified positive list of 6-digit HSN tariff lines only</td></tr>
+        <tr><td><strong>UIN</strong></td><td>Mandatory; DGFT online; FY-specific; linked to IEC bank a/c; no portability</td></tr>
+        <tr><td><strong>UIN Timing (FY 2026-27+)</strong></td><td class="td-green">Within 15 days of original disbursal; subvention from disbursal date</td></tr>
+        <tr><td><strong>Branch Claim Deadline</strong></td><td class="td-green">Before 5th of next month → Regional Office</td></tr>
+        <tr><td><strong>RO Claim Deadline</strong></td><td>Before 7th of month → Zonal Office</td></tr>
+        <tr><td><strong>ZO Claim Deadline</strong></td><td class="td-amber">Before 9th of month → Corporate Office (BoB) → RBI</td></tr>
+        <tr><td><strong>RBI Reimbursement</strong></td><td class="td-green">Monthly</td></tr>
+        <tr><td><strong>Record Keeping</strong></td><td>UIN-wise separate records at branch — mandatory for RBI audit</td></tr>
+        <tr><td><strong>Rate Review</strong></td><td>Bi-annual — March & September last week</td></tr>
+        <tr><td><strong>Not Eligible</strong></td><td class="td-red">Deemed exports | NPA accounts | Foreign currency credit | Pre-02.01.2026 credit | Non-notified HSN lines</td></tr>
+        <tr><td><strong>PC-INR TFBO Entry</strong></td><td>Net rate (ROI - 2.75%) in Interest Rate page; subvention in Extra Data Tab</td></tr>
+        <tr><td><strong>PS-INR TFBO Entry</strong></td><td>Actual ROI in Interest Rate page; subvention separately in Extra Data Tab</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+</div><!-- end tab-cheat -->
+
+<!-- ══════════════════════════════════════════════════
+     TAB 3: INTERACTIVE TOOLS
+══════════════════════════════════════════════════ -->
+<div id="tab-tools" class="tab-panel">
+
+  <div class="section-hero">
+    <div class="hero-badge">Part C · Interactive Tools</div>
+    <h2>Five Practice Tools — EPM Scheme</h2>
+    <p>Use these tools to build intuition on the scheme's mechanics before the exam.</p>
+  </div>
+
+  <div class="tool-grid">
+
+    <!-- TOOL 1: Eligibility Checker -->
+    <div class="tool-card">
+      <div class="tool-hdr">✅ Tool 1: Eligibility Checker</div>
+      <div class="tool-body">
+        <div class="form-group">
+          <label>Is the exporter registered as MSME (Udyam)?</label>
+          <select id="t1_msme"><option value="">-- Select --</option><option value="y">Yes</option><option value="n">No</option></select>
+        </div>
+        <div class="form-group">
+          <label>Type of export?</label>
+          <select id="t1_type"><option value="">-- Select --</option><option value="goods">Physical goods export</option><option value="deemed">Deemed export (FTP 2023 Ch.7)</option><option value="services">Services export</option></select>
+        </div>
+        <div class="form-group">
+          <label>Credit facility type?</label>
+          <select id="t1_credit"><option value="">-- Select --</option><option value="rupee">Rupee export credit (PC-INR/PS-INR)</option><option value="forex">Foreign currency (PCFC/FCNR/FCTL)</option></select>
+        </div>
+        <div class="form-group">
+          <label>Export credit sanction date?</label>
+          <select id="t1_date"><option value="">-- Select --</option><option value="after">On or after 02.01.2026</option><option value="before">Before 02.01.2026</option></select>
+        </div>
+        <div class="form-group">
+          <label>Account status?</label>
+          <select id="t1_npa"><option value="">-- Select --</option><option value="std">Standard</option><option value="npa">NPA</option></select>
+        </div>
+        <button class="btn-primary" onclick="checkEligibility()">Check Eligibility →</button>
+        <div class="result-box" id="t1_result"></div>
+      </div>
+    </div>
+
+    <!-- TOOL 2: Subvention Calculator -->
+    <div class="tool-card">
+      <div class="tool-hdr">💰 Tool 2: Subvention Benefit Calculator</div>
+      <div class="tool-body">
+        <div class="form-group">
+          <label>Export credit limit (₹ Lakhs)</label>
+          <input type="number" id="t2_limit" placeholder="e.g. 500" min="1" max="100000">
+        </div>
+        <div class="form-group">
+          <label>Bank's rate of interest (% p.a.)</label>
+          <input type="number" id="t2_roi" placeholder="e.g. 10.50" min="1" max="20" step="0.25">
+        </div>
+        <div class="form-group">
+          <label>Utilisation (days)</label>
+          <input type="number" id="t2_days" placeholder="e.g. 180" min="1" max="365">
+        </div>
+        <div class="form-group">
+          <label>Exporter's claim from other banks this FY (₹ Lakhs)</label>
+          <input type="number" id="t2_prev" placeholder="e.g. 20" min="0" max="50" value="0">
+        </div>
+        <button class="btn-primary" onclick="calcSubvention()">Calculate →</button>
+        <div class="result-box" id="t2_result"></div>
+      </div>
+    </div>
+
+    <!-- TOOL 3: UIN Timing Checker -->
+    <div class="tool-card">
+      <div class="tool-hdr">📅 Tool 3: UIN Timing Validity Checker</div>
+      <div class="tool-body">
+        <div class="form-group">
+          <label>Financial Year of disbursement</label>
+          <select id="t3_fy"><option value="">-- Select --</option><option value="2526">FY 2025-26 (02.01.2026 to 31.03.2026)</option><option value="2627">FY 2026-27 (01.04.2026 to 31.03.2027)</option></select>
+        </div>
+        <div class="form-group">
+          <label>Date of credit disbursal</label>
+          <input type="date" id="t3_disb" min="2026-01-02" max="2027-03-31">
+        </div>
+        <div class="form-group">
+          <label>Date UIN was generated</label>
+          <input type="date" id="t3_uin" min="2026-01-02">
+        </div>
+        <button class="btn-primary" onclick="checkUIN()">Check UIN Validity →</button>
+        <div class="result-box" id="t3_result"></div>
+      </div>
+    </div>
+
+    <!-- TOOL 4: Claim Timeline Simulator -->
+    <div class="tool-card">
+      <div class="tool-hdr">📋 Tool 4: Claim Deadline Calculator</div>
+      <div class="tool-body">
+        <div class="form-group">
+          <label>Month of subvention disbursement</label>
+          <select id="t4_month">
+            <option value="">-- Select Month --</option>
+            <option value="1">January</option><option value="2">February</option><option value="3">March</option>
+            <option value="4">April</option><option value="5">May</option><option value="6">June</option>
+            <option value="7">July</option><option value="8">August</option><option value="9">September</option>
+            <option value="10">October</option><option value="11">November</option><option value="12">December</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Year</label>
+          <select id="t4_year"><option value="2026">2026</option><option value="2027">2027</option></select>
+        </div>
+        <button class="btn-primary" onclick="calcDeadlines()">Show Deadlines →</button>
+        <div class="result-box" id="t4_result"></div>
+      </div>
+    </div>
+
+    <!-- TOOL 5: Rate Comparator -->
+    <div class="tool-card">
+      <div class="tool-hdr">📊 Tool 5: Before/After Rate Comparator</div>
+      <div class="tool-body">
+        <p style="font-size:.88rem;margin-bottom:14px;color:var(--dgray)">See the effective rate reduction for your exporter and the difference in interest cost over the export cycle.</p>
+        <div class="form-group">
+          <label>Bank's contracted ROI (% p.a.)</label>
+          <input type="number" id="t5_roi" placeholder="e.g. 9.50" min="5" max="20" step="0.25">
+        </div>
+        <div class="form-group">
+          <label>Packing Credit utilised (₹ Lakhs)</label>
+          <input type="number" id="t5_amt" placeholder="e.g. 200" min="1">
+        </div>
+        <div class="form-group">
+          <label>Period of utilisation (days)</label>
+          <input type="number" id="t5_days" placeholder="e.g. 120" min="1" max="365">
+        </div>
+        <button class="btn-primary" onclick="compareRates()">Compare →</button>
+        <div class="result-box" id="t5_result"></div>
+      </div>
+    </div>
+
+  </div><!-- end tool-grid -->
+
+</div><!-- end tab-tools -->
+
+<!-- ══════════════════════════════════════════════════
+     TAB 4: QUIZ ENGINE
+══════════════════════════════════════════════════ -->
+<div id="tab-quiz" class="tab-panel">
+
+  <div class="section-hero">
+    <div class="hero-badge">Part D · Quiz Engine</div>
+    <h2>EPM — Niryat Prothsahan MCQ Quiz (40 Questions)</h2>
+    <p>Topic-filtered, randomised, with full explanations. Answers revealed after selection.</p>
+  </div>
+
+  <div class="quiz-wrap">
+    <!-- Mode bar -->
+    <div class="quiz-mode-bar" id="mode_bar">
+      <button class="btn-mode active" onclick="setFilter('all',this)">All Topics (40)</button>
+      <button class="btn-mode" onclick="setFilter('basics',this)">Basics & Policy</button>
+      <button class="btn-mode" onclick="setFilter('eligibility',this)">Eligibility</button>
+      <button class="btn-mode" onclick="setFilter('uin',this)">UIN Mechanics</button>
+      <button class="btn-mode" onclick="setFilter('system',this)">Branch System</button>
+      <button class="btn-mode" onclick="setFilter('claims',this)">Claims & Process</button>
+    </div>
+
+    <!-- Progress row -->
+    <div class="quiz-progress">
+      <span class="q-counter" id="q_counter">Q 1 / 40</span>
+      <div class="progress-bar"><div class="progress-fill" id="q_progress" style="width:2.5%"></div></div>
+      <span class="score-badge" id="q_score">Score: 0 / 0</span>
+    </div>
+
+    <!-- Quiz card -->
+    <div class="quiz-card">
+      <div class="q-topic-bar" id="q_topic">TOPIC</div>
+      <div class="q-body">
+        <div class="q-text" id="q_text">Loading...</div>
+        <div class="options" id="q_options"></div>
+        <div class="explanation" id="q_explanation"></div>
+      </div>
+      <div class="quiz-actions">
+        <button class="btn-submit" id="btn_submit" onclick="submitAnswer()">Submit Answer</button>
+        <button class="btn-next" id="btn_next" onclick="nextQuestion()">Next Question →</button>
+        <button class="btn-restart" id="btn_restart" onclick="restartQuiz()" style="display:none">🔄 Restart Quiz</button>
+      </div>
+    </div>
+
+    <!-- Final screen -->
+    <div class="final-screen" id="final_screen">
+      <div class="final-score-ring">
+        <div class="final-pct" id="final_pct">0%</div>
+        <div class="final-label">SCORE</div>
+      </div>
+      <div class="final-grade" id="final_grade"></div>
+      <p id="final_detail" style="color:var(--dgray);margin-bottom:20px"></p>
+      <button class="btn-restart" onclick="restartQuiz()">🔄 Restart Quiz</button>
+    </div>
+
+  </div>
+</div><!-- end tab-quiz -->
+
+</main>
+
+<!-- ════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════ -->
+<script>
+// ── Tab system ──────────────────────────────────────────────────────────────
+function openTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── Accordion ───────────────────────────────────────────────────────────────
+function toggleAcc(hdr) {
+  const body = hdr.nextElementSibling;
+  const isOpen = hdr.classList.contains('open');
+  document.querySelectorAll('.acc-hdr.open').forEach(h => {
+    h.classList.remove('open');
+    h.nextElementSibling.classList.remove('open');
+  });
+  if (!isOpen) { hdr.classList.add('open'); body.classList.add('open'); }
+}
+
+// ── Tool 1: Eligibility Checker ──────────────────────────────────────────────
+function checkEligibility() {
+  const msme = document.getElementById('t1_msme').value;
+  const type = document.getElementById('t1_type').value;
+  const credit = document.getElementById('t1_credit').value;
+  const date = document.getElementById('t1_date').value;
+  const npa = document.getElementById('t1_npa').value;
+  if (!msme||!type||!credit||!date||!npa) { alert('Please answer all questions.'); return; }
+  const el = document.getElementById('t1_result');
+  el.classList.remove('result-eligible','result-ineligible','result-info');
+  let reasons = [];
+  let eligible = true;
+  if (msme === 'n') { eligible = false; reasons.push('❌ Exporter is NOT an MSME — scheme is exclusively for MSME exporters'); }
+  if (type === 'deemed') { eligible = false; reasons.push('❌ Deemed exports are EXPLICITLY excluded (FTP 2023, Chapter 7)'); }
+  if (type === 'services') { eligible = false; reasons.push('❌ Services exports are not covered — scheme is for goods exports under notified HSN tariff lines'); }
+  if (credit === 'forex') { eligible = false; reasons.push('❌ Foreign currency credit (PCFC/FCNR/FCTL) is NOT covered — Rupee credit ONLY'); }
+  if (date === 'before') { eligible = false; reasons.push('❌ Credit sanctioned before 02.01.2026 is NOT eligible (scheme launch date)'); }
+  if (npa === 'npa') { eligible = false; reasons.push('❌ Account in NPA status — subvention is NOT admissible if account turns NPA before completion of export cycle'); }
+  if (eligible) {
+    el.className = 'result-box result-eligible show';
+    el.innerHTML = '<strong>✅ ELIGIBLE for Interest Subvention</strong><br><br>All conditions satisfied. Ensure:<br>• Valid UIN obtained from DGFT before disbursement<br>• Exports under DGFT notified 6-digit HSN positive list<br>• Undertaking obtained from exporter<br>• Subvention rate: <strong>2.75% p.a.</strong> | Cap: <strong>₹50 Lakh per FY</strong>';
+  } else {
+    el.className = 'result-box result-ineligible show';
+    el.innerHTML = '<strong>❌ NOT ELIGIBLE</strong><br><br>' + reasons.join('<br>');
+  }
+}
+
+// ── Tool 2: Subvention Calculator ───────────────────────────────────────────
+function calcSubvention() {
+  const limit = parseFloat(document.getElementById('t2_limit').value);
+  const roi = parseFloat(document.getElementById('t2_roi').value);
+  const days = parseInt(document.getElementById('t2_days').value);
+  const prev = parseFloat(document.getElementById('t2_prev').value) || 0;
+  if (!limit||!roi||!days) { alert('Please fill all fields.'); return; }
+  const totalInterest = limit * roi / 100 * days / 365;
+  const subventionGross = limit * 2.75 / 100 * days / 365;
+  const capRemaining = Math.max(0, 50 - prev);
+  const subventionActual = Math.min(subventionGross, capRemaining);
+  const effectiveROI = roi - 2.75;
+  const effectiveInterest = limit * effectiveROI / 100 * days / 365;
+  const el = document.getElementById('t2_result');
+  el.className = 'result-box result-info show';
+  el.innerHTML = `
+    <strong>Subvention Calculation Results</strong>
+    <div class="result-row"><span>Bank ROI</span><span><strong>${roi}% p.a.</strong></span></div>
+    <div class="result-row"><span>Effective ROI (after subvention)</span><span><strong>${effectiveROI.toFixed(2)}% p.a.</strong></span></div>
+    <div class="result-row"><span>Total Interest at Bank ROI</span><span>₹ ${totalInterest.toFixed(2)} Lakh</span></div>
+    <div class="result-row"><span>Gross Subvention @2.75% (${days} days)</span><span>₹ ${subventionGross.toFixed(2)} Lakh</span></div>
+    <div class="result-row"><span>FY Cap remaining for this exporter</span><span>₹ ${capRemaining.toFixed(2)} Lakh</span></div>
+    <div class="result-row"><span>Actual Subvention Claimable</span><span>₹ ${subventionActual.toFixed(2)} Lakh</span></div>
+    <div class="result-row"><span>Effective Interest Cost to Exporter</span><span>₹ ${(totalInterest - subventionActual).toFixed(2)} Lakh</span></div>
+    ${capRemaining === 0 ? '<div style="margin-top:8px;color:var(--red);font-weight:700;">⚠ Annual cap of ₹50 Lakh already exhausted — no further subvention this FY</div>' : ''}
+    ${subventionGross > capRemaining && capRemaining > 0 ? `<div style="margin-top:8px;color:var(--amber);font-weight:700;">⚠ Gross subvention (₹${subventionGross.toFixed(2)}L) exceeds remaining cap — capped at ₹${subventionActual.toFixed(2)}L</div>` : ''}
+  `;
+}
+
+// ── Tool 3: UIN Timing Checker ───────────────────────────────────────────────
+function checkUIN() {
+  const fy = document.getElementById('t3_fy').value;
+  const disbStr = document.getElementById('t3_disb').value;
+  const uinStr = document.getElementById('t3_uin').value;
+  if (!fy || !disbStr || !uinStr) { alert('Please fill all fields.'); return; }
+  const disb = new Date(disbStr);
+  const uin = new Date(uinStr);
+  const el = document.getElementById('t3_result');
+  let valid = false, msg = '';
+  if (fy === '2526') {
+    // FY 2025-26: credit >= 02.01.2026 AND UIN <= 31.05.2026
+    const minDate = new Date('2026-01-02');
+    const maxUIN = new Date('2026-05-31');
+    if (disb < minDate) {
+      msg = '❌ INVALID: Credit disbursed before 02.01.2026 — not eligible for subvention.';
+    } else if (uin > maxUIN) {
+      msg = '❌ INVALID: UIN generated after 31.05.2026 — FY 2025-26 deadline passed. No subvention claimable.';
+    } else {
+      valid = true;
+      const fromDate = disbStr;
+      msg = `✅ VALID (FY 2025-26 special relaxation)\n\nUIN generated after disbursal is acceptable for FY 2025-26.\nSubvention admissible from: <strong>${fromDate}</strong> (date of disbursal)\nNOT from ${uinStr} (UIN generation date).`;
+    }
+  } else {
+    // FY 2026-27+: UIN within 15 days of disbursal
+    const diffMs = uin.getTime() - disb.getTime();
+    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+    if (diffDays < 0) {
+      valid = true;
+      msg = `✅ VALID: UIN generated ${Math.abs(diffDays)} day(s) BEFORE disbursal (best practice — generate before applying for credit).\nSubvention from: <strong>${disbStr}</strong> (disbursal date).`;
+    } else if (diffDays <= 15) {
+      valid = true;
+      msg = `✅ VALID: UIN generated ${diffDays} day(s) after disbursal — within the 15-day window.\nSubvention from: <strong>${disbStr}</strong> (disbursal date, NOT UIN date).`;
+    } else {
+      msg = `❌ INVALID: UIN generated ${diffDays} days after disbursal — EXCEEDS the 15-day window for FY 2026-27.\nSubvention claim CANNOT be submitted for this disbursement.`;
+    }
+  }
+  el.className = 'result-box show ' + (valid ? 'result-eligible' : 'result-ineligible');
+  el.innerHTML = msg.replace(/\n/g, '<br>');
+}
+
+// ── Tool 4: Claim Deadline Calculator ────────────────────────────────────────
+function calcDeadlines() {
+  const month = parseInt(document.getElementById('t4_month').value);
+  const year = parseInt(document.getElementById('t4_year').value);
+  if (!month) { alert('Please select a month.'); return; }
+  const monthNames = ['','January','February','March','April','May','June',
+    'July','August','September','October','November','December'];
+  let branchMonth = month + 1, branchYear = year;
+  if (month === 12) { branchMonth = 1; branchYear = year + 1; }
+  const roDeadline = `7th ${monthNames[branchMonth]} ${branchYear}`;
+  const zoDeadline = `9th ${monthNames[branchMonth]} ${branchYear}`;
+  const branchDeadline = `5th ${monthNames[branchMonth]} ${branchYear}`;
+  const el = document.getElementById('t4_result');
+  el.className = 'result-box result-info show';
+  el.innerHTML = `
+    <strong>Claim Deadlines for ${monthNames[month]} ${year} Subvention</strong>
+    <div class="result-row"><span>Branch → Regional Office</span><span><strong>Before ${branchDeadline}</strong></span></div>
+    <div class="result-row"><span>Regional Office → Zonal Office</span><span><strong>Before ${roDeadline}</strong></span></div>
+    <div class="result-row"><span>Zonal Office → Corporate Office</span><span><strong>Before ${zoDeadline}</strong></span></div>
+    <div class="result-row"><span>Corporate Office → RBI</span><span>As per schedule</span></div>
+    <div class="result-row"><span>RBI Reimbursement</span><span>Monthly (after verified claim)</span></div>
+    <div style="margin-top:8px;font-size:.82rem;color:var(--dgray)">Remember: In BoB's setup, the claim goes through Corporate Office before reaching RBI — unlike the DGFT circular which says Zone → RBI directly.</div>
+  `;
+}
+
+// ── Tool 5: Rate Comparator ──────────────────────────────────────────────────
+function compareRates() {
+  const roi = parseFloat(document.getElementById('t5_roi').value);
+  const amt = parseFloat(document.getElementById('t5_amt').value);
+  const days = parseInt(document.getElementById('t5_days').value);
+  if (!roi||!amt||!days) { alert('Please fill all fields.'); return; }
+  const subRate = 2.75;
+  const effROI = roi - subRate;
+  const grossInterest = amt * roi / 100 * days / 365;
+  const netInterest = amt * effROI / 100 * days / 365;
+  const saving = grossInterest - netInterest;
+  const pctSaving = (saving / grossInterest * 100).toFixed(1);
+  const el = document.getElementById('t5_result');
+  el.className = 'result-box result-info show';
+  el.innerHTML = `
+    <strong>Rate Comparison — Before vs After Subvention</strong>
+    <div class="result-row"><span>Bank's Contracted ROI</span><span><strong>${roi}% p.a.</strong></span></div>
+    <div class="result-row"><span>Subvention Rate</span><span><strong>2.75% p.a.</strong></span></div>
+    <div class="result-row"><span>Effective ROI for Exporter</span><span><strong style="color:var(--green)">${effROI.toFixed(2)}% p.a.</strong></span></div>
+    <div class="result-row"><span>Gross Interest (at ${roi}%, ${days} days)</span><span>₹ ${grossInterest.toFixed(2)} Lakh</span></div>
+    <div class="result-row"><span>Net Interest (at ${effROI.toFixed(2)}%, ${days} days)</span><span style="color:var(--green)">₹ ${netInterest.toFixed(2)} Lakh</span></div>
+    <div class="result-row"><span>💰 Interest Saving (subvention benefit)</span><span><strong style="color:var(--green)">₹ ${saving.toFixed(2)} Lakh (${pctSaving}% saving)</strong></span></div>
+    <div style="margin-top:8px;font-size:.82rem">Note: In BarodaINSTA for PC-INR, the system shows <strong>${effROI.toFixed(2)}%</strong> (net rate) in the Interest Rate page, with 2.75% captured separately in the Extra Data Tab.</div>
+  `;
+}
+
+// ── QUIZ ENGINE ──────────────────────────────────────────────────────────────
+const allQ = [
+  // BASICS & POLICY (8 questions)
+  {topic:'basics',t:'Basics & Policy',q:'What is the full name of the scheme commonly referred to as Niryat Prothsahan?',opts:['National Interest Rate Yield and Return Assurance Transmission Scheme','Interest Subvention for Pre and Post Shipment Export Credit under Export Promotion Mission','National Export Rate Yield Acceleration and Treasury Scheme','Export Promotion and National Interest Allocation Transmission Scheme'],ans:1,exp:'Niryat Prothsahan is the common name for the "Interest Subvention for Pre and Post Shipment Export Credit under Export Promotion Mission (EPM)." The scheme was launched by Government of India under the EPM framework.'},
+  {topic:'basics',t:'Basics & Policy',q:'On what basis was the EPM — Niryat Prothsahan scheme launched by Government of India?',opts:['Permanent basis','Temporary basis for one year','Pilot basis','Contractual basis for two years'],ans:2,exp:'The Government of India launched the scheme under EPM on a PILOT BASIS. This means the government will evaluate outcomes before deciding to mainstream it.'},
+  {topic:'basics',t:'Basics & Policy',q:'Which RBI notification directed banks to implement the EPM — Niryat Prothsahan scheme?',opts:['RBI/2025-26/090','RBI/2025-26/195','RBI/2026-27/003','RBI/2025-26/158'],ans:1,exp:'RBI Notification No. RBI/2025-26/195 DOR.STR.REC.393/04.02.001/2025-26 dated 19.01.2026 directed all Scheduled Commercial Banks (excluding RRBs), UCBs, State Co-op Banks and AIFIs to implement the scheme.'},
+  {topic:'basics',t:'Basics & Policy',q:'What is the DGFT Trade Notice that first launched the EPM — Niryat Prothsahan scheme with operative instructions?',opts:['Trade Notice 15/2025-26 dated 01.01.2026','Trade Notice 20/2025-26 dated 02.01.2026','Trade Notice 22/2025-26 dated 16.01.2026','Trade Notice 03/2026-27 dated 13.05.2026'],ans:1,exp:'DGFT Trade Notice 20/2025-26 dated 02.01.2026 launched the scheme and contains the operative instructions. This date (02.01.2026) is also the eligibility cut-off — credit sanctioned before this date is ineligible.'},
+  {topic:'basics',t:'Basics & Policy',q:'Which BoB circular introduced the SOP for marking interest subvention eligibility in the INSTA Tool and BarodaINSTA?',opts:['BOB:BR:118:090','BOB:BR:118:158','BOB:BR:118:395','BOB:BR:118:333'],ans:1,exp:'BoB Circular BOB:BR:118:158 dated 02.03.2026 (issued by Corporate Banking Transaction department) introduced the detailed SOP for marking eligibility in both INSTA Tool and BarodaINSTA systems.'},
+  {topic:'basics',t:'Basics & Policy',q:'Which BoB circular incorporated the amendments introduced by DGFT Trade Notice 03/2026-27?',opts:['BOB:BR:118:090','BOB:BR:118:158','BOB:BR:118:395','BOB:BR:118:245'],ans:2,exp:'BoB Circular BOB:BR:118:395 dated 14.05.2026 (issued by Trade & Forex dept) incorporated the amendments from DGFT Trade Notice 03/2026-27 dated 13.05.2026, covering UIN timing rules and portability.'},
+  {topic:'basics',t:'Basics & Policy',q:'How frequently is the notified rate of interest subvention under the EPM scheme reviewed?',opts:['Monthly','Quarterly','Bi-annually (twice per year)','Annually'],ans:2,exp:'The notified rates of subvention are reviewed on a BI-ANNUAL basis, and revised where necessary, preferably in the last week of MARCH and SEPTEMBER of each financial year.'},
+  {topic:'basics',t:'Basics & Policy',q:'The interest benefit under EPM — Niryat Prothsahan is passed on to the exporter — when?',opts:['After RBI reimburses the bank','At the end of the financial year','UPFRONT at the time of credit disbursal','Quarterly after claim submission'],ans:2,exp:'The benefit is passed on UPFRONT to eligible exporters by the lending bank. The bank then claims reimbursement from RBI. This is a key operational feature — exporter gets the benefit immediately, not retrospectively.'},
+
+  // ELIGIBILITY (8 questions)
+  {topic:'eligibility',t:'Eligibility',q:'Under the EPM scheme, which of the following types of exporters is eligible for interest subvention?',opts:['Only manufacturer-exporters with turnover above ₹50 Crore','Only merchant exporters (trading exporters)','Both manufacturer-exporters and merchant exporters who are registered MSMEs','All exporters with valid IEC code regardless of MSME status'],ans:2,exp:'Both MSME manufacturer-exporters and MSME merchant exporters are eligible. The key qualifier is MSME registration (Udyam), not the type of exporter. Non-MSME entities are excluded.'},
+  {topic:'eligibility',t:'Eligibility',q:'What is the treatment of "deemed exports" under the EPM — Niryat Prothsahan interest subvention scheme?',opts:['Eligible at half the normal rate of 1.375% p.a.','Eligible only for pre-shipment credit','COMPLETELY EXCLUDED — not eligible at all','Eligible if approved by ECGC'],ans:2,exp:'Deemed exports (as defined under Chapter 7 of Foreign Trade Policy 2023) are EXPLICITLY EXCLUDED from the scheme. The branch must obtain and keep on record an undertaking from the exporter confirming they are NOT covered under deemed exports.'},
+  {topic:'eligibility',t:'Eligibility',q:'An MSME exporter\'s export credit account turns NPA during the export cycle but before the cycle is completed. What happens to the interest subvention?',opts:['Subvention continues until NPA date, then stops','Subvention is reduced to 1% after the account turns NPA','Interest subvention is NOT admissible for that account at all','Subvention is suspended and resumed when account becomes standard again'],ans:2,exp:'The scheme clearly states that interest subvention is NOT admissible where the export credit account turns NPA PRIOR TO COMPLETION of the eligible export cycle. There is no partial or proportionate treatment — once NPA before cycle end, no subvention.'},
+  {topic:'eligibility',t:'Eligibility',q:'An MSME exporter crosses the MSME investment threshold during FY 2025-26 due to business growth. For how long does this exporter remain eligible for interest subvention after reclassification?',opts:['The benefit immediately ceases','For the balance of FY 2025-26 only','For 3 years from the date of reclassification','For 5 years from the date of reclassification'],ans:2,exp:'Per Ministry of MSME Notification S.O. 4926(E) dated 18.10.2022, exporters who graduate out of MSME category remain eligible for 3 years from the date of reclassification, subject to all other conditions. This is the "MSME graduation grace period."'},
+  {topic:'eligibility',t:'Eligibility',q:'An exporter wants to claim subvention on Pre-Shipment Credit in Foreign Currency (PCFC). Is this eligible?',opts:['Yes — both rupee and foreign currency credit are covered','Yes — only post-PCFC disbursement claims qualify','No — the scheme covers RUPEE export credit ONLY','Yes — eligible at a reduced rate of 1% subvention'],ans:2,exp:'The EPM scheme covers ONLY Rupee-denominated export credit (Pre-Shipment Rupee Credit and Post-Shipment Rupee Credit). PCFC, FCNR(B) loans, FCTL and other foreign currency facilities are completely excluded.'},
+  {topic:'eligibility',t:'Eligibility',q:'An exporter\'s IEC is in the Denied Entity List as on the date of claim. Is the interest subvention claimable?',opts:['Yes, with prior RBI approval','Yes, but at a reduced rate','No — IEC must be valid and NOT in Denied Entity List','Only if ECGC cover is in place'],ans:2,exp:'Eligibility requires the exporter to hold a valid and active IEC that is not suspended, cancelled, or in the Denied Entity List. If the IEC is in the Denied Entity List, the exporter is ineligible for subvention.'},
+  {topic:'eligibility',t:'Eligibility',q:'Export credit was sanctioned on 28.12.2025 and disbursed on 05.01.2026. Is this eligible for subvention under EPM — Niryat Prothsahan?',opts:['Yes — disbursement was after the scheme launch date','No — the credit was SANCTIONED before 02.01.2026','Yes — only disbursement date matters','Eligible for post-shipment portion only'],ans:1,exp:'The scheme is applicable only to eligible export credit SANCTIONED on or after 02.01.2026 (the date of DGFT Trade Notice 20/2025-26). Since this credit was sanctioned on 28.12.2025 (before 02.01.2026), it is NOT eligible even though disbursed after.'},
+  {topic:'eligibility',t:'Eligibility',q:'Under the EPM scheme, what type of document must the branch obtain from the exporter regarding exports not covered under deemed exports?',opts:['A DGFT certificate','An RBI approval letter','An ECGC guarantee','An undertaking on the exporter\'s letterhead signed by authorised signatory'],ans:3,exp:'The branch must obtain and keep on record an UNDERTAKING from the exporter on their letterhead, signed by the authorised signatory, confirming they are not covered under Deemed Exports. This is branch\'s compliance obligation.'},
+
+  // UIN MECHANICS (10 questions)
+  {topic:'uin',t:'UIN Mechanics',q:'A UIN generated for FY 2025-26 is valid until when?',opts:['Until the date of loan repayment','Until 30.06.2026','Until 31.03.2026 (end of FY 2025-26)','Until 31.03.2027'],ans:2,exp:'The UIN remains valid until the END OF THE RELEVANT FINANCIAL YEAR (31 March). A UIN generated for FY 2025-26 is valid until 31.03.2026. A new UIN must be generated for each fresh financial year.'},
+  {topic:'uin',t:'UIN Mechanics',q:'What is the portability status of UIN if an exporter changes their lending bank?',opts:['UIN is fully portable — automatically transferred to new bank','UIN is portable with DGFT approval within 30 days','Portability is NOT permitted — a NEW UIN must be generated for the new bank','UIN is portable only within the same banking group'],ans:2,exp:'Per the amendment in DGFT Trade Notice 03/2026-27 (incorporated in BoB:BR:118:395), UIN portability is NOT permitted. The existing UIN cannot be transferred to the new bank. A new UIN reflecting the new bank\'s details must be generated compulsorily.'},
+  {topic:'uin',t:'UIN Mechanics',q:'From which date is interest subvention admissible when UIN is generated within the valid window (FY 2026-27 onwards)?',opts:['Date of UIN generation','Date of shipment','Date of original disbursement of credit','Date of export realisation'],ans:2,exp:'Per the amendment in DGFT Trade Notice 03/2026-27, the interest subvention is admissible from the DATE OF ORIGINAL DISBURSAL — NOT from the date of UIN generation. This is the most critical distinction in the amended scheme.'},
+  {topic:'uin',t:'UIN Mechanics',q:'For FY 2026-27 onwards, within how many days from the date of original disbursal must a UIN be generated to be treated as valid for interest subvention?',opts:['7 days','15 days','30 days','60 days'],ans:1,exp:'From FY 2026-27 onwards, a UIN generated within 15 DAYS from the date of original disbursal of eligible pre/post shipment export credit is treated as valid for subvention purposes. Beyond 15 days, the UIN is invalid for that disbursement.'},
+  {topic:'uin',t:'UIN Mechanics',q:'For FY 2025-26 (disbursements from 02.01.2026 to 31.03.2026), what is the latest date by which the UIN must be generated for a subvention claim to be admissible?',opts:['31.03.2026','30.04.2026','31.05.2026','30.06.2026'],ans:2,exp:'For FY 2025-26, the special relaxation allows UIN generated AFTER the disbursement date to be valid, provided the UIN is generated on or before 31.05.2026. This was a transitional relaxation for the scheme\'s launch period.'},
+  {topic:'uin',t:'UIN Mechanics',q:'To what is a UIN electronically linked upon generation?',opts:['The exporter\'s GST registration number','The bank account specified in the exporter\'s IEC profile','The exporter\'s Udyam registration certificate','The export order/LC details'],ans:1,exp:'Upon generation, the UIN is electronically linked to the BANK ACCOUNT specified by the entity in their IEC (Import Export Code) profile on the DGFT portal. It remains valid until the end of the relevant financial year.'},
+  {topic:'uin',t:'UIN Mechanics',q:'What type of field is UIN No. in BoB\'s INSTA Tool, and what is the associated risk?',opts:['Auto-populated from DGFT database — no risk','Drop-down list — only pre-validated UINs selectable','Free text field — risk of incorrect entry as no system validation exists','Numeric with format validation — low risk'],ans:2,exp:'UIN No. is a FREE TEXT field in BoB\'s INSTA Tool. Since there is NO system-level validation against DGFT database, an incorrectly entered UIN cannot be caught by the system. Branch Maker must take EXTRA CARE, and Branch Checker must verify before submission.'},
+  {topic:'uin',t:'UIN Mechanics',q:'An exporter gets a UIN on 10.04.2026 for credit disbursed on 15.04.2026 (FY 2026-27). The UIN was generated 5 days BEFORE disbursal. Is the UIN valid?',opts:['No — UIN must be generated on the exact date of disbursal','No — UIN must be generated within 15 days AFTER disbursal only','Yes — UIN generated before disbursal is perfectly valid (best practice)','Only if DGFT confirms validity in writing'],ans:2,exp:'The UIN must be generated BEFORE applying for export credit — this is the intended procedure. A UIN generated before the actual disbursal is perfectly valid. The 15-day window is for those cases where the UIN was generated AFTER disbursal.'},
+  {topic:'uin',t:'UIN Mechanics',q:'An MSME exporter files an online declaration on DGFT portal on 01.08.2026. The DGFT system generates a UIN. The exporter then approaches BoB for Packing Credit. What must the exporter provide to the bank?',opts:['Only the Udyam registration certificate','The UIN and IEC code','The UIN to the lending bank (for system entry)','A DGFT No Objection Certificate'],ans:2,exp:'Per the scheme, the exporter furnishes the applicable UIN to the lending bank. The bank enters this UIN in its system (INSTA Tool in BoB) and maps the interest subvention claims to the corresponding UIN for reporting to RBI.'},
+  {topic:'uin',t:'UIN Mechanics',q:'A bank disbursed eligible PC-INR on 01.07.2026. The exporter generates a UIN on 20.07.2026. Under FY 2026-27 rules, is the subvention claimable, and from which date?',opts:['Not claimable — UIN generated after disbursal','Claimable from 20.07.2026 (UIN generation date)','Claimable from 01.07.2026 (disbursal date) — UIN generated within 15 days','Claimable only for post-shipment portion'],ans:2,exp:'UIN generated on 20.07.2026 = 19 days after disbursal on 01.07.2026. This EXCEEDS the 15-day window. Therefore, the claim is NOT admissible for this disbursement under FY 2026-27 rules. Had UIN been generated by 16.07.2026 (within 15 days), it would have been valid from 01.07.2026.'},
+
+  // BRANCH SYSTEM (8 questions)
+  {topic:'system',t:'Branch System & Operations',q:'In BoB\'s INSTA Tool, the HS CODE field for the interest subvention scheme accepts which format?',opts:['4-digit numeric only','6-digit numeric only','8-digit alphanumeric (ITC-HS level)','Any format as per DGFT notification'],ans:1,exp:'Per BoB Circular BOB:BR:118:158, only 6-DIGIT NUMERIC HS codes are accepted in the INSTA Tool, in line with DGFT guidelines specifying the positive list at the 6-digit ITC(HS) level. 8-digit codes are NOT permitted.'},
+  {topic:'system',t:'Branch System & Operations',q:'If a current disbursement is NOT eligible for interest subvention, what should the Branch Maker do in INSTA Tool?',opts:['Leave all interest subvention fields blank','Fill all fields with zero or NA','Select only Equalisation Eligible field as "N" — other fields not required','Delete the disbursement request and start fresh'],ans:2,exp:'BoB Circular 118:158 explicitly states: "If the present disbursement is not eligible for interest subvention, Branch Maker must select only Equalisation Eligible field as N and other fields need not to be entered." No other fields need to be touched.'},
+  {topic:'system',t:'Branch System & Operations',q:'For Post-Shipment Rupee Export Credit (PS-INR) processing at TFBO level in BarodaINSTA, how is the interest rate entered in the Interest Rate page?',opts:['NET rate = Actual ROI minus 2.75% (same as PC)','ACTUAL interest rate — no netting; subvention captured separately in Extra Data Tab','Zero — system auto-populates after verification','2.75% subvention rate only'],ans:1,exp:'For PS-INR at TFBO, the ACTUAL interest rate is entered in the Interest Rate page (unlike PC-INR where the net rate is shown). The subvention details are captured separately under Extra Data Tab (FOC Master Reference) or Subsidiary Reference (FEL). This is a key difference from PC-INR processing.'},
+  {topic:'system',t:'Branch System & Operations',q:'A PC disbursement carries ROI of 9.80% and subvention is 2.75%. What rate should appear in the Actual Rate field in BarodaINSTA for TFBO processing?',opts:['9.80%','2.75%','7.05%','12.55%'],ans:2,exp:'For Packing Credit (PC-INR) at TFBO level, Actual Rate field = Contracted ROI minus Subvention % = 9.80% - 2.75% = 7.05%. This net rate appears in the Interest Rate page. The full 9.80% is the bank\'s commercial rate; exporter pays 7.05% effectively.'},
+  {topic:'system',t:'Branch System & Operations',q:'When should the "Subvention Percentage" field in the INSTA Tool be set to "2.75" by the Branch Maker?',opts:['Always — for all export credit disbursements','Only when Equalisation Eligible field is set to "Y"','Only for post-shipment credit','Only for MSME borrowers with turnover above ₹10 Crore'],ans:1,exp:'The Subvention Percentage field (with value "2.75") should be selected only when the Equalisation Eligible field is set to "Y". If not eligible (N), the subvention percentage field need not be entered at all.'},
+  {topic:'system',t:'Branch System & Operations',q:'For Finance Same Day option under ELC (Export Letter of Credit) product in BoB\'s system, how should subvention details be captured for an eligible PS-INR disbursement?',opts:['In the regular UIN No. field in INSTA Tool','The system auto-captures — no manual entry needed','In the COMMENT SECTION by Branch Maker; confirmed by Branch Checker','Through a separate Trade Finance portal'],ans:2,exp:'For Finance Same Day in ELC, if a PS-INR disbursement is eligible, Branch Maker must mention the subvention details (UIN No., UIN Expiry Date, HS Code, Subvention Eligibility, MSME Status, Subvention %) in the COMMENT SECTION. This must be confirmed by the Branch Checker.'},
+  {topic:'system',t:'Branch System & Operations',q:'When are month-end reports on interest subvention disbursements provided to branches in BoB?',opts:['1st of each month','5th of each month','Last working date of the month based on BarodaINSTA data','15th of each month'],ans:2,exp:'Per BoB Circular 118:158, reports are provided to branches on the LAST WORKING DATE of the month, based on the data available in BarodaINSTA. This helps branches reconcile their claim submissions.'},
+  {topic:'system',t:'Branch System & Operations',q:'After Branch Maker submits an eligible interest subvention disbursement request in INSTA Tool, what is the next step?',opts:['Automatic approval by RO system','Branch Checker verifies all details and confirms before submission','TFBO reviews and approves','Corporate Office validates the UIN against DGFT database'],ans:1,exp:'After Branch Maker submits, the BRANCH CHECKER must check all details and confirm before final submission. This two-person maker-checker control is mandatory and is explicitly described in BoB Circular 118:158.'},
+
+  // CLAIMS & PROCESS (6 questions)
+  {topic:'claims',t:'Claims & Process',q:'What is the deadline for a BoB branch to submit interest subvention claims to the Regional Office?',opts:['Before 3rd of next month','Before 5th of next month','Before 7th of the month','Before 10th of the month'],ans:1,exp:'Branch must submit claims to Regional Office before the 5th of the NEXT MONTH. This 5-7-9 cascade (Branch: 5th, RO: 7th, ZO: 9th) is consistently mentioned in all three BoB circulars and is a high-priority exam question.'},
+  {topic:'claims',t:'Claims & Process',q:'In BoB\'s internal framework, how does the interest subvention claim reach RBI?',opts:['Branch → RBI directly','Branch → Zonal Office → RBI','Branch → Regional Office → Zonal Office → Corporate Office → RBI','Branch → Regional Office → RBI'],ans:2,exp:'BoB\'s claim chain: Branch → Regional Office (by 5th) → Zonal Office (by 7th) → Corporate Office (by 9th) → RBI. Note: DGFT circular says Zone → RBI, but BoB adds Corporate Office as an additional layer. This BoB-specific overlay is an exam trap.'},
+  {topic:'claims',t:'Claims & Process',q:'How frequently does RBI reimburse banks for interest subvention under the EPM scheme?',opts:['Quarterly','Monthly','Annually','Half-yearly'],ans:1,exp:'RBI reimburses banks on a MONTHLY basis, limited to the actual amount of interest subvention extended to eligible exporters, as reflected in the verified claims submitted by banks.'},
+  {topic:'claims',t:'Claims & Process',q:'What type of records must a branch maintain for claims submitted under the EPM — Niryat Prothsahan scheme?',opts:['Branch-level aggregate monthly records','Product-type wise quarterly summaries','Separate UIN-WISE records for each claim — for RBI audit','Only electronic records in BarodaINSTA are sufficient'],ans:2,exp:'Branches MUST maintain SEPARATE UIN-WISE RECORDS of all claims submitted under the scheme for the purpose of audit by RBI or any competent authority. This requirement is reiterated in circulars 090 and 395, signalling its importance.'},
+  {topic:'claims',t:'Claims & Process',q:'If a borrower repays the entire export credit loan before the stipulated tenure, what is the branch\'s obligation?',opts:['Recover the proportionate subvention already paid from the exporter','Report the early foreclosure of the loan account to RBI','Continue subvention until original maturity date','No action required — scheme automatically closes on repayment'],ans:1,exp:'If the borrower repays the entire loan amount BEFORE the stipulated tenure, the bank must REPORT the early foreclosure to RBI. This is an important compliance obligation. The bank stops computing/extending subvention from the date of full repayment.'},
+  {topic:'claims',t:'Claims & Process',q:'An exporter avails export credit from Bank A (₹30 Lakh subvention claimed) and Bank B (₹35 Lakh subvention claimed) in the same FY. The total claim is ₹65 Lakh against a cap of ₹50 Lakh. Who is responsible for this excess?',opts:['Bank A is responsible — first to disburse','Bank B is responsible — later disbursement','The responsibility rests SOLELY with the beneficiary exporter','Both banks share responsibility equally'],ans:2,exp:'Per the scheme, the responsibility to ensure aggregate subvention claims remain within ₹50 Lakh per FY rests SOLELY with the beneficiary exporter. Any excess is recoverable from the exporter. Banks must obtain suitable undertakings to this effect.'},
+];
+
+// Quiz state
+let quizState = {
+  questions: [],
+  current: 0,
+  score: 0,
+  answered: 0,
+  selected: null,
+  submitted: false,
+  filter: 'all'
+};
+
+function setFilter(f, btn) {
+  document.querySelectorAll('.btn-mode').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  quizState.filter = f;
+  initQuiz();
+}
+
+function initQuiz() {
+  const qs = quizState.filter === 'all' ? [...allQ] : allQ.filter(q => q.topic === quizState.filter);
+  // Shuffle
+  for (let i = qs.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [qs[i], qs[j]] = [qs[j], qs[i]];
+  }
+  quizState.questions = qs;
+  quizState.current = 0;
+  quizState.score = 0;
+  quizState.answered = 0;
+  quizState.selected = null;
+  quizState.submitted = false;
+  document.getElementById('final_screen').classList.remove('show');
+  document.getElementById('final_screen').style.display = 'none';
+  document.querySelector('.quiz-card').style.display = 'block';
+  document.getElementById('q_progress').parentElement.parentElement.style.display = 'flex';
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const qs = quizState.questions;
+  const idx = quizState.current;
+  if (idx >= qs.length) { showFinal(); return; }
+  const q = qs[idx];
+  const total = qs.length;
+  quizState.selected = null;
+  quizState.submitted = false;
+
+  document.getElementById('q_counter').textContent = `Q ${idx + 1} / ${total}`;
+  document.getElementById('q_progress').style.width = ((idx + 1) / total * 100) + '%';
+  document.getElementById('q_score').textContent = `Score: ${quizState.score} / ${quizState.answered}`;
+  document.getElementById('q_topic').textContent = q.t;
+  document.getElementById('q_text').textContent = q.q;
+
+  const optDiv = document.getElementById('q_options');
+  optDiv.innerHTML = '';
+  const letters = ['A','B','C','D'];
+  q.opts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span class="opt-letter">${letters[i]}</span><span>${opt}</span>`;
+    btn.onclick = () => selectOption(i);
+    optDiv.appendChild(btn);
+  });
+
+  document.getElementById('q_explanation').className = 'explanation';
+  document.getElementById('q_explanation').innerHTML = '';
+  document.getElementById('btn_submit').style.display = 'inline-block';
+  document.getElementById('btn_next').style.display = 'none';
+  document.getElementById('btn_restart').style.display = 'none';
+}
+
+function selectOption(i) {
+  if (quizState.submitted) return;
+  quizState.selected = i;
+  document.querySelectorAll('.option-btn').forEach((b, idx) => {
+    b.classList.remove('correct', 'wrong', 'missed');
+    b.style.borderColor = idx === i ? 'var(--blue)' : '';
+    b.style.background = idx === i ? 'var(--sky)' : '';
+    b.querySelector('.opt-letter').style.background = idx === i ? 'var(--blue)' : '';
+    b.querySelector('.opt-letter').style.color = idx === i ? '#fff' : '';
+  });
+}
+
+function submitAnswer() {
+  if (quizState.selected === null) { alert('Please select an answer first.'); return; }
+  quizState.submitted = true;
+  const q = quizState.questions[quizState.current];
+  const correct = q.ans;
+  const selected = quizState.selected;
+  quizState.answered++;
+  if (selected === correct) quizState.score++;
+
+  document.querySelectorAll('.option-btn').forEach((b, i) => {
+    b.disabled = true;
+    b.style.borderColor = '';
+    b.style.background = '';
+    b.querySelector('.opt-letter').style.background = '';
+    b.querySelector('.opt-letter').style.color = '';
+    if (i === correct) b.classList.add('correct');
+    else if (i === selected && i !== correct) b.classList.add('wrong');
+  });
+
+  const expEl = document.getElementById('q_explanation');
+  expEl.innerHTML = `<strong>💡 Explanation:</strong> ${q.exp}`;
+  expEl.className = 'explanation show';
+
+  document.getElementById('q_score').textContent = `Score: ${quizState.score} / ${quizState.answered}`;
+  document.getElementById('btn_submit').style.display = 'none';
+
+  const total = quizState.questions.length;
+  if (quizState.current + 1 >= total) {
+    document.getElementById('btn_next').style.display = 'none';
+    document.getElementById('btn_restart').style.display = 'inline-block';
+    // Auto-show final after small delay
+    setTimeout(showFinal, 1200);
+  } else {
+    document.getElementById('btn_next').style.display = 'inline-block';
+  }
+}
+
+function nextQuestion() {
+  quizState.current++;
+  renderQuestion();
+}
+
+function showFinal() {
+  document.querySelector('.quiz-card').style.display = 'none';
+  document.getElementById('q_progress').parentElement.parentElement.style.display = 'none';
+  const final = document.getElementById('final_screen');
+  final.style.display = 'block';
+  final.classList.add('show');
+  const pct = Math.round(quizState.score / quizState.answered * 100);
+  document.getElementById('final_pct').textContent = pct + '%';
+  document.getElementById('final_detail').textContent = `You scored ${quizState.score} out of ${quizState.answered} questions.`;
+  let grade, color;
+  if (pct >= 90) { grade = '🏆 Excellent — Exam Ready!'; color = 'var(--green)'; }
+  else if (pct >= 75) { grade = '✅ Good — Minor revision needed'; color = 'var(--blue)'; }
+  else if (pct >= 60) { grade = '📚 Average — Review key topics again'; color = 'var(--amber)'; }
+  else { grade = '🔄 Needs more study — Focus on weak areas'; color = 'var(--red)'; }
+  const g = document.getElementById('final_grade');
+  g.textContent = grade;
+  g.style.color = color;
+}
+
+function restartQuiz() {
+  document.getElementById('final_screen').classList.remove('show');
+  document.getElementById('final_screen').style.display = 'none';
+  document.querySelector('.quiz-card').style.display = 'block';
+  document.getElementById('q_progress').parentElement.parentElement.style.display = 'flex';
+  initQuiz();
+}
+
+// Initialise quiz on page load
+document.addEventListener('DOMContentLoaded', () => initQuiz());
+</script>
+
+</body>
+</html>
