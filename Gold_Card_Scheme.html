@@ -2244,7 +2244,7 @@ function restartQuiz() {
   quizState.selectedIdx = null;
   document.getElementById('quiz_results').style.display = 'none';
   document.getElementById('quiz_card').style.display = 'block';
-  document.getElementById('btn_submit').style.display = '';
+  document.getElementById('btn_submit').style.display = 'inline-block';
   document.getElementById('btn_next').style.display = 'none';
   renderQuestion();
 }
@@ -2274,7 +2274,7 @@ function renderQuestion() {
   document.getElementById('q_explanation').className = 'quiz-explanation';
   document.getElementById('q_explanation').innerHTML = '';
   document.getElementById('btn_submit').disabled = true;
-  document.getElementById('btn_submit').style.display = '';
+  document.getElementById('btn_submit').style.display = 'inline-block';
   document.getElementById('btn_next').style.display = 'none';
   quizState.selectedIdx = null;
 }
@@ -2309,7 +2309,7 @@ function submitAnswer() {
 
   document.getElementById('q_score').textContent = 'Score: ' + quizState.score + ' / ' + quizState.answered;
   document.getElementById('btn_submit').style.display = 'none';
-  document.getElementById('btn_next').style.display = '';
+  document.getElementById('btn_next').style.display = 'inline-block';
 
   if (quizState.current + 1 >= quizState.questions.length) {
     document.getElementById('btn_next').textContent = 'View Results →';
