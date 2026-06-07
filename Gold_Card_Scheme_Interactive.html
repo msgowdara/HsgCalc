@@ -1,0 +1,2361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gold Card Scheme for Exporters — BoB IBO Study Module</title>
+<style>
+/* ═══════════════════════════════════════════════════════
+   DESIGN: Premium Banking Blue — Editorial / Institutional
+   Font: Playfair Display (headings) + Source Serif 4 (body)
+   Theme: Deep navy + gold accent + crisp white cards
+══════════════════════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Source+Serif+4:wght@300;400;600&family=JetBrains+Mono:wght@400;600&display=swap');
+
+:root {
+  --navy: #0D1B2A;
+  --navy-mid: #1B3150;
+  --navy-light: #243E60;
+  --gold: #C8941A;
+  --gold-light: #E8B84B;
+  --gold-pale: #FDF3DC;
+  --white: #FFFFFF;
+  --offwhite: #F7F9FC;
+  --slate: #4A5568;
+  --slate-light: #718096;
+  --border: #CBD5E0;
+  --success: #276749;
+  --success-bg: #F0FFF4;
+  --error: #9B2335;
+  --error-bg: #FFF5F5;
+  --amber-bg: #FFFBEB;
+  --amber-border: #D97706;
+  --blue-bg: #EBF4FF;
+  --blue-border: #2B6CB0;
+  --green-bg: #F0FFF4;
+  --green-border: #276749;
+  --trap-bg: #FEF3C7;
+  --trap-border: #B45309;
+  --shadow-sm: 0 1px 3px rgba(13,27,42,0.08), 0 1px 2px rgba(13,27,42,0.06);
+  --shadow-md: 0 4px 6px rgba(13,27,42,0.07), 0 2px 4px rgba(13,27,42,0.06);
+  --shadow-lg: 0 10px 25px rgba(13,27,42,0.10), 0 4px 10px rgba(13,27,42,0.06);
+  --shadow-xl: 0 20px 40px rgba(13,27,42,0.15);
+  --radius: 12px;
+  --radius-sm: 6px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Source Serif 4', Georgia, serif;
+  background: var(--navy);
+  color: var(--navy);
+  min-height: 100vh;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+/* ─── HEADER ─── */
+.site-header {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 60%, var(--navy-light) 100%);
+  padding: 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 20px rgba(0,0,0,0.4);
+}
+
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 32px;
+  border-bottom: 1px solid rgba(200,148,26,0.3);
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.brand-badge {
+  width: 44px; height: 44px;
+  background: linear-gradient(135deg, var(--gold), var(--gold-light));
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Playfair Display', serif;
+  font-weight: 800; font-size: 20px;
+  color: var(--navy);
+  box-shadow: 0 2px 8px rgba(200,148,26,0.4);
+}
+
+.brand-text h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px; font-weight: 700;
+  color: var(--white);
+  letter-spacing: 0.3px;
+}
+
+.brand-text p {
+  font-size: 11px;
+  color: var(--gold-light);
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.header-meta {
+  font-size: 11px;
+  color: rgba(255,255,255,0.5);
+  font-family: 'JetBrains Mono', monospace;
+  text-align: right;
+}
+
+/* ─── NAV TABS ─── */
+.nav-tabs {
+  display: flex;
+  padding: 0 32px;
+  gap: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.nav-tabs::-webkit-scrollbar { display: none; }
+
+.nav-tab {
+  padding: 14px 24px;
+  font-family: 'Source Serif 4', serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.6);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.25s;
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+}
+
+.nav-tab:hover { color: rgba(255,255,255,0.85); }
+.nav-tab.active {
+  color: var(--gold-light);
+  border-bottom-color: var(--gold);
+}
+
+/* ─── MAIN LAYOUT ─── */
+.main-container {
+  background: var(--offwhite);
+  min-height: calc(100vh - 100px);
+}
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ─── SECTION HERO ─── */
+.section-hero {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
+  padding: 48px 48px 40px;
+  position: relative;
+  overflow: hidden;
+}
+
+.section-hero::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 300px; height: 300px;
+  border-radius: 50%;
+  background: rgba(200,148,26,0.07);
+  pointer-events: none;
+}
+
+.section-hero::after {
+  content: '';
+  position: absolute;
+  bottom: -40px; left: 30%;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  background: rgba(200,148,26,0.04);
+  pointer-events: none;
+}
+
+.section-hero h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 32px; font-weight: 800;
+  color: var(--white);
+  margin-bottom: 10px;
+}
+
+.section-hero p {
+  color: rgba(255,255,255,0.65);
+  font-size: 15px;
+  max-width: 700px;
+}
+
+.hero-badge {
+  display: inline-block;
+  background: rgba(200,148,26,0.2);
+  border: 1px solid rgba(200,148,26,0.4);
+  color: var(--gold-light);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: 20px;
+  margin-bottom: 16px;
+  display: inline-block;
+}
+
+/* ─── CONTENT AREA ─── */
+.content-area {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 40px 32px;
+}
+
+/* ─── ACCORDION ─── */
+.accordion-group { margin-bottom: 32px; }
+
+.accordion-title-bar {
+  background: var(--navy);
+  color: var(--gold-light);
+  font-family: 'Playfair Display', serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 8px 20px;
+  border-radius: var(--radius) var(--radius) 0 0;
+  margin-bottom: 0;
+}
+
+.accordion-item {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-top: none;
+  transition: all 0.2s;
+}
+
+.accordion-item:first-of-type { border-top: 1px solid var(--border); }
+.accordion-item:last-child { border-radius: 0 0 var(--radius) var(--radius); }
+
+.accordion-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.2s;
+}
+
+.accordion-trigger:hover { background: var(--offwhite); }
+
+.accordion-trigger h3 {
+  font-family: 'Source Serif 4', serif;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--navy);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.acc-icon {
+  width: 28px; height: 28px;
+  background: var(--navy);
+  color: var(--gold-light);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+  flex-shrink: 0;
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+}
+
+.acc-chevron {
+  width: 22px; height: 22px;
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  color: var(--slate);
+  transition: transform 0.3s, border-color 0.2s;
+  flex-shrink: 0;
+}
+
+.accordion-item.open .acc-chevron {
+  transform: rotate(180deg);
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.accordion-body {
+  display: none;
+  padding: 0 24px 24px;
+  border-top: 1px solid var(--border);
+}
+.accordion-item.open .accordion-body { display: block; }
+.accordion-body > *:first-child { margin-top: 20px; }
+
+/* ─── STUDY CONTENT ELEMENTS ─── */
+.study-para {
+  color: var(--slate);
+  font-size: 15.5px;
+  line-height: 1.75;
+  margin-bottom: 16px;
+}
+
+.callout {
+  border-radius: var(--radius-sm);
+  padding: 14px 18px;
+  margin: 16px 0;
+  border-left: 4px solid;
+  font-size: 14.5px;
+  line-height: 1.65;
+}
+
+.callout.rbi { background: var(--green-bg); border-color: var(--green-border); }
+.callout.bob { background: var(--amber-bg); border-color: var(--amber-border); }
+.callout.example { background: var(--blue-bg); border-color: var(--blue-border); }
+.callout.trap { background: var(--trap-bg); border-color: var(--trap-border); }
+
+.callout-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.callout.rbi .callout-label { color: var(--green-border); }
+.callout.bob .callout-label { color: var(--amber-border); }
+.callout.example .callout-label { color: var(--blue-border); }
+.callout.trap .callout-label { color: var(--trap-border); }
+
+/* ─── STUDY TABLE ─── */
+.study-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 18px 0;
+  font-size: 14px;
+  box-shadow: var(--shadow-sm);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.study-table th {
+  background: var(--navy);
+  color: var(--white);
+  font-family: 'Source Serif 4', serif;
+  font-weight: 600;
+  font-size: 13px;
+  padding: 12px 16px;
+  text-align: left;
+  border: none;
+}
+
+.study-table td {
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--slate);
+  vertical-align: top;
+  line-height: 1.6;
+}
+
+.study-table tr:nth-child(even) td { background: var(--offwhite); }
+.study-table tr:hover td { background: var(--blue-bg); }
+.study-table tr:last-child td { border-bottom: none; }
+
+.highlight-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+  color: var(--navy);
+  background: var(--gold-pale);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+/* ─── BULLET LIST ─── */
+.study-list {
+  list-style: none;
+  margin: 12px 0;
+  padding: 0;
+}
+
+.study-list li {
+  padding: 5px 0 5px 24px;
+  position: relative;
+  color: var(--slate);
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.study-list li::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  color: var(--gold);
+  font-size: 12px;
+  top: 8px;
+}
+
+/* ─── TIMELINE ─── */
+.timeline {
+  position: relative;
+  padding: 16px 0;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 22px; top: 0; bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--gold), var(--navy-light));
+}
+
+.timeline-item {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.timeline-dot {
+  width: 44px; height: 44px;
+  background: var(--white);
+  border: 2px solid var(--gold);
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--navy);
+  z-index: 1;
+  box-shadow: var(--shadow-sm);
+}
+
+.timeline-content {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 18px;
+  flex: 1;
+  box-shadow: var(--shadow-sm);
+}
+
+.timeline-content h4 {
+  font-family: 'Source Serif 4', serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 4px;
+}
+
+.timeline-content .circ-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--gold);
+  font-weight: 600;
+}
+
+.timeline-content p {
+  font-size: 13.5px;
+  color: var(--slate);
+  margin-top: 4px;
+}
+
+/* ─── COMPARISON TABLE ─── */
+.compare-table {
+  width: 100%; border-collapse: collapse; margin: 18px 0;
+  font-size: 14px; border-radius: var(--radius-sm); overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.compare-table th { padding: 12px 16px; font-size: 13px; font-weight: 700; text-align: left; }
+.compare-table th:first-child { background: var(--navy); color: var(--white); }
+.compare-table th:nth-child(2) { background: #2D3748; color: rgba(255,255,255,0.8); }
+.compare-table th:nth-child(3) { background: var(--navy-light); color: var(--gold-light); }
+.compare-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); color: var(--slate); }
+.compare-table tr:nth-child(even) td { background: var(--offwhite); }
+.compare-table td:first-child { font-weight: 600; color: var(--navy); font-size: 13px; }
+
+/* ─── INTERACTIVE TOOLS SECTION ─── */
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  padding: 40px 32px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.tool-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.tool-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+
+.tool-card-header {
+  background: linear-gradient(135deg, var(--navy), var(--navy-mid));
+  padding: 20px 24px;
+  color: var(--white);
+}
+
+.tool-card-header h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  margin-bottom: 4px;
+}
+
+.tool-card-header p {
+  font-size: 12px;
+  color: rgba(255,255,255,0.6);
+}
+
+.tool-card-body { padding: 24px; }
+
+/* ─── ELIGIBILITY CHECKER ─── */
+.elig-step {
+  margin-bottom: 18px;
+}
+
+.elig-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 8px;
+  display: block;
+}
+
+.elig-select, .elig-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: 'Source Serif 4', serif;
+  font-size: 14px;
+  color: var(--navy);
+  background: var(--offwhite);
+  transition: border-color 0.2s;
+}
+
+.elig-select:focus, .elig-input:focus {
+  outline: none;
+  border-color: var(--gold);
+  background: var(--white);
+}
+
+.btn-check {
+  width: 100%;
+  padding: 12px;
+  background: var(--navy);
+  color: var(--gold-light);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: 'Source Serif 4', serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 8px;
+}
+.btn-check:hover { background: var(--navy-light); transform: translateY(-1px); }
+
+.elig-result {
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  line-height: 1.6;
+  display: none;
+}
+.elig-result.eligible { background: var(--success-bg); border: 1.5px solid var(--success); color: var(--success); }
+.elig-result.ineligible { background: var(--error-bg); border: 1.5px solid var(--error); color: var(--error); }
+.elig-result.conditional { background: var(--amber-bg); border: 1.5px solid var(--amber-border); color: #7C3D12; }
+
+/* ─── STANDBY CALCULATOR ─── */
+.calc-row {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 14px;
+}
+
+.calc-label {
+  font-size: 13px; font-weight: 600; color: var(--navy); flex: 1; min-width: 120px;
+}
+
+.calc-input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  text-align: right;
+  color: var(--navy);
+  background: var(--offwhite);
+}
+.calc-input:focus { outline: none; border-color: var(--gold); background: var(--white); }
+
+.calc-result-box {
+  background: var(--navy);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  margin-top: 8px;
+}
+
+.calc-result-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.calc-result-row:last-child { border-bottom: none; padding-top: 10px; }
+.calc-result-label { color: rgba(255,255,255,0.65); font-size: 12px; font-family: 'JetBrains Mono', monospace; }
+.calc-result-value { color: var(--gold-light); font-size: 14px; font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+.calc-result-value.total { font-size: 18px; color: var(--gold); }
+
+/* ─── WITHDRAWAL TRIGGER SIMULATOR ─── */
+.trigger-grid {
+  display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 16px;
+}
+
+.trigger-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 12px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--offwhite);
+}
+
+.trigger-item.triggered {
+  border-color: var(--error);
+  background: var(--error-bg);
+}
+
+.trigger-item label {
+  font-size: 13.5px;
+  color: var(--slate);
+  cursor: pointer;
+  line-height: 1.5;
+}
+
+.trigger-item input[type=checkbox] {
+  width: 16px; height: 16px;
+  flex-shrink: 0;
+  accent-color: var(--error);
+  margin-top: 2px;
+}
+
+.withdrawal-status {
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  text-align: center;
+  font-weight: 600;
+  font-size: 15px;
+  transition: all 0.3s;
+}
+
+.withdrawal-status.safe {
+  background: var(--success-bg);
+  color: var(--success);
+  border: 1.5px solid var(--success);
+}
+
+.withdrawal-status.warning {
+  background: var(--error-bg);
+  color: var(--error);
+  border: 1.5px solid var(--error);
+  animation: pulse-red 1s ease infinite;
+}
+
+@keyframes pulse-red {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(155,35,53,0.3); }
+  50% { box-shadow: 0 0 0 8px rgba(155,35,53,0); }
+}
+
+/* ─── TIMELINE CIRCULAR (EVOLUTION) ─── */
+.evolution-container { padding: 16px 0; }
+
+.evo-year-select {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px;
+}
+
+.evo-btn {
+  padding: 6px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  background: var(--offwhite);
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--slate);
+  transition: all 0.2s;
+}
+
+.evo-btn:hover, .evo-btn.active {
+  background: var(--navy);
+  border-color: var(--navy);
+  color: var(--gold-light);
+}
+
+.evo-detail {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--gold);
+  border-radius: var(--radius-sm);
+  padding: 20px;
+  min-height: 120px;
+}
+
+.evo-detail h4 {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px; color: var(--navy); margin-bottom: 4px;
+}
+
+.evo-detail .circ-ref {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--gold); margin-bottom: 12px;
+  display: block;
+}
+
+.evo-detail ul { list-style: none; padding: 0; }
+.evo-detail li {
+  font-size: 14px; color: var(--slate); padding: 5px 0;
+  border-bottom: 1px dashed var(--border);
+  display: flex; gap: 10px; align-items: flex-start;
+}
+.evo-detail li:last-child { border-bottom: none; }
+.evo-detail li::before { content: '◆'; color: var(--gold); font-size: 9px; flex-shrink: 0; margin-top: 6px; }
+
+/* ─── CHEAT SHEET ─── */
+.cheat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+  padding: 40px 32px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.cheat-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.cheat-card-header {
+  padding: 14px 20px;
+  font-family: 'Playfair Display', serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--white);
+  background: linear-gradient(135deg, var(--navy), var(--navy-light));
+  display: flex; align-items: center; gap: 10px;
+}
+
+.cheat-card-icon { font-size: 18px; }
+
+.cheat-card-body { padding: 16px 20px; }
+
+.num-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--gold-pale);
+  border: 1.5px solid var(--gold);
+  color: var(--navy);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 16px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 8px;
+  margin: 3px 0;
+}
+
+.num-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 9px 0; border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+.num-row:last-child { border-bottom: none; }
+.num-row-label { color: var(--slate); flex: 1; }
+.num-row-value { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--navy); font-size: 15px; }
+
+.trap-item {
+  padding: 12px 14px;
+  background: var(--trap-bg);
+  border: 1px solid var(--trap-border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 10px;
+  font-size: 13.5px;
+  color: #7C3D12;
+  line-height: 1.6;
+}
+
+.trap-item strong { color: var(--navy); }
+
+.print-btn {
+  display: flex; align-items: center; gap: 8px;
+  margin: 0 auto 24px;
+  padding: 10px 24px;
+  background: var(--navy);
+  color: var(--gold-light);
+  border: none;
+  border-radius: 20px;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: 'Source Serif 4', serif;
+  transition: all 0.2s;
+}
+.print-btn:hover { background: var(--navy-light); }
+
+/* ─── QUIZ SECTION ─── */
+.quiz-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 40px 32px;
+}
+
+.quiz-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+  flex-wrap: gap;
+  gap: 12px;
+}
+
+.quiz-progress-bar {
+  flex: 1;
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.quiz-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold), var(--gold-light));
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+.quiz-counter {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: var(--slate-light);
+  white-space: nowrap;
+}
+
+.quiz-score-badge {
+  background: var(--navy);
+  color: var(--gold-light);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  padding: 4px 14px;
+  border-radius: 20px;
+}
+
+.quiz-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px;
+  box-shadow: var(--shadow-md);
+  margin-bottom: 24px;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.quiz-topic {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 14px;
+  display: flex; align-items: center; gap: 8px;
+}
+
+.quiz-question {
+  font-family: 'Source Serif 4', serif;
+  font-size: 18px;
+  color: var(--navy);
+  font-weight: 600;
+  line-height: 1.55;
+  margin-bottom: 24px;
+}
+
+.quiz-options { display: flex; flex-direction: column; gap: 12px; }
+
+.quiz-option {
+  padding: 14px 18px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex; align-items: flex-start; gap: 14px;
+  background: var(--offwhite);
+  text-align: left;
+  font-family: 'Source Serif 4', serif;
+  font-size: 14.5px;
+  color: var(--slate);
+  line-height: 1.55;
+}
+
+.quiz-option:hover:not(:disabled) {
+  border-color: var(--navy);
+  background: var(--blue-bg);
+  color: var(--navy);
+}
+
+.quiz-option:disabled { cursor: default; }
+
+.quiz-option.selected { border-color: var(--navy); background: var(--blue-bg); }
+.quiz-option.correct { border-color: var(--success); background: var(--success-bg); color: var(--success); }
+.quiz-option.incorrect { border-color: var(--error); background: var(--error-bg); color: var(--error); }
+
+.option-letter {
+  width: 26px; height: 26px;
+  border: 1.5px solid var(--border);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+  color: var(--slate);
+  transition: all 0.2s;
+}
+
+.quiz-option.correct .option-letter { background: var(--success); border-color: var(--success); color: white; }
+.quiz-option.incorrect .option-letter { background: var(--error); border-color: var(--error); color: white; }
+.quiz-option.selected .option-letter { background: var(--navy); border-color: var(--navy); color: white; }
+
+.quiz-explanation {
+  margin-top: 20px;
+  padding: 16px 18px;
+  background: var(--offwhite);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--navy);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  color: var(--slate);
+  line-height: 1.65;
+  display: none;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.quiz-explanation.show { display: block; }
+.quiz-explanation strong { color: var(--navy); }
+
+.quiz-controls {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.btn-quiz {
+  padding: 12px 28px;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Source Serif 4', serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-submit {
+  background: var(--navy);
+  color: var(--gold-light);
+}
+.btn-submit:hover { background: var(--navy-light); }
+.btn-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn-next {
+  background: var(--gold);
+  color: var(--navy);
+  display: none;
+}
+.btn-next:hover { background: var(--gold-light); }
+
+.btn-filter {
+  padding: 6px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  background: var(--white);
+  font-size: 12px;
+  color: var(--slate);
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  transition: all 0.2s;
+}
+.btn-filter:hover, .btn-filter.active { background: var(--navy); color: var(--gold-light); border-color: var(--navy); }
+
+.quiz-results {
+  text-align: center;
+  padding: 40px;
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  display: none;
+}
+
+.results-score {
+  font-family: 'Playfair Display', serif;
+  font-size: 72px;
+  font-weight: 800;
+  color: var(--navy);
+  line-height: 1;
+}
+
+.results-label {
+  font-size: 14px;
+  color: var(--slate-light);
+  margin: 8px 0 24px;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 1px;
+}
+
+.results-grade {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px;
+  margin-bottom: 24px;
+}
+
+.mode-selector {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+/* ─── FOOTER ─── */
+footer {
+  background: var(--navy);
+  color: rgba(255,255,255,0.5);
+  text-align: center;
+  padding: 20px;
+  font-size: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.5px;
+}
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 640px) {
+  .header-top { padding: 12px 16px; }
+  .nav-tab { padding: 12px 14px; font-size: 12px; }
+  .section-hero { padding: 28px 20px; }
+  .content-area { padding: 24px 16px; }
+  .tools-grid, .cheat-grid { padding: 20px 16px; }
+  .quiz-container { padding: 20px 16px; }
+  .section-hero h2 { font-size: 24px; }
+  .quiz-question { font-size: 16px; }
+}
+
+@media print {
+  .site-header, .nav-tabs, .quiz-controls, .print-btn { display: none; }
+  .tab-panel { display: block !important; }
+  .accordion-body { display: block !important; }
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-top">
+    <div class="header-brand">
+      <div class="brand-badge">GC</div>
+      <div class="brand-text">
+        <h1>Gold Card Scheme for Exporters</h1>
+        <p>Bank of Baroda · IBO FY 2026-27 · Branch Head Study Module</p>
+      </div>
+    </div>
+    <div class="header-meta">
+      Mallikarjunagowda S Gowdara<br>
+      Chief Manager · BoB
+    </div>
+  </div>
+  <nav class="nav-tabs" role="tablist">
+    <button class="nav-tab active" onclick="showTab('study')" role="tab">📖 Study Guide</button>
+    <button class="nav-tab" onclick="showTab('tools')" role="tab">⚙️ Interactive Tools</button>
+    <button class="nav-tab" onclick="showTab('cheat')" role="tab">📋 Cheat Sheet</button>
+    <button class="nav-tab" onclick="showTab('quiz')" role="tab">🎯 Quiz Engine</button>
+  </nav>
+</header>
+
+<div class="main-container">
+
+<!-- ════════════════════════════════════════════════════ -->
+<!--                   TAB 1: STUDY                      -->
+<!-- ════════════════════════════════════════════════════ -->
+<div id="tab-study" class="tab-panel active">
+  <div class="section-hero">
+    <div class="hero-badge">Study Material · Part A</div>
+    <h2>Gold Card Scheme — Complete Study Guide</h2>
+    <p>Comprehensive coverage of RBI directives, all BoB circulars from 2004–2023, and GCEMP 2025 overlays. Click chapters to expand.</p>
+  </div>
+
+  <div class="content-area">
+
+    <!-- CHAPTER 1 -->
+    <div class="accordion-group">
+      <div class="accordion-title-bar">Chapter 1 · Genesis & Regulatory Framework</div>
+
+      <div class="accordion-item open">
+        <button class="accordion-trigger" onclick="toggleAcc(this)">
+          <h3><span class="acc-icon">1</span>Introduction & RBI Mandate</h3>
+          <span class="acc-chevron">▼</span>
+        </button>
+        <div class="accordion-body">
+          <p class="study-para">The Gold Card Scheme for Exporters is a flagship RBI initiative designed to provide creditworthy exporters with streamlined, concessional access to export credit on best terms. It was mandated in the <strong>EXIM Policy 2003-04</strong> by the Ministry of Commerce and Industry, directing RBI to work out a scheme for creditworthy exporters with good track records.</p>
+
+          <div class="callout rbi">
+            <span class="callout-label">RBI Directive</span>
+            RBI's Gold Card Scheme (embedded in Master Circular DBOD.DIR(Exp).BC.14/04.02.002/2015-16) aims to ensure easy availability of export credit on best terms for exporters with a proven track record. In June 2019, RBI issued a specific reminder circular (RBI/2019-20/23) directing banks to strictly implement the scheme as many were not extending benefits per extant instructions.
+          </div>
+
+          <p class="study-para">Bank of Baroda launched its Gold Card Scheme on <strong>29 June 2004</strong> via circular BCC:BR:96/253 after Board approval on 24 June 2004. The scheme has been progressively updated through 8 major circulars over 19 years.</p>
+
+          <div class="callout bob">
+            <span class="callout-label">BoB Overlay</span>
+            BoB operates the Gold Card Scheme through the Trade, FX and Remittances Department, Baroda Corporate Centre, Mumbai. The Gold Card is issued centrally by BCC directly to the exporter under intimation to the respective Branch. The Branch must update its records upon receipt of the Gold Card advice.
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <button class="accordion-trigger" onclick="toggleAcc(this)">
+          <h3><span class="acc-icon">2</span>Chronological Evolution (2004–2023)</h3>
+          <span class="acc-chevron">▼</span>
+        </button>
+        <div class="accordion-body">
+          <p class="study-para">The scheme has been progressively refined through 8 major circulars. Understanding this evolution is critical as exam questions frequently test the "before vs after" differences.</p>
+
+          <div class="timeline">
+            <div class="timeline-item">
+              <div class="timeline-dot">2004</div>
+              <div class="timeline-content">
+                <div class="circ-num">BCC:BR:96/253 · 29.06.2004</div>
+                <h4>Launch of Gold Card Scheme</h4>
+                <p>Original eligibility (BBB/B+ rating), 3-year limits, BPLR minus 4% for Rupee credit, LIBOR+75bps for FC credit, 20% standby, 25-day TAT for fresh applications, 10% concession on commission/exchange</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot">2005</div>
+              <div class="timeline-content">
+                <div class="circ-num">BCC:INT:DFB:97/583 · 09.03.2005</div>
+                <h4>Overdue Bills Benchmark Changed</h4>
+                <p>Critical change: Overdue bills benchmark changed from "current year's turnover" to <strong>"previous year's turnover"</strong> — a tightening of the eligibility gate</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot">2009</div>
+              <div class="timeline-content">
+                <div class="circ-num">BCC:WB:DFB:101/47 · 11.09.2009</div>
+                <h4>COVID-Predecessor Waiver</h4>
+                <p>Temporary waiver of 10% overdue bill criterion for April 2009 – March 2010 due to global financial crisis. Exporters could qualify despite higher overdues during this period</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot">2012</div>
+              <div class="timeline-content">
+                <div class="circ-num">BCC:WB:DFB:104/10 · 09.02.2012</div>
+                <h4>Expiry Alert — Concessions Auto-Cancelled</h4>
+                <p>Alert to branches: Many Gold Cards had expired without renewal. If Gold Card expires — ALL concessions/facilities must be cancelled IMMEDIATELY. Branches directed to send renewal applications urgently</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot">2019</div>
+              <div class="timeline-content">
+                <div class="circ-num">BCC:BR:111/324 · 05.07.2019</div>
+                <h4>Comprehensive Rationalization</h4>
+                <p>Full consolidation for field-level clarity. Rating updated to BOB-6 (new model). ECGC premium for Pre-shipment made Bank's responsibility. Withdrawal criteria formally listed</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot">2020</div>
+              <div class="timeline-content">
+                <div class="circ-num">BCC:BR:112:628 · 20.10.2020</div>
+                <h4>Major Modifications</h4>
+                <p>Rating changed from BOB-6 to <strong>BOB-5</strong>. Interest concession on INR: 25 bps (no FC concession). Period extended to operating cycle + max 12 months. Standby sanctioned as per DLP. No additional collateral for standby. Withdrawal criteria detailed</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot">2023a</div>
+              <div class="timeline-content">
+                <div class="circ-num">BCC:BR:115:247 · 29.04.2023</div>
+                <h4>Most Comprehensive Update</h4>
+                <p>Multi-framework rating (BOB-5 + BBB + CMR-5). Three new eligibility routes added. Loss criterion clarified as "negative PBT." SMA-1 added as withdrawal trigger. Exception authority changed from COCC-ED to COCC-CGM. Meritorious case exception WITHDRAWN</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot">2023b</div>
+              <div class="timeline-content">
+                <div class="circ-num">BCC:BR:115:290 · 26.05.2023</div>
+                <h4>Single-Scheme Addendum</h4>
+                <p>Clarification: A borrower cannot avail benefit of more than ONE Gold Card scheme at a time. The three BoB variants (Exporters/SME/Traders Gold Card) are mutually exclusive</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHAPTER 2 -->
+    <div class="accordion-group">
+      <div class="accordion-title-bar">Chapter 2 · Eligibility Criteria (Current 2023)</div>
+
+      <div class="accordion-item">
+        <button class="accordion-trigger" onclick="toggleAcc(this)">
+          <h3><span class="acc-icon">1</span>Criterion 1: Credit Rating Framework</h3>
+          <span class="acc-chevron">▼</span>
+        </button>
+        <div class="accordion-body">
+          <p class="study-para">The 2023 circular introduced a multi-framework rating approach replacing the single internal rating system:</p>
+
+          <table class="study-table">
+            <thead>
+              <tr><th>Rating Framework</th><th>Minimum Threshold</th><th>Applicable When</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Internal BOBRAM Rating</td><td><span class="highlight-num">BOB-5</span> for last 2 years</td><td>All borrowers where External/CMR not applicable</td></tr>
+              <tr><td>External Agency Rating</td><td><span class="highlight-num">BBB</span> for last 2 years</td><td>Wherever external rating is applicable</td></tr>
+              <tr><td>CIBIL MSME Rating (CMR)</td><td><span class="highlight-num">CMR-5</span> at sanction AND at issuance</td><td>Wherever CMR is applicable to MSME accounts</td></tr>
+            </tbody>
+          </table>
+
+          <div class="callout trap">
+            <span class="callout-label">⚠ Exam Trap — Rating Evolution</span>
+            <strong>2004:</strong> BBB (new model) or B+ (old model) — qualitative/external<br>
+            <strong>2019:</strong> BOB-6 (internal rating, new model)<br>
+            <strong>2020:</strong> BOB-5 (internal rating — tightened!)<br>
+            <strong>2023:</strong> BOB-5 + BBB (external) + CMR-5 (CIBIL MSME) — multi-framework<br>
+            Note: CMR-5 must be checked at TWO points: time of sanction AND time of issuance of Gold Card.
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <button class="accordion-trigger" onclick="toggleAcc(this)">
+          <h3><span class="acc-icon">2</span>Criterion 2: Account Conduct & Three Alternative Routes</h3>
+          <span class="acc-chevron">▼</span>
+        </button>
+        <div class="accordion-body">
+          <p class="study-para"><strong>Standard Route (a):</strong> Account must be classified as "Standard" continuously for 3 years and must not be caution-listed/blacklisted by ECGC or RBI.</p>
+
+          <p class="study-para">The 2023 circular added three ALTERNATIVE routes for cases where standard 3-year credit history is absent:</p>
+
+          <div class="callout bob">
+            <span class="callout-label">BoB — Route (b): Current Account Entities</span>
+            Entities with NO credit facility with banking system but having business/current account relationship with BoB for last 2 years, routing <strong>50% or more</strong> of export turnover through BoB for last 2 years. Eligible on sanction of fresh export credit, provided minimum rating criteria are met at sanction AND at issuance.
+          </div>
+
+          <div class="callout bob">
+            <span class="callout-label">BoB — Route (c): New Firm (Parent/Associate)</span>
+            New firm established in same line of activity by parent/associate that is a BoB borrower. Conditions: (i) Common promoters with <strong>50%+ voting rights/control</strong> in parent/associate; (ii) Parent should be availing Gold Card or satisfying Gold Card eligibility; (iii) Minimum rating criteria at sanction AND issuance.
+          </div>
+
+          <div class="callout bob">
+            <span class="callout-label">BoB — Route: Takeover Accounts</span>
+            Takeover accounts can be given Gold Card if they satisfy both Gold Card criteria AND takeover norms. Rating criteria: Internal BOB-5 at sanction; External BBB for last 2 years (where applicable); CMR-5 at sanction AND at issuance (where applicable).
+          </div>
+
+          <div class="callout trap">
+            <span class="callout-label">⚠ Exam Trap</span>
+            In all three alternative routes, the exporter must ALSO satisfy ALL other Gold Card eligibility criteria: not blacklisted by ECGC, no negative PBT in past 3 years, overdue bills ≤ 10% of previous year's turnover.
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <button class="accordion-trigger" onclick="toggleAcc(this)">
+          <h3><span class="acc-icon">3</span>Criterion 3: Negative Eligibility (Disqualification)</h3>
+          <span class="acc-chevron">▼</span>
+        </button>
+        <div class="accordion-body">
+          <p class="study-para">An exporter is NOT eligible for Gold Card if <em>either or both</em> of the following conditions exist:</p>
+          <ul class="study-list">
+            <li>Export firm making <strong>loss (negative Profit Before Tax — PBT)</strong> in any one or more of the past three years</li>
+            <li>Having overdue export bills as on the date of issuance of Gold Card in excess of <strong>10% of previous financial year's turnover</strong></li>
+          </ul>
+
+          <div class="callout bob">
+            <span class="callout-label">BoB — Covid-19 Exception for MSMEs (Existing Borrowers Only)</span>
+            Net loss due to Covid-19 in FY 2020-21 and/or FY 2021-22 is overlooked IF:<br>
+            ✓ Entity generated cash profit (PBT + Depreciation) in BOTH FY 2020-21 and FY 2021-22<br>
+            ✓ Firm earned net profit in FY 2022-23<br>
+            ✓ All other Gold Card conditions satisfied<br>
+            This relaxation is applicable only to <strong>existing borrowers</strong>.
+          </div>
+
+          <div class="callout trap">
+            <span class="callout-label">⚠ Critical — Exception Withdrawn</span>
+            The earlier 'meritorious cases' exception (which permitted COCC-ED to approve Gold Card despite losses/overdue bills) has been <strong>WITHDRAWN</strong> by BCC:BR:115:247 dated 29.04.2023. Only the Covid-19 MSME exception survives.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHAPTER 3 -->
+    <div class="accordion-group">
+      <div class="accordion-title-bar">Chapter 3 · Key Features: Limits, Interest & Charges</div>
+
+      <div class="accordion-item">
+        <button class="accordion-trigger" onclick="toggleAcc(this)">
+          <h3><span class="acc-icon">1</span>Limit Structure & Standby Limit</h3>
+          <span class="acc-chevron">▼</span>
+        </button>
+        <div class="accordion-body">
+          <table class="study-table">
+            <thead><tr><th>Feature</th><th>Specification</th></tr></thead>
+            <tbody>
+              <tr><td>Main Limit</td><td>Pre-shipment + Post-shipment limits for 3 years, subject to annual review, based on usual appraisal of credit needs</td></tr>
+              <tr><td>Standby Limit</td><td>At least <span class="highlight-num">20%</span> of assessed export credit limit — for urgent credit needs to execute sudden orders</td></tr>
+              <tr><td>Sanctioning Authority for Standby</td><td>As per DLP based on <strong>(Existing Total Exposure + Proposed Standby Limit)</strong></td></tr>
+              <tr><td>Separate Pre/Post-shipment Limits</td><td>Standby sanctioned separately for each, based on the respective limit</td></tr>
+              <tr><td>Inventory Norms</td><td>May be relaxed in case of <strong>unanticipated export orders</strong> (considering size and nature)</td></tr>
+              <tr><td>Collateral for Standby</td><td><strong>NIL</strong> — No additional collateral security to be demanded for Standby Limit</td></tr>
+            </tbody>
+          </table>
+
+          <div class="callout example">
+            <span class="callout-label">Worked Example</span>
+            MSME exporter with assessed MPBF = ₹5 crore for export credit.<br>
+            Standby Limit = 20% × ₹5 crore = <strong>₹1 crore</strong> (sanctioned OUTSIDE MPBF)<br>
+            DLP exposure = ₹5 crore (existing) + ₹1 crore (standby) = <strong>₹6 crore total</strong><br>
+            25 bps interest concession applies on the full ₹6 crore (INR facilities).<br>
+            No additional collateral for the standby ₹1 crore component.
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <button class="accordion-trigger" onclick="toggleAcc(this)">
+          <h3><span class="acc-icon">2</span>Rate of Interest, Period of Concession & Charges</h3>
+          <span class="acc-chevron">▼</span>
+        </button>
+        <div class="accordion-body">
+          <table class="study-table">
+            <thead><tr><th>Parameter</th><th>Current Position</th></tr></thead>
+            <tbody>
+              <tr><td>INR Export Credit (Pre+Post-shipment)</td><td><span class="highlight-num">25 bps</span> reduction in applicable rate of interest, including Standby Limit</td></tr>
+              <tr><td>FC Export Credit (PCFC/EPC-FC)</td><td><strong>NO reduction</strong> in interest rate</td></tr>
+              <tr><td>Concession Cap</td><td>If SA has already given ≥25 bps concession → No further Gold Card concession. If SA concession < 25 bps → Gold Card tops up to overall 25 bps ceiling</td></tr>
+              <tr><td>Period of Concession</td><td>Up to operating cycle; extendable to max <span class="highlight-num">12 months</span> from date of disbursement (both Pre + Post-shipment INR)</td></tr>
+              <tr><td>Commission & Exchange</td><td><span class="highlight-num">10%</span> concession</td></tr>
+              <tr><td>Processing Charges</td><td>NO concession — recovered on <strong>Total Exposure including Standby</strong> at applicable rate</td></tr>
+            </tbody>
+          </table>
+
+          <div class="callout trap">
+            <span class="callout-label">⚠ Exam Trap — Period of Concession</span>
+            <strong>Pre-2020:</strong> Pre-shipment up to 270 days; Post-shipment up to 180 days (whichever lesser)<br>
+            <strong>Post-2020 (BCC:BR:112:628):</strong> Up to operating cycle, extendable to max <strong>12 months from date of disbursement</strong> for BOTH Pre and Post-shipment Rupee export credit. This is a significant extension.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHAPTER 4 -->
+    <div class="accordion-group">
+      <div class="accordion-title-bar">Chapter 4 · Other Features, TAT & ECGC</div>
+
+      <div class="accordion-item">
+        <button class="accordion-trigger" onclick="toggleAcc(this)">
+          <h3><span class="acc-icon">1</span>ECGC Premium, PCFC & Service Features</h3>
+          <span class="acc-chevron">▼</span>
+        </button>
+        <div class="accordion-body">
+          <table class="study-table">
+            <thead><tr><th>Feature</th><th>Gold Card Position</th><th>Normal Position</th></tr></thead>
+            <tbody>
+              <tr><td>ECGC Premium (Pre-shipment)</td><td><strong>Borne by Bank</strong></td><td>Recovered from borrower</td></tr>
+              <tr><td>ECGC Premium (Post-shipment)</td><td>Borne by Bank</td><td>Borne by Bank</td></tr>
+              <tr><td>PCFC (Packing Credit FC)</td><td>Preference given (subject to availability & pricing)</td><td>Subject to availability</td></tr>
+              <tr><td>Fresh applications</td><td>TAT: <span class="highlight-num">25 days</span></td><td>Normal processing time</td></tr>
+              <tr><td>Renewal of limits</td><td>TAT: <span class="highlight-num">15 days</span></td><td>Normal processing time</td></tr>
+              <tr><td>Adhoc limits</td><td>TAT: <span class="highlight-num">7 days</span></td><td>Normal processing time</td></tr>
+              <tr><td>Security Norms</td><td>May be relaxed based on creditworthiness; No extra collateral for standby</td><td>Standard norms apply</td></tr>
+              <tr><td>Credit Cards</td><td>Branches should explore/recommend VISA/Master credit cards to exporter customers</td><td>Standard process</td></tr>
+            </tbody>
+          </table>
+
+          <div class="callout trap">
+            <span class="callout-label">⚠ Exam Trap — ECGC Premium</span>
+            Under Gold Card: Bank bears PRE-SHIPMENT ECGC premium. Under general MSME policy (non-Gold Card): pre-shipment premium is recovered FROM the borrower. Post-shipment premium is borne by Bank in both cases. This distinction — who bears pre-shipment ECGC premium — is a frequent MCQ topic.
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <button class="accordion-trigger" onclick="toggleAcc(this)">
+          <h3><span class="acc-icon">2</span>Single Scheme Rule & Reporting</h3>
+          <span class="acc-chevron">▼</span>
+        </button>
+        <div class="accordion-body">
+          <p class="study-para"><strong>Single Scheme Rule (BCC:BR:115:290 dated 26.05.2023):</strong> BoB operates three Gold Card variants:</p>
+          <ul class="study-list">
+            <li><strong>Baroda Gold Card for Exporters</strong> — Launched 2004 (BCC:BR:96/253)</li>
+            <li><strong>Baroda SME Gold Card</strong> — Launched 2008 (BCC:BR:100:98)</li>
+            <li><strong>Baroda Traders Gold Card Scheme</strong> — Launched 2013 (BCC:BR:105:174)</li>
+          </ul>
+          <p class="study-para">Any additional/standby limit sanctioned to a borrower can be given under ANY ONE of these three schemes. <strong>No borrower can benefit from more than one scheme at a time.</strong></p>
+
+          <p class="study-para"><strong>Data Reporting to RBI:</strong> Export credit data under Gold Card Scheme is furnished to RBI in <strong>Form C</strong> on a quarterly basis — as on the last reporting Friday of each quarter (March/June/September/December). Regional Offices collect data from Branches and send to BCC for consolidation and RBI reporting.</p>
+
+          <p class="study-para"><strong>Zonal Monitoring:</strong> Renewal/withdrawal of Gold Card Scheme must be <strong>invariably monitored at Zonal level</strong>. Zones/Regions are advised to leverage Gold Card provisions to increase export credit and garner new business.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHAPTER 5 -->
+    <div class="accordion-group">
+      <div class="accordion-title-bar">Chapter 5 · Withdrawal Criteria (Critical for Exam)</div>
+
+      <div class="accordion-item">
+        <button class="accordion-trigger" onclick="toggleAcc(this)">
+          <h3><span class="acc-icon">1</span>All 6 Withdrawal Triggers (Current 2023)</h3>
+          <span class="acc-chevron">▼</span>
+        </button>
+        <div class="accordion-body">
+          <p class="study-para">Gold Card facility is <strong>automatically withdrawn</strong> upon occurrence of ANY of the following. Outstanding amount (including standby) is converted to regular export credit with withdrawal of concessions:</p>
+
+          <table class="study-table">
+            <thead><tr><th>#</th><th>Trigger (2023)</th><th>Was it Different Before?</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>Loss (negative PBT) in <strong>any financial year subsequent to issuance</strong></td><td>2020: Losses in 2+ of past 3 years</td></tr>
+              <tr><td>2</td><td>Downgrade in External or Internal BOB rating during <strong>2 consecutive years</strong></td><td>Same</td></tr>
+              <tr><td>3</td><td>CMR rating below CMR-5 at review/renewal. If technical reason: 30-day grace; else immediate withdrawal</td><td>CMR framework new in 2023</td></tr>
+              <tr><td>4</td><td>Overdue bills &gt; 10% of previous year's turnover for <strong>2 consecutive quarters</strong></td><td>Earlier: "frequently remaining in excess" (imprecise)</td></tr>
+              <tr><td>5</td><td>Adverse notice of RBI, ECGC, DOE, CBI, or any Regulatory body/Law enforcement agency</td><td>Same</td></tr>
+              <tr><td>6</td><td><strong>Slippage to SMA-1</strong></td><td>NEW in 2023 — not in earlier versions</td></tr>
+            </tbody>
+          </table>
+
+          <div class="callout bob">
+            <span class="callout-label">BoB — Exception for Continuation Despite Deficiency</span>
+            In exceptional/meritorious cases where Gold Card is to be continued despite deficiency:<br>
+            • Proposals within COCC-CGM delegated power → permitted by <strong>COCC-CGM</strong><br>
+            • Proposals above COCC-CGM delegated power → by <strong>respective sanctioning committees</strong><br>
+            (Pre-2023, this exception was permitted by COCC-ED — now upgraded to COCC-CGM)
+          </div>
+
+          <div class="callout trap">
+            <span class="callout-label">⚠ Three Key Changes in 2023 Withdrawal Criteria</span>
+            1. Loss trigger: "2+ of past 3 years" → "ANY ONE year post-issuance"<br>
+            2. New trigger: SMA-1 slippage added<br>
+            3. Exception authority: COCC-ED → COCC-CGM
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHAPTER 6 -->
+    <div class="accordion-group">
+      <div class="accordion-title-bar">Chapter 6 · RBI vs BoB Comparison</div>
+
+      <div class="accordion-item">
+        <button class="accordion-trigger" onclick="toggleAcc(this)">
+          <h3><span class="acc-icon">1</span>RBI Framework vs BoB Internal Policy</h3>
+          <span class="acc-chevron">▼</span>
+        </button>
+        <div class="accordion-body">
+          <p class="study-para">The governing analytical principle for this exam: <strong>RBI sets the outer regulatory boundary; BoB's internal policy adds operational specificity</strong> — sometimes tighter, sometimes operationally defined where RBI was vague.</p>
+
+          <table class="compare-table">
+            <thead><tr><th>Parameter</th><th>RBI Framework</th><th>BoB Position (2023)</th></tr></thead>
+            <tbody>
+              <tr><td>Credit Rating</td><td>Good track record + credit worthiness (qualitative)</td><td>Quantitative: BOB-5, BBB, CMR-5 — specific thresholds</td></tr>
+              <tr><td>Overdue Bills</td><td>Not in excess of 10% of current year's turnover</td><td>10% of <strong>previous</strong> year's turnover (stricter benchmark year)</td></tr>
+              <tr><td>Interest Concession</td><td>Better terms than other exporters</td><td>Specifically 25 bps on INR only; NO concession on FC credit</td></tr>
+              <tr><td>Loss Criteria</td><td>Not making losses for past 3 years</td><td>Negative PBT in any one or more of past 3 years (defined as negative PBT)</td></tr>
+              <tr><td>Exception Authority</td><td>Not specified</td><td>COCC-CGM for continuation despite deficiency</td></tr>
+              <tr><td>Monitoring</td><td>Banks to monitor implementation</td><td>Invariably at Zonal level</td></tr>
+              <tr><td>ECGC Premium</td><td>Gold Card holders: Bank bears pre-shipment premium</td><td>Confirmed: Bank bears pre-shipment ECGC premium for Gold Card</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHAPTER 7 -->
+    <div class="accordion-group">
+      <div class="accordion-title-bar">Chapter 7 · GCEMP 2025 Interface</div>
+
+      <div class="accordion-item">
+        <button class="accordion-trigger" onclick="toggleAcc(this)">
+          <h3><span class="acc-icon">1</span>Gold Card in BoB's GCEMP 2025</h3>
+          <span class="acc-chevron">▼</span>
+        </button>
+        <div class="accordion-body">
+          <p class="study-para">The GCEMP (Global Credit Exposure Management Policy) 2025 specifically references the Gold Card Scheme in the context of MSME Export Credit Policy (Annex No. 3):</p>
+
+          <ul class="study-list">
+            <li>Gold Card Standby Limit = <strong>20% of assessed MPBF</strong> to execute sudden/unanticipated export orders</li>
+            <li>Standby sanctioned <strong>OUTSIDE MPBF</strong>, as per DLP on basis of (Existing Total Exposure + Proposed Standby Limit), at specific customer request</li>
+            <li>No additional collateral security for Standby Limit</li>
+            <li>25 bps concession under Gold Card is <strong>NOT available</strong> where any other interest rate concession has already been granted under DLP</li>
+            <li>ECGC premium for Pre-shipment credit under Gold Card is borne by Bank</li>
+            <li>General MSME benefit: 50% concession on processing charges (this is general MSME policy, NOT Gold Card-specific)</li>
+          </ul>
+
+          <div class="callout trap">
+            <span class="callout-label">⚠ GCEMP 2025 Key Distinction</span>
+            The 50% concession on processing charges applies to ALL MSME exporter customers generally. The 10% concession on commission and exchange is Gold Card-specific. Processing charges under Gold Card are recovered on Total Exposure (including Standby) at full applicable rate — no processing charge concession under Gold Card.
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end content-area -->
+</div><!-- end tab-study -->
+
+<!-- ════════════════════════════════════════════════════ -->
+<!--               TAB 2: INTERACTIVE TOOLS              -->
+<!-- ════════════════════════════════════════════════════ -->
+<div id="tab-tools" class="tab-panel">
+  <div class="section-hero">
+    <div class="hero-badge">Interactive Learning · Part B</div>
+    <h2>Interactive Study Tools</h2>
+    <p>Five hands-on tools to test your understanding of the Gold Card Scheme. Explore eligibility scenarios, calculate limits, and trace the scheme's evolution.</p>
+  </div>
+
+  <div class="tools-grid">
+
+    <!-- TOOL 1: ELIGIBILITY CHECKER -->
+    <div class="tool-card">
+      <div class="tool-card-header">
+        <h3>🔍 Eligibility Checker</h3>
+        <p>Test if an exporter qualifies for Gold Card</p>
+      </div>
+      <div class="tool-card-body">
+        <div class="elig-step">
+          <label class="elig-label">Internal BOBRAM Rating (last 2 years)</label>
+          <select class="elig-select" id="elig_rating">
+            <option value="">-- Select --</option>
+            <option value="good">BOB-1 to BOB-5 (✓ Eligible)</option>
+            <option value="bad">BOB-6 or worse (✗ Not eligible)</option>
+          </select>
+        </div>
+        <div class="elig-step">
+          <label class="elig-label">Account Standard continuously for 3 years?</label>
+          <select class="elig-select" id="elig_standard">
+            <option value="">-- Select --</option>
+            <option value="yes">Yes, 3+ years Standard</option>
+            <option value="curr_ac">No, but have current a/c with BoB (2+ yrs, 50%+ routing)</option>
+            <option value="new_firm">No, new firm (parent is BoB borrower)</option>
+            <option value="no">No (no alternative route)</option>
+          </select>
+        </div>
+        <div class="elig-step">
+          <label class="elig-label">Overdue bills as % of previous year's turnover</label>
+          <select class="elig-select" id="elig_overdue">
+            <option value="">-- Select --</option>
+            <option value="low">≤ 10% (within limit)</option>
+            <option value="high">> 10% (exceeds limit)</option>
+          </select>
+        </div>
+        <div class="elig-step">
+          <label class="elig-label">Loss (negative PBT) in any of past 3 years?</label>
+          <select class="elig-select" id="elig_loss">
+            <option value="">-- Select --</option>
+            <option value="no">No losses in past 3 years</option>
+            <option value="yes_msme">Yes, loss due to COVID (MSME, existing borrower)</option>
+            <option value="yes">Yes, other losses</option>
+          </select>
+        </div>
+        <div class="elig-step">
+          <label class="elig-label">ECGC / RBI status</label>
+          <select class="elig-select" id="elig_ecgc">
+            <option value="">-- Select --</option>
+            <option value="clean">Not caution-listed / blacklisted</option>
+            <option value="listed">Caution-listed or blacklisted</option>
+          </select>
+        </div>
+        <button class="btn-check" onclick="checkEligibility()">Check Eligibility →</button>
+        <div class="elig-result" id="elig_result"></div>
+      </div>
+    </div>
+
+    <!-- TOOL 2: STANDBY LIMIT CALCULATOR -->
+    <div class="tool-card">
+      <div class="tool-card-header">
+        <h3>🧮 Standby Limit Calculator</h3>
+        <p>Calculate Gold Card benefits and DLP exposure</p>
+      </div>
+      <div class="tool-card-body">
+        <div class="calc-row">
+          <span class="calc-label">Pre-shipment Limit (₹ Cr)</span>
+          <input class="calc-input" type="number" id="calc_pre" placeholder="0.00" oninput="calcStandby()" step="0.5">
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Post-shipment Limit (₹ Cr)</span>
+          <input class="calc-input" type="number" id="calc_post" placeholder="0.00" oninput="calcStandby()" step="0.5">
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Existing exposure (₹ Cr)</span>
+          <input class="calc-input" type="number" id="calc_existing" placeholder="0.00" oninput="calcStandby()" step="0.5">
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Applicable ROI (%)</span>
+          <input class="calc-input" type="number" id="calc_roi" placeholder="9.00" oninput="calcStandby()" step="0.05">
+        </div>
+        <div class="calc-result-box" id="calc_results" style="display:none">
+          <div class="calc-result-row">
+            <span class="calc-result-label">Pre-shipment Standby (20%)</span>
+            <span class="calc-result-value" id="res_pre_standby">-</span>
+          </div>
+          <div class="calc-result-row">
+            <span class="calc-result-label">Post-shipment Standby (20%)</span>
+            <span class="calc-result-value" id="res_post_standby">-</span>
+          </div>
+          <div class="calc-result-row">
+            <span class="calc-result-label">Total Standby</span>
+            <span class="calc-result-value" id="res_total_standby">-</span>
+          </div>
+          <div class="calc-result-row">
+            <span class="calc-result-label">DLP Exposure (Existing + Total Standby)</span>
+            <span class="calc-result-value" id="res_dlp">-</span>
+          </div>
+          <div class="calc-result-row">
+            <span class="calc-result-label">Gold Card ROI (25 bps concession)</span>
+            <span class="calc-result-value total" id="res_roi">-</span>
+          </div>
+        </div>
+        <p style="font-size:11px;color:#999;margin-top:10px;font-family:'JetBrains Mono',monospace;">
+          ↑ Enter any values to see real-time calculation<br>
+          No additional collateral required for standby limit.
+        </p>
+      </div>
+    </div>
+
+    <!-- TOOL 3: WITHDRAWAL TRIGGER SIMULATOR -->
+    <div class="tool-card">
+      <div class="tool-card-header">
+        <h3>⚠️ Withdrawal Trigger Simulator</h3>
+        <p>Check which conditions trigger Gold Card withdrawal</p>
+      </div>
+      <div class="tool-card-body">
+        <div class="trigger-grid" id="trigger_grid">
+          <div class="trigger-item" id="trig_0">
+            <input type="checkbox" id="t0" onchange="checkWithdrawal()">
+            <label for="t0">Loss (negative PBT) occurred in any financial year after Gold Card issuance</label>
+          </div>
+          <div class="trigger-item" id="trig_1">
+            <input type="checkbox" id="t1" onchange="checkWithdrawal()">
+            <label for="t1">Rating downgraded (External or Internal BOB) for 2 consecutive years</label>
+          </div>
+          <div class="trigger-item" id="trig_2">
+            <input type="checkbox" id="t2" onchange="checkWithdrawal()">
+            <label for="t2">CMR rating below CMR-5 at time of review/renewal (non-technical reason)</label>
+          </div>
+          <div class="trigger-item" id="trig_3">
+            <input type="checkbox" id="t3" onchange="checkWithdrawal()">
+            <label for="t3">Overdue bills >10% of previous year's turnover for 2 consecutive quarters</label>
+          </div>
+          <div class="trigger-item" id="trig_4">
+            <input type="checkbox" id="t4" onchange="checkWithdrawal()">
+            <label for="t4">Adverse notice from RBI, ECGC, DOE, CBI or any Regulatory/Law enforcement body</label>
+          </div>
+          <div class="trigger-item" id="trig_5">
+            <input type="checkbox" id="t5" onchange="checkWithdrawal()">
+            <label for="t5">Account slipped to SMA-1 <em>(New trigger added in 2023)</em></label>
+          </div>
+        </div>
+        <div class="withdrawal-status safe" id="withdrawal_status">
+          ✅ Gold Card Status: INTACT — No withdrawal triggers activated
+        </div>
+        <p style="font-size:11px;color:#666;margin-top:12px;text-align:center;">
+          Any ONE trigger is sufficient for automatic withdrawal
+        </p>
+      </div>
+    </div>
+
+    <!-- TOOL 4: SCHEME EVOLUTION EXPLORER -->
+    <div class="tool-card">
+      <div class="tool-card-header">
+        <h3>📅 Scheme Evolution Explorer</h3>
+        <p>Explore how each circular changed the scheme</p>
+      </div>
+      <div class="tool-card-body">
+        <div class="evo-year-select" id="evo_buttons"></div>
+        <div class="evo-detail" id="evo_detail">
+          <p style="color:#999;font-size:14px;">← Select a circular year above to explore changes</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOOL 5: CONCESSION COMPARATOR -->
+    <div class="tool-card" style="grid-column: span 1;">
+      <div class="tool-card-header">
+        <h3>📊 Concession Comparator</h3>
+        <p>Compare Gold Card vs Normal Export Credit benefits</p>
+      </div>
+      <div class="tool-card-body">
+        <div id="concession_table">
+          <table class="study-table">
+            <thead><tr><th>Benefit</th><th>Gold Card Holder</th><th>Regular Exporter</th></tr></thead>
+            <tbody>
+              <tr><td>ROI on INR Pre-shipment</td><td style="color:#276749;font-weight:600">25 bps below benchmark</td><td>Benchmark rate</td></tr>
+              <tr><td>ROI on INR Post-shipment</td><td style="color:#276749;font-weight:600">25 bps below benchmark</td><td>Benchmark rate</td></tr>
+              <tr><td>ROI on FC Export Credit</td><td>No concession</td><td>No concession</td></tr>
+              <tr><td>Commission & Exchange</td><td style="color:#276749;font-weight:600">10% concession</td><td>Full charges</td></tr>
+              <tr><td>Processing Charges</td><td>Full charges (no concession)</td><td>Full charges</td></tr>
+              <tr><td>ECGC Premium (Pre-shipment)</td><td style="color:#276749;font-weight:600">Borne by Bank</td><td>Recovered from borrower</td></tr>
+              <tr><td>Standby Limit</td><td style="color:#276749;font-weight:600">Min. 20% of export credit limit</td><td>Not available</td></tr>
+              <tr><td>Extra Collateral for Standby</td><td style="color:#276749;font-weight:600">NIL</td><td>N/A</td></tr>
+              <tr><td>TAT — Fresh Applications</td><td style="color:#276749;font-weight:600">25 days</td><td>Normal time</td></tr>
+              <tr><td>PCFC Preference</td><td style="color:#276749;font-weight:600">Priority given</td><td>No priority</td></tr>
+              <tr><td>Inventory Norms</td><td style="color:#276749;font-weight:600">Relaxable for unanticipated orders</td><td>Standard norms</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<!-- ════════════════════════════════════════════════════ -->
+<!--                 TAB 3: CHEAT SHEET                  -->
+<!-- ════════════════════════════════════════════════════ -->
+<div id="tab-cheat" class="tab-panel">
+  <div class="section-hero">
+    <div class="hero-badge">Quick Reference · Part C</div>
+    <h2>Cheat Sheet — All Golden Numbers & Exam Traps</h2>
+    <p>Everything you need to remember on one page. Use the print button before the exam.</p>
+  </div>
+
+  <div style="text-align:center;padding:20px 0 0;">
+    <button class="print-btn" onclick="window.print()">🖨️ Print Cheat Sheet</button>
+  </div>
+
+  <div class="cheat-grid">
+
+    <!-- Card 1: Critical Numbers -->
+    <div class="cheat-card">
+      <div class="cheat-card-header"><span class="cheat-card-icon">🔢</span>Critical Numbers</div>
+      <div class="cheat-card-body">
+        <div class="num-row"><span class="num-row-label">Standby Limit</span><span class="num-row-value">≥ 20%</span></div>
+        <div class="num-row"><span class="num-row-label">Interest Concession (INR)</span><span class="num-row-value">25 bps</span></div>
+        <div class="num-row"><span class="num-row-label">Commission/Exchange concession</span><span class="num-row-value">10%</span></div>
+        <div class="num-row"><span class="num-row-label">Overdue bills threshold</span><span class="num-row-value">≤ 10%</span></div>
+        <div class="num-row"><span class="num-row-label">Gold Card tenor</span><span class="num-row-value">3 years</span></div>
+        <div class="num-row"><span class="num-row-label">Max concession period</span><span class="num-row-value">12 months</span></div>
+        <div class="num-row"><span class="num-row-label">TAT — Fresh applications</span><span class="num-row-value">25 days</span></div>
+        <div class="num-row"><span class="num-row-label">TAT — Renewals</span><span class="num-row-value">15 days</span></div>
+        <div class="num-row"><span class="num-row-label">TAT — Adhoc limits</span><span class="num-row-value">7 days</span></div>
+        <div class="num-row"><span class="num-row-label">CMR technical downgrade grace</span><span class="num-row-value">30 days</span></div>
+        <div class="num-row"><span class="num-row-label">Overdue trigger: consecutive quarters</span><span class="num-row-value">2 quarters</span></div>
+        <div class="num-row"><span class="num-row-label">Route (b): min export routing through BoB</span><span class="num-row-value">50%+</span></div>
+        <div class="num-row"><span class="num-row-label">Route (c): min promoter control in parent</span><span class="num-row-value">50%+</span></div>
+        <div class="num-row"><span class="num-row-label">Current a/c relationship period (Route b)</span><span class="num-row-value">2 years</span></div>
+        <div class="num-row"><span class="num-row-label">RBI quarterly reporting form</span><span class="num-row-value">Form C</span></div>
+      </div>
+    </div>
+
+    <!-- Card 2: Rating Requirements -->
+    <div class="cheat-card">
+      <div class="cheat-card-header"><span class="cheat-card-icon">⭐</span>Rating Thresholds (2023)</div>
+      <div class="cheat-card-body">
+        <div class="num-row"><span class="num-row-label">Internal BOBRAM (last 2 years)</span><span class="num-row-value">BOB-5</span></div>
+        <div class="num-row"><span class="num-row-label">External Agency Rating (last 2 years)</span><span class="num-row-value">BBB</span></div>
+        <div class="num-row"><span class="num-row-label">CIBIL MSME (CMR) — at sanction</span><span class="num-row-value">CMR-5</span></div>
+        <div class="num-row"><span class="num-row-label">CIBIL MSME (CMR) — at issuance</span><span class="num-row-value">CMR-5</span></div>
+        <div style="margin-top:12px;padding-top:10px;border-top:1px solid #CBD5E0;">
+          <p style="font-size:12px;color:#718096;margin-bottom:8px;font-family:'JetBrains Mono',monospace;letter-spacing:0.5px;">EVOLUTION OF RATING CRITERION:</p>
+          <div class="num-row"><span class="num-row-label">2004 original</span><span class="num-row-value" style="font-size:13px">BBB / B+</span></div>
+          <div class="num-row"><span class="num-row-label">2019 (BR:111/324)</span><span class="num-row-value" style="font-size:13px">BOB-6</span></div>
+          <div class="num-row"><span class="num-row-label">2020 (BR:112:628)</span><span class="num-row-value" style="font-size:13px">BOB-5</span></div>
+          <div class="num-row"><span class="num-row-label">2023 (BR:115:247)</span><span class="num-row-value" style="font-size:13px">Multi-framework</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 3: Exam Traps -->
+    <div class="cheat-card">
+      <div class="cheat-card-header"><span class="cheat-card-icon">⚠️</span>Top Exam Traps</div>
+      <div class="cheat-card-body">
+        <div class="trap-item"><strong>Overdue benchmark year:</strong> Always PREVIOUS year's turnover (not current year). Changed in 2005.</div>
+        <div class="trap-item"><strong>FC interest concession:</strong> ZERO concession on PCFC/foreign currency export credit. 25 bps applies to INR ONLY.</div>
+        <div class="trap-item"><strong>ECGC pre-shipment premium:</strong> Under Gold Card → Bank bears it. Under normal policy → borrower bears it.</div>
+        <div class="trap-item"><strong>Meritorious cases exception:</strong> WITHDRAWN in April 2023. Only Covid-19 MSME exception remains (existing borrowers only).</div>
+        <div class="trap-item"><strong>Withdrawal loss trigger changed:</strong> Pre-2023: losses in 2+ of past 3 years. Post-2023: ANY ONE year after issuance.</div>
+        <div class="trap-item"><strong>SMA-1 is NEW (2023):</strong> Earlier circulars had SMA in list but as "3 years in SMA list." 2023 changed to SMA-1 slippage directly.</div>
+        <div class="trap-item"><strong>Exception authority changed:</strong> COCC-ED → COCC-CGM (April 2023). Always use the current authority.</div>
+        <div class="trap-item"><strong>Single scheme rule (2023):</strong> Cannot avail Exporter Gold Card + SME Gold Card simultaneously. ONE at a time.</div>
+        <div class="trap-item"><strong>Processing charges:</strong> No concession on processing. Charged on TOTAL exposure including standby.</div>
+        <div class="trap-item"><strong>CMR dual checkpoint:</strong> CMR-5 required at time of SANCTION and again at time of ISSUANCE of Gold Card.</div>
+      </div>
+    </div>
+
+    <!-- Card 4: Withdrawal Triggers Summary -->
+    <div class="cheat-card">
+      <div class="cheat-card-header"><span class="cheat-card-icon">🚨</span>Withdrawal Triggers (All 6)</div>
+      <div class="cheat-card-body">
+        <div class="num-row" style="align-items:flex-start;padding:8px 0;">
+          <span class="num-row-label" style="font-size:13px">1. Loss (neg. PBT) — any year post-issuance</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#9B2335;font-weight:600;flex-shrink:0">AUTO</span>
+        </div>
+        <div class="num-row" style="align-items:flex-start;padding:8px 0;">
+          <span class="num-row-label" style="font-size:13px">2. Rating downgrade — 2 consecutive years</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#9B2335;font-weight:600;flex-shrink:0">AUTO</span>
+        </div>
+        <div class="num-row" style="align-items:flex-start;padding:8px 0;">
+          <span class="num-row-label" style="font-size:13px">3. CMR below CMR-5 at review (30-day grace if technical)</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#D97706;font-weight:600;flex-shrink:0">CONDITIONAL</span>
+        </div>
+        <div class="num-row" style="align-items:flex-start;padding:8px 0;">
+          <span class="num-row-label" style="font-size:13px">4. Overdue >10% — 2 consecutive quarters</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#9B2335;font-weight:600;flex-shrink:0">AUTO</span>
+        </div>
+        <div class="num-row" style="align-items:flex-start;padding:8px 0;">
+          <span class="num-row-label" style="font-size:13px">5. Adverse notice: RBI/ECGC/DOE/CBI/Regulator</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#9B2335;font-weight:600;flex-shrink:0">AUTO</span>
+        </div>
+        <div class="num-row" style="align-items:flex-start;padding:8px 0;">
+          <span class="num-row-label" style="font-size:13px">6. SMA-1 slippage ← NEW 2023</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#9B2335;font-weight:600;flex-shrink:0">AUTO</span>
+        </div>
+        <div style="margin-top:14px;padding:10px;background:#FFF5F5;border-radius:6px;font-size:12px;color:#9B2335;">
+          Any ONE trigger = automatic withdrawal. Outstanding converted to regular export credit. All concessions withdrawn.
+        </div>
+        <div style="margin-top:10px;padding:10px;background:#EBF4FF;border-radius:6px;font-size:12px;color:#2B6CB0;">
+          Exception: COCC-CGM may permit continuation despite deficiency (proposals within its DLP). Above COCC-CGM: respective sanctioning committee.
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 5: Circular Quick Reference -->
+    <div class="cheat-card">
+      <div class="cheat-card-header"><span class="cheat-card-icon">📜</span>Circular Quick Reference</div>
+      <div class="cheat-card-body">
+        <div class="num-row"><span class="num-row-label" style="font-family:'JetBrains Mono',monospace;font-size:12px">BCC:BR:96/253</span><span class="num-row-value" style="font-size:12px">Launch (Jun 2004)</span></div>
+        <div class="num-row"><span class="num-row-label" style="font-family:'JetBrains Mono',monospace;font-size:12px">BCC:INT:DFB:97/583</span><span class="num-row-value" style="font-size:12px">Overdue → prev yr (2005)</span></div>
+        <div class="num-row"><span class="num-row-label" style="font-family:'JetBrains Mono',monospace;font-size:12px">BCC:WB:DFB:101/47</span><span class="num-row-value" style="font-size:12px">Crisis waiver (2009)</span></div>
+        <div class="num-row"><span class="num-row-label" style="font-family:'JetBrains Mono',monospace;font-size:12px">BCC:WB:DFB:104/10</span><span class="num-row-value" style="font-size:12px">Expiry alert (2012)</span></div>
+        <div class="num-row"><span class="num-row-label" style="font-family:'JetBrains Mono',monospace;font-size:12px">BCC:BR:111/324</span><span class="num-row-value" style="font-size:12px">Rationalization (2019)</span></div>
+        <div class="num-row"><span class="num-row-label" style="font-family:'JetBrains Mono',monospace;font-size:12px">BCC:BR:112:628</span><span class="num-row-value" style="font-size:12px">Major update (Oct 2020)</span></div>
+        <div class="num-row"><span class="num-row-label" style="font-family:'JetBrains Mono',monospace;font-size:12px">BCC:BR:115:247</span><span class="num-row-value" style="font-size:12px">Comprehensive (Apr 2023)</span></div>
+        <div class="num-row"><span class="num-row-label" style="font-family:'JetBrains Mono',monospace;font-size:12px">BCC:BR:115:290</span><span class="num-row-value" style="font-size:12px">One scheme rule (May 2023)</span></div>
+        <div style="margin-top:12px;border-top:1px solid #CBD5E0;padding-top:10px;">
+          <div class="num-row"><span class="num-row-label" style="font-size:12px">SME Gold Card circular</span><span class="num-row-value" style="font-size:12px">BCC:BR:100:98 (Apr 2008)</span></div>
+          <div class="num-row"><span class="num-row-label" style="font-size:12px">Traders Gold Card circular</span><span class="num-row-value" style="font-size:12px">BCC:BR:105:174 (Apr 2013)</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 6: Key RBI vs BoB Gaps -->
+    <div class="cheat-card">
+      <div class="cheat-card-header"><span class="cheat-card-icon">⚖️</span>RBI vs BoB — Key Gaps</div>
+      <div class="cheat-card-body">
+        <table class="study-table" style="font-size:12px;">
+          <thead><tr><th>Parameter</th><th>RBI</th><th>BoB</th></tr></thead>
+          <tbody>
+            <tr><td>Rating</td><td>Qualitative track record</td><td>BOB-5/BBB/CMR-5 specific</td></tr>
+            <tr><td>Overdue bills</td><td>Current year's turnover</td><td>Previous year's (stricter)</td></tr>
+            <tr><td>ROI benefit</td><td>Better than others</td><td>Specific 25 bps INR only</td></tr>
+            <tr><td>FC concession</td><td>Not specified</td><td>Explicitly NIL</td></tr>
+            <tr><td>Exception authority</td><td>Not specified</td><td>COCC-CGM</td></tr>
+            <tr><td>Monitoring level</td><td>Banks to monitor</td><td>Zonal level (mandatory)</td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:12px;padding:10px;background:#FFFBEB;border:1px solid #D97706;border-radius:6px;font-size:12px;color:#7C3D12;">
+          <strong>Key Principle:</strong> RBI sets the outer boundary. BoB's internal policy adds quantitative specificity and operational tightening where RBI was qualitative.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!--                  TAB 4: QUIZ ENGINE                 -->
+<!-- ════════════════════════════════════════════════════ -->
+<div id="tab-quiz" class="tab-panel">
+  <div class="section-hero">
+    <div class="hero-badge">Quiz Engine · Part D</div>
+    <h2>Gold Card Scheme — MCQ Quiz (50 Questions)</h2>
+    <p>Test your exam readiness. Choose your mode below. Answers with full explanations after each question.</p>
+  </div>
+
+  <div class="quiz-container">
+    <!-- Mode Selector -->
+    <div class="mode-selector" id="mode_selector">
+      <button class="btn-filter active" id="mode_all" onclick="setMode('all')">All Topics</button>
+      <button class="btn-filter" id="mode_elig" onclick="setMode('eligibility')">Eligibility</button>
+      <button class="btn-filter" id="mode_limits" onclick="setMode('limits')">Limits & Interest</button>
+      <button class="btn-filter" id="mode_withdraw" onclick="setMode('withdrawal')">Withdrawal</button>
+      <button class="btn-filter" id="mode_features" onclick="setMode('features')">Features & TAT</button>
+      <button class="btn-filter" id="mode_history" onclick="setMode('history')">History & Circulars</button>
+    </div>
+
+    <!-- Progress -->
+    <div class="quiz-header">
+      <span class="quiz-counter" id="q_counter">Q 1 / 50</span>
+      <div class="quiz-progress-bar"><div class="quiz-progress-fill" id="q_progress" style="width:2%"></div></div>
+      <span class="quiz-score-badge" id="q_score">Score: 0 / 0</span>
+    </div>
+
+    <!-- Question Card -->
+    <div class="quiz-card" id="quiz_card">
+      <div class="quiz-topic" id="q_topic">TOPIC</div>
+      <div class="quiz-question" id="q_text">Loading...</div>
+      <div class="quiz-options" id="q_options"></div>
+      <div class="quiz-explanation" id="q_explanation"></div>
+    </div>
+
+    <!-- Controls -->
+    <div class="quiz-controls">
+      <button class="btn-quiz btn-submit" id="btn_submit" onclick="submitAnswer()" disabled>Submit Answer</button>
+      <button class="btn-quiz btn-next" id="btn_next" onclick="nextQuestion()">Next Question →</button>
+    </div>
+
+    <!-- Results -->
+    <div class="quiz-results" id="quiz_results">
+      <div class="results-score" id="final_score">0</div>
+      <div class="results-label" id="final_label">OUT OF 0 QUESTIONS</div>
+      <div class="results-grade" id="final_grade"></div>
+      <button class="btn-quiz btn-submit" onclick="restartQuiz()" style="margin:0 auto;display:block;width:200px;">Restart Quiz</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- end main-container -->
+
+<footer>
+  Gold Card Scheme for Exporters · IBO 2026-27 Study Module ·
+  Compiled by Mallikarjunagowda S Gowdara, Chief Manager, Bank of Baroda ·
+  Sources: BoB Circulars BCC:BR:96/253–BCC:BR:115:290 · RBI Master Circular · BoB GCEMP 2025
+</footer>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!--                    JAVASCRIPT                       -->
+<!-- ════════════════════════════════════════════════════ -->
+<script>
+// ─── TAB NAVIGATION ───
+function showTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.target.classList.add('active');
+  if (name === 'quiz' && !quizInitialized) initQuiz();
+}
+
+// ─── ACCORDION ───
+function toggleAcc(btn) {
+  const item = btn.closest('.accordion-item');
+  item.classList.toggle('open');
+}
+
+// ─── ELIGIBILITY CHECKER ───
+function checkEligibility() {
+  const rating = document.getElementById('elig_rating').value;
+  const standard = document.getElementById('elig_standard').value;
+  const overdue = document.getElementById('elig_overdue').value;
+  const loss = document.getElementById('elig_loss').value;
+  const ecgc = document.getElementById('elig_ecgc').value;
+  const result = document.getElementById('elig_result');
+
+  if (!rating || !standard || !overdue || !loss || !ecgc) {
+    result.className = 'elig-result conditional';
+    result.style.display = 'block';
+    result.innerHTML = 'ℹ️ Please answer all 5 questions to check eligibility.';
+    return;
+  }
+
+  let eligible = true;
+  let issues = [];
+  let notes = [];
+
+  if (rating === 'bad') { eligible = false; issues.push('Internal rating is below BOB-5 — minimum BOB-5 required for last 2 years'); }
+  if (standard === 'no') { eligible = false; issues.push('Account not Standard for 3 years and no qualifying alternative route (current a/c or new firm route)'); }
+  if (overdue === 'high') { eligible = false; issues.push('Overdue bills exceed 10% of previous year\'s turnover'); }
+  if (loss === 'yes') { eligible = false; issues.push('Loss (negative PBT) in one or more of past 3 years — meritorious case exception has been withdrawn'); }
+  if (loss === 'yes_msme') {
+    notes.push('COVID-19 MSME exception may apply — verify: (1) Cash profit in FY 2020-21 & 2021-22; (2) Net profit in FY 2022-23; (3) Existing borrower');
+  }
+  if (ecgc === 'listed') { eligible = false; issues.push('Exporter is caution-listed/blacklisted by ECGC or RBI — not eligible'); }
+  if (standard === 'curr_ac') notes.push('Alternative Route (b) applies: must verify 2-yr current a/c relationship + 50%+ turnover routed through BoB');
+  if (standard === 'new_firm') notes.push('Alternative Route (c) applies: must verify 50%+ common promoter control + parent satisfying Gold Card criteria');
+
+  result.style.display = 'block';
+
+  if (eligible && issues.length === 0) {
+    result.className = 'elig-result eligible';
+    let html = '<strong>✅ ELIGIBLE for Gold Card</strong><br><br>';
+    if (notes.length) html += '<strong>Notes:</strong><br>' + notes.map(n => '• ' + n).join('<br>');
+    else html += 'All basic criteria appear to be met. Proceed to prepare Gold Card application.';
+    result.innerHTML = html;
+  } else {
+    result.className = 'elig-result ineligible';
+    let html = '<strong>❌ NOT ELIGIBLE for Gold Card</strong><br><br><strong>Issues:</strong><br>';
+    html += issues.map(i => '• ' + i).join('<br>');
+    if (notes.length) html += '<br><br><strong>Notes:</strong><br>' + notes.map(n => '• ' + n).join('<br>');
+    result.innerHTML = html;
+  }
+}
+
+// ─── STANDBY CALCULATOR ───
+function calcStandby() {
+  const pre = parseFloat(document.getElementById('calc_pre').value) || 0;
+  const post = parseFloat(document.getElementById('calc_post').value) || 0;
+  const existing = parseFloat(document.getElementById('calc_existing').value) || 0;
+  const roi = parseFloat(document.getElementById('calc_roi').value) || 0;
+
+  if (pre === 0 && post === 0) { document.getElementById('calc_results').style.display = 'none'; return; }
+
+  const preStandby = pre * 0.20;
+  const postStandby = post * 0.20;
+  const totalStandby = preStandby + postStandby;
+  const dlp = existing + totalStandby;
+  const goldRoi = roi > 0.25 ? roi - 0.25 : 0;
+
+  document.getElementById('calc_results').style.display = 'block';
+  document.getElementById('res_pre_standby').textContent = '₹' + preStandby.toFixed(2) + ' Cr';
+  document.getElementById('res_post_standby').textContent = '₹' + postStandby.toFixed(2) + ' Cr';
+  document.getElementById('res_total_standby').textContent = '₹' + totalStandby.toFixed(2) + ' Cr';
+  document.getElementById('res_dlp').textContent = '₹' + dlp.toFixed(2) + ' Cr';
+  document.getElementById('res_roi').textContent = roi > 0 ? goldRoi.toFixed(2) + '% p.a.' : 'Enter ROI above';
+}
+
+// ─── WITHDRAWAL SIMULATOR ───
+function checkWithdrawal() {
+  const triggers = [0,1,2,3,4,5].map(i => document.getElementById('t'+i).checked);
+  const anyTriggered = triggers.some(t => t);
+
+  for (let i = 0; i < 6; i++) {
+    const item = document.getElementById('trig_' + i);
+    item.classList.toggle('triggered', triggers[i]);
+  }
+
+  const status = document.getElementById('withdrawal_status');
+  if (anyTriggered) {
+    status.className = 'withdrawal-status warning';
+    const triggerNames = ['Loss (negative PBT)', 'Rating Downgrade 2yrs', 'CMR below CMR-5', 'Overdue 10%+ (2 qtrs)', 'Adverse RBI/ECGC notice', 'SMA-1 Slippage'];
+    const active = triggers.map((t,i) => t ? triggerNames[i] : null).filter(Boolean);
+    status.innerHTML = '🚨 GOLD CARD WITHDRAWAL TRIGGERED<br><small>Active: ' + active.join(' | ') + '</small><br><small>Outstanding converted to regular export credit. All concessions withdrawn.</small>';
+  } else {
+    status.className = 'withdrawal-status safe';
+    status.innerHTML = '✅ Gold Card Status: INTACT — No withdrawal triggers activated';
+  }
+}
+
+// ─── EVOLUTION EXPLORER ───
+const evoData = [
+  { year: '2004', circ: 'BCC:BR:96/253', title: 'Launch of Gold Card Scheme', points: [
+    'Rating: Minimum BBB (new model) or B+ (old model)',
+    'Interest: BPLR minus 4.00% (Rupee); LIBOR + 75 bps (FC)',
+    'FC service charge: 0.1% p.a. (vs 3% p.a. for others)',
+    'Standby: At least 20% of assessed limit',
+    'Period: Pre-shipment up to 270 days; Post-shipment up to 180 days',
+    'TAT: 25 days (fresh), 15 days (renewal), 7 days (adhoc)',
+    'Gold Card issued for 3 years; Board-approved scheme'
+  ]},
+  { year: '2005', circ: 'BCC:INT:DFB:97/583', title: 'Overdue Bills Benchmark Changed', points: [
+    'CRITICAL: Overdue bills benchmark changed from "current year\'s turnover" to "previous year\'s turnover"',
+    'This is a TIGHTENING — previous year is a more objective/verifiable figure',
+    'All other terms remained as per 2004 original circular',
+    'This change is a frequent MCQ trap question'
+  ]},
+  { year: '2009', circ: 'BCC:WB:DFB:101/47', title: 'Global Crisis Waiver', points: [
+    'Temporary waiver of 10% overdue bills criterion for April 1, 2009 – March 31, 2010',
+    'Reason: Weakening of external demand; difficulties in realizing dues within stipulated time',
+    'Based on RBI circular RBI/2009-10/149 dated 7th September 2009',
+    'All other eligibility criteria remained unchanged during waiver period'
+  ]},
+  { year: '2012', circ: 'BCC:WB:DFB:104/10', title: 'Expiry & Auto-Cancellation Alert', points: [
+    'BoB records showed many Gold Cards expired without renewal',
+    'KEY RULE: If Gold Card expires → ALL concessions/facilities cancelled IMMEDIATELY',
+    'Branches directed to verify records and send renewal applications urgently',
+    'Reminder: Gold Card issued for 3 years; to be renewed BEFORE expiry on satisfactory conduct'
+  ]},
+  { year: '2019', circ: 'BCC:BR:111/324', title: 'Comprehensive Rationalization', points: [
+    'Rating updated to BOB-6 (new model) — first quantitative internal rating threshold',
+    'Account to be Standard and not in caution/defaulter list of ECGC or RBI',
+    'ECGC premium for Pre-shipment credit to be borne by Bank (formalized)',
+    'Withdrawal criteria formally listed for the first time',
+    'Full consolidation of scheme for easy understanding of field-level functionaries',
+    'Gold Card holders get priority for PCFC grant'
+  ]},
+  { year: '2020', circ: 'BCC:BR:112:628', title: 'Major Modifications (CPC Approval)', points: [
+    'RATING: Changed from BOB-6 to BOB-5 (tightened further)',
+    'INTEREST: 25 bps concession on INR export credit; NO concession on FC credit',
+    'CONCESSION PERIOD: Operating cycle + max 12 months from disbursement (replaced 270/180-day limits)',
+    'STANDBY: Sanctioned as per DLP (Existing Total Exposure + Standby); No extra collateral',
+    'ECGC PREMIUM: Explicitly — Bank bears pre-shipment premium for Gold Card holders',
+    'WITHDRAWAL: Detailed criteria; Gold Card in takeover accounts formalized',
+    'CHARGES: No concession on processing charges (only 10% on commission/exchange)'
+  ]},
+  { year: '2023a', circ: 'BCC:BR:115:247', title: 'Most Comprehensive Update', points: [
+    'RATING: Multi-framework — BOB-5 (internal) + BBB (external) + CMR-5 (CIBIL MSME)',
+    'CMR-5 must be met at time of SANCTION and at time of ISSUANCE (dual checkpoint)',
+    'THREE NEW ELIGIBILITY ROUTES: (b) Current a/c entities; (c) New firm (parent/associate); (d) Takeover accounts',
+    'LOSS CRITERION: Clarified as "negative PBT"; Covid-19 MSME exception added; meritorious exception WITHDRAWN',
+    'WITHDRAWAL: Loss in ANY ONE year (not 2+ of 3); SMA-1 added; Overdue — 2 consecutive quarters (precise)',
+    'EXCEPTION AUTHORITY: Changed from COCC-ED to COCC-CGM',
+    'Renewal/withdrawal monitoring must be at Zonal level'
+  ]},
+  { year: '2023b', circ: 'BCC:BR:115:290', title: 'Single Scheme Addendum', points: [
+    'Clarification on co-existence of three BoB Gold Card variants',
+    'Baroda Gold Card for Exporters (2004), Baroda SME Gold Card (2008), Baroda Traders Gold Card (2013)',
+    'KEY RULE: Borrower cannot benefit from more than ONE Gold Card variant at any one time',
+    'Any standby/additional limit must be under ONE scheme only — not split across schemes',
+    'All other existing Gold Card guidelines remain unchanged'
+  ]}
+];
+
+function initEvoExplorer() {
+  const btn_div = document.getElementById('evo_buttons');
+  evoData.forEach((item, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'evo-btn';
+    btn.textContent = item.year;
+    btn.onclick = () => showEvo(i, btn);
+    btn_div.appendChild(btn);
+  });
+}
+
+function showEvo(idx, btn) {
+  document.querySelectorAll('.evo-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const d = evoData[idx];
+  document.getElementById('evo_detail').innerHTML = `
+    <span class="circ-ref">${d.circ}</span>
+    <h4>${d.title}</h4>
+    <ul>${d.points.map(p => '<li>' + p + '</li>').join('')}</ul>
+  `;
+}
+
+// ─── QUIZ ENGINE ───
+const allQuestions = [
+  // ELIGIBILITY
+  { topic: 'eligibility', q: 'The Gold Card Scheme for Exporters was initially launched by Bank of Baroda vide circular:', opts: ['BCC:BR:111/324 dated 05.07.2019','BCC:BR:96/253 dated 29.06.2004','BCC:BR:112:628 dated 20.10.2020','BCC:BR:115:247 dated 29.04.2023'], ans: 1, exp: 'The Gold Card Scheme was launched in June 2004 by BoB\'s International Division following the EXIM Policy 2003-04 mandate. BCC:BR:96/253 dated 29.06.2004 is the original circular.' },
+  { topic: 'eligibility', q: 'Under current (2023) guidelines, what is the minimum INTERNAL credit rating for Gold Card eligibility?', opts: ['BOB-6 for last 2 years','BOB-5 for last 2 years','BBB for last 2 years','CMR-5 at time of sanction only'], ans: 1, exp: 'BOB-5 (internal BOBRAM rating) for last 2 years is the minimum. BBB is the minimum EXTERNAL rating. CMR-5 is the CIBIL MSME rating requirement (wherever applicable).' },
+  { topic: 'eligibility', q: 'The overdue export bills criterion is linked to what percentage of which year\'s turnover?', opts: ['10% of current financial year\'s turnover','10% of previous financial year\'s turnover','15% of previous year\'s export turnover','10% of total outstanding export bills'], ans: 1, exp: '10% of PREVIOUS financial year\'s turnover. This was changed from "current year" to "previous year" by BCC:INT:DFB:97/583 in March 2005 — a tightening of the eligibility criterion.' },
+  { topic: 'eligibility', q: 'Under Route (b) for Gold Card eligibility, what % of export turnover must be routed through BoB?', opts: ['25%','33%','50%','75%'], ans: 2, exp: '50% or more of export turnover must be routed through Bank of Baroda for at least the last 2 years. The entity must also have business/current account relationship with BoB for last 2 years.' },
+  { topic: 'eligibility', q: 'Under Route (c) (new firm/parent-associate route), common promoters must hold what minimum control in the parent?', opts: ['26% voting rights','33% voting rights','50% or more voting rights/control','51% voting rights'], ans: 2, exp: '50% or more voting rights/control in the parent/associate entity. The parent should also be either availing Gold Card or satisfying Gold Card eligibility criteria.' },
+  { topic: 'eligibility', q: 'For CIBIL MSME (CMR) rating, at which stage(s) must CMR-5 be met for Gold Card?', opts: ['Only at time of sanction of credit facility','Only at time of issuance of Gold Card','At time of sanction AND at time of issuance of Gold Card','At time of annual review only'], ans: 2, exp: 'CMR-5 must be satisfied at BOTH the time of sanction of credit facility AND at the time of issuance of Gold Card. This dual checkpoint is unique to the CMR framework.' },
+  { topic: 'eligibility', q: 'The COVID-19 MSME exception for Gold Card eligibility applies to:', opts: ['All MSME exporters','Only new MSME borrowers','Only existing MSME borrowers who meet specific cash profit criteria','All exporters making loss in FY 2020-21'], ans: 2, exp: 'The COVID-19 MSME exception applies only to EXISTING borrowers. Requirements: (1) Net loss due to Covid-19 in FY 2020-21 and/or 2021-22; (2) Cash profit (PBT+Depreciation) generated in BOTH those years; (3) Net profit in FY 2022-23.' },
+  { topic: 'eligibility', q: 'What happened to the "meritorious cases" exception (via COCC-ED) for Gold Card eligibility as of April 2023?', opts: ['Authority upgraded to Board level','Exception was WITHDRAWN','Exception threshold changed to COCC-CGM','Exception limit reduced to ZOCC-GM'], ans: 1, exp: 'The meritorious cases exception for negative PBT/overdue bills was WITHDRAWN by BCC:BR:115:247 dated 29.04.2023. Only the Covid-19 MSME exception for existing borrowers remains.' },
+  { topic: 'eligibility', q: '"Loss" in the context of Gold Card eligibility criterion is defined as:', opts: ['Any negative net worth','Negative Profit Before Tax (PBT)','Negative cash profit','Negative net profit after exceptional items'], ans: 1, exp: 'Loss in Gold Card context is specifically defined as NEGATIVE PROFIT BEFORE TAX (PBT). This explicit clarification was added in 2023 (BCC:BR:115:247).' },
+  { topic: 'eligibility', q: 'Under the takeover route for Gold Card, what minimum internal rating is required at sanction?', opts: ['BOB-6 or better','BOB-5 or better','BOB-4 or better','BOB-3 or better'], ans: 1, exp: 'BOB-5 or better at the time of sanction of credit facility for takeover accounts. External rating BBB (last 2 years) and CMR-5 at sanction AND issuance (wherever applicable) are also required.' },
+
+  // LIMITS & INTEREST
+  { topic: 'limits', q: 'Under the Gold Card Scheme, the Standby Limit shall be:', opts: ['At least 25% of the assessed export credit limit','At least 20% of the sanctioned working capital limit','At least 20% of the assessed export credit limit','Not more than 20% of the assessed limit'], ans: 2, exp: 'At least 20% of the assessed export credit limit. This is the MINIMUM; it is sanctioned to meet urgent credit needs for executing sudden/unanticipated orders.' },
+  { topic: 'limits', q: 'Gold Card holders receive what concession on interest rates for INR export credit?', opts: ['50 basis points','25 basis points','0.75% per annum','75 basis points'], ans: 1, exp: '25 basis points (bps) reduction in applicable rate of interest for Export credit (Pre-shipment INR and Post-shipment INR). This concession also applies to the Standby Limit. NO concession on foreign currency export credit.' },
+  { topic: 'limits', q: 'Under the Gold Card Scheme, interest rate concession is available on:', opts: ['All export credit facilities','Only PCFC (Packing Credit in Foreign Currency)','Only INR Pre-shipment and Post-shipment credit','INR facilities only — NO concession on FC export credit'], ans: 3, exp: 'The 25 bps concession applies ONLY to INR export credit (Pre-shipment INR and Post-shipment INR including standby limit). There is NO reduction in interest rate on Export Credit in Foreign Currency (PCFC/EPC-FC).' },
+  { topic: 'limits', q: 'If SA has already granted 20 bps concession on export credit INR, what additional concession can Gold Card provide?', opts: ['25 bps additional (total 45 bps)','5 bps additional (to reach overall 25 bps)','No additional concession at all','10 bps additional'], ans: 1, exp: 'The overall ceiling is 25 bps. If SA has given 20 bps already, Gold Card can add only 5 bps more (to reach 25 bps total). The combined concession cannot exceed 25 bps.' },
+  { topic: 'limits', q: 'The maximum period of concessional interest for Gold Card holders under current guidelines is:', opts: ['270 days for Pre-shipment; 180 days for Post-shipment','360 days from date of advance','12 months from date of disbursement for BOTH Pre and Post-shipment','Operating cycle only with no extension'], ans: 2, exp: 'Available up to operating cycle; extendable up to maximum 12 months from date of disbursement for BOTH Pre-shipment and Post-shipment Rupee export credit. Pre-2020 limits were 270 days (Pre) and 180 days (Post).' },
+  { topic: 'limits', q: 'Additional collateral security for the Standby Limit under Gold Card Scheme is:', opts: ['Mandatory — in proportion to standby amount','Optional — at bank\'s discretion','Not to be demanded','Required only if account is below BOB-5 rating'], ans: 2, exp: 'No additional collateral security is to be demanded for the Standby Limit under Gold Card Scheme. This is an explicit protection built into the scheme for Gold Card holders.' },
+  { topic: 'limits', q: 'Under GCEMP 2025, the Standby Limit under Gold Card is sanctioned:', opts: ['As part of MPBF','Outside MPBF, as per DLP','Inside working capital limits','Via ECGC guarantee'], ans: 1, exp: 'Standby Limit under Gold Card is sanctioned OUTSIDE MPBF, as per respective DLP, at specific customer request, on the basis of (Existing Total Exposure + Proposed Standby Limit).' },
+  { topic: 'limits', q: 'Norms for inventory under the Gold Card Scheme may be relaxed in case of:', opts: ['Any export order from Blue Chip customers','Unanticipated export orders (considering size and nature)','All orders above ₹5 crore','Orders backed by irrevocable LC only'], ans: 1, exp: 'Inventory norms may be relaxed in case of UNANTICIPATED export orders, taking into account the size and nature of the export order. This is a standard feature of the scheme since 2004.' },
+  { topic: 'limits', q: 'Processing charges under the Gold Card Scheme are recovered on:', opts: ['Only the main export credit limit','Only the pre-shipment component','Total Exposure including Standby Limit at applicable rate','50% of applicable rate for Gold Card holders'], ans: 2, exp: 'Processing charges are recovered on TOTAL EXPOSURE including Standby Limit at applicable rate. There is NO concession on processing charges (only 10% concession on commission/exchange).' },
+  { topic: 'limits', q: 'Under GCEMP 2025, the 25 bps Gold Card concession is NOT available when:', opts: ['The exporter is rated BOB-5','Any other interest rate concession has been granted under DLP','Standby limit is not sanctioned','Account is under consortium banking'], ans: 1, exp: 'GCEMP 2025 explicitly states: 25 bps Gold Card concession is not available where any other interest rate concession is already granted under DLP of various sanctioning authorities.' },
+
+  // WITHDRAWAL
+  { topic: 'withdrawal', q: 'Under current (2023) guidelines, Gold Card is withdrawn if loss occurs:', opts: ['In 2 or more of past 3 years prior to issuance','In any financial year subsequent to issuance of Gold Card','For 3 consecutive financial years','In the year of annual review only'], ans: 1, exp: 'Post-2023: ANY loss (negative PBT) in a financial year SUBSEQUENT to issuance triggers withdrawal. Pre-2023 (2020 circular) trigger was losses in 2 or more of past 3 years — a more lenient standard.' },
+  { topic: 'withdrawal', q: 'Which NEW withdrawal trigger was added by the April 2023 circular?', opts: ['NPA classification','SMA-0 slippage','SMA-1 slippage','SMA-2 slippage'], ans: 2, exp: 'SMA-1 (Special Mention Account-1) slippage was added as a NEW withdrawal trigger in April 2023 by BCC:BR:115:247. Earlier versions of the withdrawal criteria did not include SMA-1.' },
+  { topic: 'withdrawal', q: 'Gold Card is withdrawn for overdue bills exceeding 10% of previous year\'s turnover for:', opts: ['Any single reporting date','2 consecutive quarters','3 consecutive months','2 consecutive years'], ans: 1, exp: '2 CONSECUTIVE QUARTERS of overdue bills exceeding 10% threshold triggers withdrawal. The earlier guideline said "frequently remaining in excess" — the 2023 circular made this precise at 2 consecutive quarters.' },
+  { topic: 'withdrawal', q: 'The authority to permit continuation of Gold Card despite deficiencies (as of 2023) is:', opts: ['COCC-MD','COCC-ED','COCC-CGM','COCC-DGM'], ans: 2, exp: 'COCC-CGM (changed from COCC-ED in April 2023). For proposals above COCC-CGM\'s delegated power, respective sanctioning committees can permit continuation.' },
+  { topic: 'withdrawal', q: 'An exporter with CMR rating downgraded due to TECHNICAL reasons at renewal gets:', opts: ['60 days to rectify','90 days to rectify','30 days to rectify','Immediate withdrawal — no grace period'], ans: 2, exp: '30 days to rectify the technical rating downgrade and upgrade the CMR rating. Failing this, the Gold Card shall be withdrawn. If downgrade is NOT due to technical reasons, withdrawal is immediate.' },
+  { topic: 'withdrawal', q: 'Upon Gold Card withdrawal, the outstanding amount (including standby) is:', opts: ['Written off immediately','Converted to regular export credit facility with withdrawal of concessions','Transferred to NPA immediately','Subject to penal interest of 2% p.a.'], ans: 1, exp: 'Outstanding amount (including the standby limit) is CONVERTED into regular export credit facility along with withdrawal of concessions, if any. It does not become NPA unless it meets NPA criteria independently.' },
+  { topic: 'withdrawal', q: 'How many triggers are needed for Gold Card withdrawal?', opts: ['All 6 must occur simultaneously','Any 3 of 6 triggers','Any 2 of 6 triggers','ANY ONE of the 6 triggers'], ans: 3, exp: 'ANY ONE of the six withdrawal triggers is sufficient for automatic withdrawal. The phrase used is "upon occurrence of (any) of the following" — i.e., each trigger is independently sufficient.' },
+  { topic: 'withdrawal', q: 'Rating downgrade as a withdrawal trigger requires:', opts: ['Downgrade in any single quarter','Downgrade in External or Internal BOB rating for 2 consecutive years','3 consecutive years of rating decline','Rating below BOB-7 for 1 year'], ans: 1, exp: 'Downgrade in External or Internal BOB rating during 2 CONSECUTIVE YEARS triggers withdrawal. Note for CMR: downgrade below CMR-5 at review is a separate trigger (with or without the 2-year requirement).' },
+
+  // FEATURES & TAT
+  { topic: 'features', q: 'The ECGC premium for Pre-shipment credit under Gold Card Scheme is:', opts: ['Borne by the borrower','Borne by the Bank','Shared equally','Waived entirely'], ans: 1, exp: 'Under Gold Card Scheme, the ECGC premium for Pre-shipment export credit facility is borne by the Bank. Under general (non-Gold Card) policy, pre-shipment premium is recovered from the borrower.' },
+  { topic: 'features', q: 'The turnaround time for disposal of FRESH applications under Gold Card is:', opts: ['7 days','15 days','25 days','30 days'], ans: 2, exp: '25 days for fresh applications. 15 days for renewal of limits. 7 days for sanction of adhoc limits. These TATs have been unchanged since the original 2004 circular.' },
+  { topic: 'features', q: 'The Gold Card is initially issued for what period?', opts: ['1 year, renewable annually','2 years, subject to half-yearly review','3 years, subject to annual review','5 years, subject to biennial review'], ans: 2, exp: 'Gold Card is issued initially for 3 years, renewed for further 3 years unless any adverse/irregularities are noticed, subject to ANNUAL REVIEW of account.' },
+  { topic: 'features', q: 'If a Gold Card issued to an exporter expires without renewal, what happens?', opts: ['Concessions continue for 3 months as grace','Concessions are cancelled immediately','Concessions continue till next review','Concessions are renegotiated'], ans: 1, exp: 'ALL concessions/facilities must be cancelled IMMEDIATELY upon expiry of the Gold Card without renewal. This was specifically highlighted in BCC:WB:DFB:104/10 (2012) after BoB found many expired cards with concessions still running.' },
+  { topic: 'features', q: 'As per BCC:BR:115:290 (May 2023), a borrower under Gold Card Scheme:', opts: ['Can simultaneously avail Exporter and SME Gold Card','Can avail two schemes if under different business lines','Can avail only ONE Gold Card scheme variant at a time','Must choose between Gold Card and running account'], ans: 2, exp: 'A borrower cannot benefit from more than one Gold Card scheme (Exporter/SME/Trader) at a time. Any standby/additional limit must be under ONE of BoB\'s three Gold Card variants only.' },
+  { topic: 'features', q: 'Under the Gold Card Scheme, what concession is provided on commission and exchange charges?', opts: ['25% concession','10% concession','15% concession','50% on processing charges'], ans: 1, exp: '10% concession on commission and exchange. There is NO concession on processing charges or other charges (except the 10% on commission/exchange). Processing charges recovered on total exposure including standby.' },
+  { topic: 'features', q: 'The Gold Card data reporting to RBI is done via Form C on what basis?', opts: ['Monthly','Quarterly (last reporting Friday of each quarter)','Half-yearly','Annually'], ans: 1, exp: 'Form C — data as of the last reporting Friday of each quarter (March/June/September/December). Regional Offices collect data from Branches and send to BCC for consolidation and RBI reporting.' },
+  { topic: 'features', q: 'The renewal/withdrawal monitoring of Gold Card must be done at what level?', opts: ['Branch level','Zonal level invariably','Head Office level','Regional Office level'], ans: 1, exp: 'Zonal level — renewal/withdrawal monitoring MUST be carried out invariably at Zonal level as per BCC:BR:115:247. Zones/Regions are advised to leverage on Gold Card provisions to garner new business.' },
+  { topic: 'features', q: 'Which department of BoB issues the Gold Card to the exporter?', opts: ['Directly by the Branch','Trade, FX and Remittances Dept., BCC, centrally','By Regional Office','By ECGC jointly with BoB'], ans: 1, exp: 'BoB issues the Gold Card DIRECTLY to the exporter through the Trade, FX and Remittances Department, Baroda Corporate Centre (BCC), Mumbai, under intimation to the respective Branch.' },
+  { topic: 'features', q: 'Under Gold Card Scheme, preference is given for grant of PCFC subject to:', opts: ['No conditions — mandatory preference','Availability of foreign currency funds and pricing acceptable to Bank','Exporter having minimum BOB-3 rating','Exporter routing 75%+ business through BoB'], ans: 1, exp: 'Preference for PCFC is given "subject to availability of foreign currency funds/pricing acceptable to the Bank." This qualification was added in the 2020 circular (2004 original said simply "preference will be given").' },
+  { topic: 'features', q: 'Under GCEMP 2025, 50% concession on processing charges for MSME exporter customers is:', opts: ['A Gold Card-specific benefit','A general MSME exporter benefit (not Gold Card-specific)','Available only for Gold Card standby limit','Not applicable under current policy'], ans: 1, exp: 'The 50% concession on processing charges is a general MSME exporter benefit, NOT Gold Card-specific. Gold Card processing charges are recovered at full applicable rate on total exposure including standby.' },
+
+  // HISTORY & CIRCULARS
+  { topic: 'history', q: 'Which RBI reminder circular directed banks to strictly implement the Gold Card Scheme in 2019?', opts: ['RBI/2019-20/23 dated 27.06.2019','RBI/2020-21/50 dated 01.09.2020','RBI/2015-16/47 dated 01.07.2015','RBI/2004-05/210 dated 15.05.2004'], ans: 0, exp: 'RBI issued circular RBI/2019-20/23 in June 2019 directing banks to strictly implement the Gold Card Scheme as many banks were not extending benefits per extant instructions.' },
+  { topic: 'history', q: 'The Baroda SME Gold Card was introduced by BoB through:', opts: ['BCC:BR:96/253 dated 29.06.2004','BCC:BR:100:98 dated 04.04.2008','BCC:BR:105:174 dated 30.04.2013','BCC:BR:111/324 dated 05.07.2019'], ans: 1, exp: 'Baroda SME Gold Card was introduced by BCC:BR:100:98 dated 04.04.2008. Baroda Traders Gold Card was introduced by BCC:BR:105:174 dated 30.04.2013.' },
+  { topic: 'history', q: 'The original 2004 Gold Card Scheme set what rate for Rupee export credit?', opts: ['MCLR + 0.25%','BPLR minus 4.00%','Base Rate minus 25 bps','LIBOR + 75 bps'], ans: 1, exp: 'Original 2004 rate was BPLR minus 4.00% for Rupee credit. LIBOR + 75 bps was for FC export credit (now replaced by the current 25 bps concession framework). The scheme has been updated as benchmark rates changed.' },
+  { topic: 'history', q: 'Which BoB circular rationalized/realigned the Gold Card Scheme for easy understanding of field functionaries?', opts: ['BCC:BR:96/253 (2004)','BCC:BR:111/324 (2019)','BCC:WB:DFB:104/10 (2012)','BCC:BR:115:247 (2023)'], ans: 1, exp: 'BCC:BR:111/324 dated 05.07.2019 was specifically issued to rationalize/realign the existing Gold Card Scheme guidelines for easy understanding of field-level functionaries.' },
+  { topic: 'history', q: 'Which BoB circular in 2009 temporarily waived the 10% overdue bills criterion?', opts: ['BCC:BR:96/253','BCC:INT:DFB:97/583','BCC:WB:DFB:101/47','BCC:WB:DFB:104/10'], ans: 2, exp: 'BCC:WB:DFB:101/47 dated 11.09.2009 waived the 10% overdue bills criterion for April 1, 2009 – March 31, 2010 due to the global financial crisis. This was based on RBI\'s directive RBI/2009-10/149.' },
+  { topic: 'history', q: 'Which circular introduced the multi-framework rating approach (BOB-5 + BBB + CMR-5)?', opts: ['BCC:BR:111/324 (2019)','BCC:BR:112:628 (2020)','BCC:BR:115:247 (2023)','BCC:BR:96/253 (2004)'], ans: 2, exp: 'BCC:BR:115:247 dated 29.04.2023 introduced the multi-framework rating approach incorporating Internal (BOB-5), External (BBB), and CIBIL MSME (CMR-5) rating criteria.' },
+  { topic: 'history', q: 'The concept of exporting firms "making losses" was clarified as "negative PBT" in which circular?', opts: ['BCC:BR:111/324 (2019)','BCC:BR:112:628 (2020)','BCC:BR:115:247 (2023)','BCC:BR:115:290 (2023)'], ans: 2, exp: 'BCC:BR:115:247 dated 29.04.2023 clarified that "loss" means "negative Profit Before Tax (PBT)" for the purpose of Gold Card eligibility and withdrawal criteria.' },
+  { topic: 'history', q: 'Which Credit Vision Score circular is applicable for CMR rating 4 and 5 accounts under Gold Card?', opts: ['BCC:BR:112:628 dated 20.10.2020','BCC:BR:114:279 dated 22.04.2022','BCC:BR:115:247 dated 29.04.2023','BCC:BR:111/324 dated 05.07.2019'], ans: 1, exp: 'BCC:BR:114:279 dated 22.04.2022 governs Credit Vision Score guidelines for CMR rating 4 and 5 accounts. This must be followed in conjunction with Gold Card CMR requirements.' },
+  { topic: 'history', q: 'The Gold Card Scheme was initiated following which government policy?', opts: ['EXIM Policy 2001-02','EXIM Policy 2003-04','Foreign Trade Policy 2004-09','RBI Export Credit Policy 2003'], ans: 1, exp: 'The EXIM Policy 2003-04 indicated that RBI would work out a Gold Card Scheme for creditworthy exporters with good track record for easy availability of export credit. Bank of Baroda implemented this in June 2004.' },
+  { topic: 'history', q: 'Which of the following correctly describes the evolution of exception authority for Gold Card continuation?', opts: ['COCC-ED (2004) → Board (2019) → COCC-CGM (2023)','COCC-ED (pre-2023) → COCC-CGM (2023)','COCC-CGM (pre-2020) → COCC-ED (2020) → COCC-CGM (2023)','No exception was ever permitted before 2023'], ans: 1, exp: 'Exception for continuation despite deficiency was permitted by COCC-ED (in pre-2023 circulars). This was changed to COCC-CGM by BCC:BR:115:247 dated April 2023 — an upgrade of the exception authority level.' },
+  { topic: 'history', q: 'Which of the following is NOT a benefit under the Gold Card Scheme (any version)?', opts: ['Preference for grant of PCFC','25 bps concession on foreign currency export credit','Standby limit of minimum 20%','10% concession on commission and exchange'], ans: 1, exp: 'There is NO concession on foreign currency export credit (PCFC/EPC-FC) under the Gold Card Scheme. The 25 bps concession applies ONLY to INR export credit. This has been explicitly stated since 2020.' }
+];
+
+let quizState = { mode: 'all', questions: [], current: 0, score: 0, answered: 0, selectedIdx: null };
+let quizInitialized = false;
+
+function setMode(m) {
+  quizState.mode = m;
+  document.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active'));
+  document.getElementById('mode_' + m).classList.add('active');
+  restartQuiz();
+}
+
+function initQuiz() {
+  quizInitialized = true;
+  initEvoExplorer();
+  restartQuiz();
+}
+
+function restartQuiz() {
+  let pool = quizState.mode === 'all' ? [...allQuestions] :
+    allQuestions.filter(q => q.topic === quizState.mode);
+  // Shuffle
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  quizState.questions = pool;
+  quizState.current = 0;
+  quizState.score = 0;
+  quizState.answered = 0;
+  quizState.selectedIdx = null;
+  document.getElementById('quiz_results').style.display = 'none';
+  document.getElementById('quiz_card').style.display = 'block';
+  document.getElementById('btn_submit').style.display = '';
+  document.getElementById('btn_next').style.display = 'none';
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = quizState.questions[quizState.current];
+  const total = quizState.questions.length;
+  document.getElementById('q_counter').textContent = 'Q ' + (quizState.current+1) + ' / ' + total;
+  document.getElementById('q_progress').style.width = ((quizState.current+1)/total*100) + '%';
+  document.getElementById('q_score').textContent = 'Score: ' + quizState.score + ' / ' + quizState.answered;
+
+  const topicLabels = { eligibility:'ELIGIBILITY', limits:'LIMITS & INTEREST', withdrawal:'WITHDRAWAL CRITERIA', features:'FEATURES & TAT', history:'HISTORY & CIRCULARS' };
+  document.getElementById('q_topic').innerHTML = '🏷️ ' + (topicLabels[q.topic] || q.topic.toUpperCase());
+  document.getElementById('q_text').textContent = q.q;
+
+  const opts = document.getElementById('q_options');
+  opts.innerHTML = '';
+  const letters = ['A','B','C','D'];
+  q.opts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'quiz-option';
+    btn.innerHTML = '<span class="option-letter">' + letters[i] + '</span>' + opt;
+    btn.onclick = () => selectOption(i);
+    opts.appendChild(btn);
+  });
+
+  document.getElementById('q_explanation').className = 'quiz-explanation';
+  document.getElementById('q_explanation').innerHTML = '';
+  document.getElementById('btn_submit').disabled = true;
+  document.getElementById('btn_submit').style.display = '';
+  document.getElementById('btn_next').style.display = 'none';
+  quizState.selectedIdx = null;
+}
+
+function selectOption(idx) {
+  const opts = document.querySelectorAll('.quiz-option');
+  opts.forEach(o => o.classList.remove('selected'));
+  opts[idx].classList.add('selected');
+  quizState.selectedIdx = idx;
+  document.getElementById('btn_submit').disabled = false;
+}
+
+function submitAnswer() {
+  if (quizState.selectedIdx === null) return;
+  const q = quizState.questions[quizState.current];
+  const opts = document.querySelectorAll('.quiz-option');
+  const selected = quizState.selectedIdx;
+  const correct = q.ans;
+
+  opts.forEach((o, i) => {
+    o.disabled = true;
+    if (i === correct) o.classList.add('correct');
+    else if (i === selected && selected !== correct) o.classList.add('incorrect');
+  });
+
+  if (selected === correct) quizState.score++;
+  quizState.answered++;
+
+  const expEl = document.getElementById('q_explanation');
+  expEl.className = 'quiz-explanation show';
+  expEl.innerHTML = (selected === correct ? '✅ <strong>Correct!</strong> ' : '❌ <strong>Incorrect.</strong> ') + q.exp;
+
+  document.getElementById('q_score').textContent = 'Score: ' + quizState.score + ' / ' + quizState.answered;
+  document.getElementById('btn_submit').style.display = 'none';
+  document.getElementById('btn_next').style.display = '';
+
+  if (quizState.current + 1 >= quizState.questions.length) {
+    document.getElementById('btn_next').textContent = 'View Results →';
+  }
+}
+
+function nextQuestion() {
+  quizState.current++;
+  if (quizState.current >= quizState.questions.length) {
+    showResults();
+    return;
+  }
+  document.getElementById('quiz_card').style.animation = 'none';
+  setTimeout(() => {
+    document.getElementById('quiz_card').style.animation = 'slideUp 0.3s ease';
+    renderQuestion();
+  }, 10);
+}
+
+function showResults() {
+  document.getElementById('quiz_card').style.display = 'none';
+  document.getElementById('btn_submit').style.display = 'none';
+  document.getElementById('btn_next').style.display = 'none';
+
+  const results = document.getElementById('quiz_results');
+  results.style.display = 'block';
+  const pct = Math.round(quizState.score / quizState.questions.length * 100);
+  document.getElementById('final_score').textContent = pct + '%';
+  document.getElementById('final_label').textContent = quizState.score + ' CORRECT OUT OF ' + quizState.questions.length + ' QUESTIONS';
+
+  let grade, color;
+  if (pct >= 90) { grade = '🏆 Outstanding — Exam Ready!'; color = '#276749'; }
+  else if (pct >= 75) { grade = '✅ Good — Minor revision needed'; color = '#2B6CB0'; }
+  else if (pct >= 60) { grade = '📚 Average — Review key topics again'; color = '#D97706'; }
+  else { grade = '🔄 Needs more study — Focus on weak areas'; color = '#9B2335'; }
+
+  const gradeEl = document.getElementById('final_grade');
+  gradeEl.textContent = grade;
+  gradeEl.style.color = color;
+}
+
+// Initialize evolution explorer on page load
+document.addEventListener('DOMContentLoaded', () => {
+  initEvoExplorer();
+});
+</script>
+
+</body>
+</html>
