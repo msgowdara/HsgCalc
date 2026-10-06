@@ -2,172 +2,217 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Baroda Auto Loan - Final Compliance Engine</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baroda Auto Loan - Eligibility &amp; EMI Calculator</title>
     <style>
         :root { --primary: #ee6e1a; --dark: #2c3e50; --bg: #f5f7fa; --green: #2ecc71; --blue: #3498db; }
         body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: var(--bg); margin: 0; padding: 10px; color: #333; }
-        
-        .app-card { 
-            max-width: 480px; 
-            margin: 0 auto; 
-            background: #fff; 
-            border-radius: 12px; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
+
+        .app-card {
+            max-width: 480px;
+            margin: 10px auto 0;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
             border-top: 5px solid var(--primary);
             padding-bottom: 20px;
         }
 
-        /* Header */
-        .header { padding: 20px; text-align: center; border-bottom: 1px solid #eee; }
+        /* Header & tabs */
+        .header { padding: 20px 20px 14px; text-align: center; }
         .header h2 { margin: 0; color: var(--primary); font-size: 18px; text-transform: uppercase; }
         .header span { font-size: 11px; color: #888; }
+        .tabs { display: flex; border-top: 1px solid #eee; border-bottom: 1px solid #eee; }
+        .tab-btn { flex: 1; padding: 12px 8px; background: #fff; border: none; border-bottom: 3px solid transparent; font-weight: 700; font-size: 13px; color: #888; cursor: pointer; text-transform: uppercase; letter-spacing: .5px; font-family: inherit; }
+        .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+        .panel { display: none; }
+        .panel.active { display: block; }
+        .rate-line { margin: 12px 15px 0; padding: 8px 10px; background: #f8f9fa; border-radius: 6px; font-size: 11px; color: #555; line-height: 1.5; }
+        .rate-line .rl-sub { display: block; color: #888; }
+        .rate-line a { color: var(--primary); font-weight: 700; }
 
         /* Form Sections */
-        .section-header { 
-            background: #f8f9fa; 
-            padding: 10px 15px; 
-            font-weight: 700; 
-            font-size: 13px; 
-            color: var(--dark); 
+        .section-header {
+            background: #f8f9fa;
+            padding: 10px 15px;
+            font-weight: 700;
+            font-size: 13px;
+            color: var(--dark);
             border-left: 4px solid var(--primary);
             margin: 20px 0 10px 0;
             text-transform: uppercase;
         }
-
         .input-group { padding: 0 15px; margin-bottom: 15px; }
         label { display: block; font-size: 11px; font-weight: 700; margin-bottom: 5px; color: #555; text-transform: uppercase; }
-        
-        /* FIX: target only text-like inputs for full width/appearance to avoid hiding checkboxes */
-        input:not([type="checkbox"]), select { 
-            width: 100%; 
-            padding: 12px; 
-            border: 1px solid #ddd; 
-            border-radius: 8px; 
-            font-size: 15px; 
-            background: #fff; 
+        input:not([type="checkbox"]), select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+            background-color: #fff;
             box-sizing: border-box;
-            appearance: none; /* Removes native UI styling for text inputs */
+            font-family: inherit;
+            color: #333;
+        }
+        input:not([type="checkbox"]) { -webkit-appearance: none; appearance: none; }
+        input[type="date"] { min-height: 46px; }
+        select {
+            -webkit-appearance: none; appearance: none; padding-right: 34px;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' fill='none' stroke='%23888' stroke-width='2'/></svg>");
+            background-repeat: no-repeat; background-position: right 12px center; background-size: 12px 8px;
         }
         input:focus, select:focus { border-color: var(--primary); outline: none; }
-
-        /* FIX: Explicit Checkbox Styling */
         input[type="checkbox"] {
-            appearance: auto; /* Forces browser to render the checkbox */
+            appearance: auto;
             width: 20px;
             height: 20px;
+            flex: 0 0 auto;
             accent-color: var(--primary);
-            margin-right: 10px;
+            margin: 0 10px 0 0;
             cursor: pointer;
         }
+        .hint { font-size: 10px; color: #888; margin-top: 4px; line-height: 1.45; text-transform: none; font-weight: 400; }
+        .hint.red, .warn-hint { color: #c0392b; }
+        .hint.pad { padding: 0 15px; margin: -6px 0 10px; }
+        .pad { padding: 0 15px; }
+        .mt8 { margin-top: 8px; }
+        .mt12 { margin-top: 12px; }
+        .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+        .grid2.pad { margin-bottom: 12px; }
+        .grid2 > *, .grid3 > * { min-width: 0; }
+        input[type="date"] { min-width: 0; max-width: 100%; }
+        .note-box { margin: -6px 15px 15px; padding: 9px 11px; background: #fff8f4; border: 1px solid #ffe0cc; border-radius: 6px; font-size: 11px; color: #7a3e10; line-height: 1.5; }
 
-        /* Concessions & Options */
+        /* Checkboxes (the whole row is tappable) */
+        label.cb-item { display: flex; align-items: center; margin: 0; text-transform: none; font-weight: 600; font-size: 12px; color: #333; cursor: pointer; line-height: 1.35; }
+        .checks { padding: 0 15px; margin-bottom: 12px; display: grid; gap: 8px; }
+        .checks .cb-item, .checkbox-grid .cb-item { background: #fff8f4; border: 1px solid #ffe0cc; padding: 10px; border-radius: 6px; }
         .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 15px; }
-        .cb-item { 
-            background: #fff8f4; 
-            border: 1px solid #ffe0cc; 
-            padding: 10px; 
-            border-radius: 6px; 
-            font-size: 12px; 
-            display: flex; 
-            align-items: center; 
-        }
-        
+        .checkbox-grid.one { grid-template-columns: 1fr; gap: 8px; }
+        .checkbox-grid .hint { padding: 2px 0; }
+
         /* Insurance Toggle */
-        .ins-toggle {
-            background: #e3f2fd;
-            border: 1px solid #bbdefb;
-            padding: 10px 15px;
-            margin: 0 15px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-        }
+        .ins-toggle { background: #e3f2fd; border: 1px solid #bbdefb; padding: 10px 15px; margin: 0 15px 8px; border-radius: 6px; }
         .ins-toggle span { font-size: 13px; font-weight: 600; color: #0d47a1; }
 
-        /* Main Button */
-        .btn-calc { 
-            display: block;
-            width: calc(100% - 30px);
-            margin: 20px 15px;
-            padding: 15px; 
-            background: var(--primary); 
-            color: white; 
-            border: none; 
-            border-radius: 8px; 
-            font-size: 16px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            box-shadow: 0 4px 10px rgba(238,110,26,0.3);
+        /* Co-applicant */
+        .co-box { margin: 0 15px 15px; padding: 12px; border: 1px dashed #ffd2b3; border-radius: 8px; background: #fffdfb; display: grid; gap: 10px; }
+
+        /* Main Button & errors */
+        .btn-calc {
+            display: block; width: calc(100% - 30px); margin: 20px 15px; padding: 15px;
+            background: var(--primary); color: white; border: none; border-radius: 8px;
+            font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(238,110,26,0.3); font-family: inherit;
         }
+        .err-box { margin: 15px 15px 0; padding: 10px 12px; background: #fdecea; border: 1px solid #f5c6cb; border-radius: 8px; color: #8e1c1c; font-size: 12px; }
+        .err-box ul { margin: 6px 0 0; padding-left: 18px; }
 
         /* Results Area */
-        #resultArea { display: none; background: #fff; animation: slideUp 0.3s ease; }
+        #resultArea { background: #fff; animation: slideUp 0.3s ease; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .status { margin: 15px; padding: 12px 14px; border-radius: 8px; border: 1px solid; }
+        .status h3 { margin: 0 0 6px; font-size: 14px; letter-spacing: .5px; text-transform: uppercase; }
+        .st-ok { background: #e8f5e9; border-color: #c8e6c9; color: #1b5e20; }
+        .st-dev { background: #fff8e1; border-color: #ffe082; color: #6d4c00; }
+        .st-fail { background: #fdecea; border-color: #f5c6cb; color: #8e1c1c; }
+        .st-sub { font-size: 12px; }
+        .issues { margin: 0; padding-left: 16px; font-size: 12px; line-height: 1.45; color: #333; }
+        .issues li { margin-bottom: 6px; }
+        .tg { display: inline-block; font-size: 9px; font-weight: 800; padding: 1px 6px; border-radius: 10px; text-transform: uppercase; letter-spacing: .3px; vertical-align: 1px; }
+        .tg-fail { background: #c0392b; color: #fff; }
+        .tg-dev { background: #e69500; color: #fff; }
+        .tg-warn { background: #dfe6ee; color: #34495e; }
 
-        .final-box { 
-            background: #e8f5e9; 
-            margin: 15px; 
-            padding: 20px; 
-            border-radius: 8px; 
-            text-align: center; 
-            border: 1px solid #c8e6c9; 
-        }
+        .final-box { background: #e8f5e9; margin: 15px; padding: 20px; border-radius: 8px; text-align: center; border: 1px solid #c8e6c9; }
+        .fb-cap { font-size: 11px; text-transform: uppercase; color: #666; letter-spacing: 1px; }
+        .fb-sub { font-size: 11px; margin-top: 5px; color: #555; }
+        .fb-emi { font-size: 13px; font-weight: 700; color: #1b5e20; }
         .final-amount { font-size: 28px; font-weight: 900; color: #2e7d32; display: block; margin: 5px 0; }
-        
-        .auth-box {
-            background: #fff3e0;
-            border: 1px solid #ffe0b2;
-            margin: 0 15px 15px 15px;
-            padding: 10px;
-            border-radius: 6px;
-            text-align: center;
-        }
-        .auth-label { font-size: 10px; font-weight: bold; color: #e65100; text-transform: uppercase; }
-        .auth-val { font-size: 13px; font-weight: 800; color: #bf360c; }
 
-        .detail-row { 
-            display: flex; 
-            justify-content: space-between; 
-            padding: 8px 15px; 
-            font-size: 13px; 
-            border-bottom: 1px dashed #eee; 
-        }
+
+        .detail-row { display: flex; justify-content: space-between; gap: 10px; padding: 8px 15px; font-size: 13px; border-bottom: 1px dashed #eee; }
+        .detail-row span:first-child { flex: 0 0 auto; max-width: 48%; }
         .detail-row span:last-child { font-weight: 700; color: var(--dark); text-align: right; }
-        
-        .section-label { 
-            font-size: 12px; 
-            font-weight: 800; 
-            color: #999; 
-            padding: 15px 15px 5px 15px; 
-            text-transform: uppercase; 
-            letter-spacing: 0.5px;
-        }
+        .detail-row small { font-weight: 400; color: #777; font-size: 11px; }
+        .detail-row.green-row span { color: #1e8449; }
+        .detail-row.red-row span:last-child { color: #c0392b; }
+        .detail-row.roi-row span { color: #d35400; }
+        .detail-row.decider { background: #e8f5e9; }
+        .dec-tag { display: inline-block; font-size: 9px; font-weight: 800; background: #2e7d32; color: #fff; border-radius: 10px; padding: 1px 6px; margin-left: 4px; text-transform: uppercase; vertical-align: 1px; }
+        .section-label { font-size: 12px; font-weight: 800; color: #999; padding: 15px 15px 5px 15px; text-transform: uppercase; letter-spacing: 0.5px; }
 
         /* Document List */
-        .doc-container { 
-            background: #fdfdfd; 
-            margin: 15px; 
-            padding: 15px; 
-            border: 1px solid #eee; 
-            border-radius: 8px; 
-        }
+        .doc-container { background: #fdfdfd; margin: 15px; padding: 15px; border: 1px solid #eee; border-radius: 8px; }
         .doc-header { font-size: 13px; font-weight: bold; color: var(--primary); margin-bottom: 10px; text-decoration: underline; }
         ul.doc-list { padding-left: 20px; margin: 0; font-size: 12px; color: #444; line-height: 1.5; }
-        li { margin-bottom: 6px; }
+        ul.doc-list li { margin-bottom: 6px; }
 
         /* Action Buttons */
         .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 15px 15px 15px; }
-        .btn-act { padding: 12px; border: none; border-radius: 6px; color: white; font-weight: bold; font-size: 13px; cursor: pointer; }
+        .btn-act { padding: 12px; border: none; border-radius: 6px; color: white; font-weight: bold; font-size: 13px; cursor: pointer; font-family: inherit; }
         .btn-copy { background: #34495e; }
         .btn-wa { background: #25D366; }
-        .btn-amort { background: #7f8c8d; width: calc(100% - 30px); margin: 0 15px 20px 15px; }
+        .btn-amort { background: #7f8c8d; width: calc(100% - 30px); margin: 0 15px 20px 15px; display: block; }
 
-        /* Table */
-        .table-box { display: none; overflow-x: auto; margin: 0 15px 20px 15px; border: 1px solid #eee; }
-        table { width: 100%; border-collapse: collapse; font-size: 12px; white-space: nowrap; }
-        th, td { padding: 8px; border-bottom: 1px solid #eee; text-align: right; }
-        th { background: #f8f9fa; text-align: center; }
+        /* Repayment table */
+        .table-box { overflow-x: auto; margin: 0 15px 20px 15px; border: 1px solid #eee; }
+        .table-box table { width: 100%; border-collapse: collapse; font-size: 12px; white-space: nowrap; }
+        .table-box th, .table-box td { padding: 8px; border-bottom: 1px solid #eee; text-align: right; }
+        .table-box th { background: #f8f9fa; text-align: center; }
+
+        .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(20px); background: #2c3e50; color: #fff; padding: 10px 18px; border-radius: 20px; font-size: 13px; opacity: 0; pointer-events: none; transition: all .2s; z-index: 20; }
+        .toast.on { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        /* ---------- Settings ---------- */
+        .set-intro { padding: 14px 15px 4px; font-size: 12px; color: #555; line-height: 1.5; }
+        #setMsgs { padding: 0 15px; }
+        .msg-err, .msg-warn { margin-top: 10px; padding: 10px 12px; border-radius: 8px; font-size: 12px; line-height: 1.45; }
+        .msg-err { background: #fdecea; border: 1px solid #f5c6cb; color: #8e1c1c; }
+        .msg-warn { background: #fff8e1; border: 1px solid #ffe082; color: #6d4c00; }
+        .msg-err ul, .msg-warn ul { margin: 6px 0 0; padding-left: 18px; }
+        details.set-sec { margin: 10px 12px; border: 1px solid #e6e9ee; border-radius: 8px; background: #fff; }
+        details.set-sec > summary { padding: 12px 14px; font-weight: 700; font-size: 13px; color: var(--dark); cursor: pointer; border-left: 4px solid var(--primary); border-radius: 8px; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+        details.set-sec[open] > summary { border-bottom: 1px solid #eee; border-radius: 8px 8px 0 0; }
+        .sum-sub { font-size: 10px; color: #999; font-weight: 600; text-transform: none; }
+        .set-body { padding: 10px; }
+        details.card-ed { border: 1px solid #ffe0cc; border-radius: 8px; margin-bottom: 10px; background: #fffaf6; }
+        details.card-ed > summary { padding: 10px 12px; cursor: pointer; font-size: 13px; font-weight: 700; color: #333; }
+        .ce-name { margin-right: 6px; }
+        .ce-sub { display: block; font-size: 10px; color: #888; font-weight: 600; margin-top: 3px; }
+        .tag { display: inline-block; font-size: 9px; font-weight: 800; background: #fff; border: 1px solid #ffc9a3; color: #c35a10; border-radius: 10px; padding: 1px 6px; margin-right: 4px; text-transform: uppercase; vertical-align: 1px; }
+        .tag.sp { background: #e8f5e9; border-color: #a5d6a7; color: #2e7d32; }
+        .card-body { padding: 8px 8px 10px; border-top: 1px dashed #ffd2b3; }
+        .sf { margin-bottom: 10px; }
+        .set-body input:not([type="checkbox"]), .set-body select { padding: 9px 8px; font-size: 14px; border-radius: 6px; }
+        .set-body input[type="date"] { font-size: 13px; padding: 8px 4px; min-height: 40px; }
+        .set-body select { padding-right: 28px; background-position: right 9px center; }
+        .tbl-title { font-size: 11px; font-weight: 800; color: #555; text-transform: uppercase; margin: 14px 0 6px; }
+        .set-table { width: 100%; border-collapse: collapse; table-layout: fixed; margin-bottom: 6px; }
+        .set-table th { background: #f4f6f8; font-size: 9px; text-transform: uppercase; color: #666; padding: 6px 4px; text-align: left; }
+        .set-table td { padding: 3px 1px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+        .set-table td.lbl { font-size: 12px; padding-left: 4px; }
+        .set-body .set-table input:not([type="checkbox"]), .set-body .set-table select { padding: 7px 4px; font-size: 12.5px; }
+        .set-body .set-table select { padding-right: 14px; background-position: right 3px center; background-size: 8px 6px; }
+        .x { border: none; background: #fdecea; color: #c0392b; border-radius: 6px; width: 28px; height: 30px; cursor: pointer; font-weight: 700; font-size: 12px; }
+        .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .btn-sm { padding: 8px 12px; font-size: 12px; font-weight: 700; border-radius: 6px; border: 1px solid var(--primary); background: #fff; color: var(--primary); cursor: pointer; font-family: inherit; }
+        .btn-sm.danger { border-color: #c0392b; color: #c0392b; }
+        .cb-wrap { display: flex; flex-wrap: wrap; gap: 6px; }
+        .cb-wrap .cb-item { padding: 6px 8px; font-size: 11px; background: #fff; border: 1px solid #e3e6ea; border-radius: 6px; }
+        .cb-wrap .cb-item input { width: 16px; height: 16px; margin-right: 6px; }
+        .set-body > .cb-item, .card-body > .cb-item, .sp-box > .cb-item { margin: 6px 0 10px; }
+        .mini-card { border: 1px solid #eceff3; border-radius: 8px; padding: 10px; margin-bottom: 10px; background: #fcfcfd; }
+        .sp-box { margin-top: 14px; padding: 10px; border: 1px dashed #a5d6a7; border-radius: 8px; background: #f7fcf7; }
+        .sp-box .tbl-title { margin-top: 0; }
+        .save-bar { position: sticky; bottom: 0; background: #fff; border-top: 1px solid #eee; padding: 10px 15px; display: flex; gap: 8px; align-items: center; z-index: 5; box-shadow: 0 -4px 10px rgba(0,0,0,.05); margin-top: 10px; flex-wrap: wrap; }
+        .btn-save { padding: 11px 16px; background: var(--primary); color: #fff; border: none; border-radius: 8px; font-weight: 800; font-size: 13px; cursor: pointer; font-family: inherit; }
+        .set-status { font-size: 11px; font-weight: 700; color: #888; }
+        .set-status.warn { color: #b9770e; }
+        .set-status.ok { color: #1e8449; }
+        .set-status.err { color: #c0392b; }
+        .disclaimer { margin: 18px 15px 0; padding-top: 12px; border-top: 1px solid #eee; font-size: 10.5px; color: #888; line-height: 1.5; }
     </style>
 </head>
 <body>
@@ -187,326 +232,1569 @@
 <div class="app-card">
     <div class="header">
         <h2>Baroda Auto Loan</h2>
-        <span>Master Circular BCC:BR:114:665</span>
+        <span id="hdrSub"></span>
+    </div>
+    <div class="tabs" role="tablist">
+        <button type="button" class="tab-btn active" id="tabCalc" role="tab">Calculator</button>
+        <button type="button" class="tab-btn" id="tabSet" role="tab">Settings</button>
     </div>
 
-    <div class="section-header">1. Applicant Details</div>
-    <div class="input-group">
-        <label>Borrower Type</label>
-        <select id="borr" onchange="updateUI()">
-            <option value="SAL">Salaried Individual</option>
-            <option value="STAFF">BOB Staff / Ex-Staff</option>
-            <option value="BIZ">Businessman (Individual)</option>
-            <option value="ENT">Entity (Firm/Co/LLP)</option>
-        </select>
-    </div>
-    <div class="input-group">
-        <label id="dobLbl">Date of Birth</label>
-        <input type="date" id="dob">
-    </div>
-    <div class="input-group">
-        <label>CIBIL (Credit Vision Score)</label>
-        <input type="number" id="cibil" value="750" placeholder="e.g. 750 or -1">
-        <div style="font-size:10px; color:#c0392b; margin-top:3px;">*Min Score 701. Score of -1 is eligible.</div>
-    </div>
+    <!-- ============================ CALCULATOR ============================ -->
+    <div id="panelCalc" class="panel active">
+        <div class="rate-line" id="rateLine"></div>
 
-    <div class="section-header">2. Product & Invoice</div>
-    <div class="input-group">
-        <label>Product Category</label>
-        <select id="prod">
-            <option value="NEW">New Car Loan</option>
-            <option value="USED">Pre-Owned Car</option>
-        </select>
-    </div>
-    <div class="input-group"><label>Ex-Showroom Price (₹)</label><input type="number" id="ex" placeholder="0"></div>
-    <div class="input-group"><label>GST + Cess (₹)</label><input type="number" id="gst" placeholder="0"></div>
-    <div class="input-group"><label>RTO & Registration (₹)</label><input type="number" id="rto" placeholder="0"></div>
-    <div class="input-group"><label>Insurance (1yr/3yr) (₹)</label><input type="number" id="ins" placeholder="0"></div>
-    <div class="input-group"><label>Less: Dealer Discount (₹)</label><input type="number" id="disc" placeholder="0"></div>
-    <div class="input-group">
-        <label>Accessories (Not Funded)</label>
-        <input type="number" id="acc" placeholder="0">
-        <div style="font-size:10px; color:#c0392b; margin-top:3px;">*Warning: Invoice must be from Authorized Dealer (OEM).</div>
-    </div>
-    <div class="input-group"><label>Requested Loan Amount (₹)</label><input type="number" id="req"></div>
-
-    <div class="section-header">3. Income & Banking</div>
-    <div id="salInput">
-        <div class="input-group"><label>Gross Salary M1 (₹)</label><input type="number" id="s1"></div>
-        <div class="input-group"><label>Gross Salary M2 (₹)</label><input type="number" id="s2"></div>
-        <div class="input-group"><label>Gross Salary M3 (₹)</label><input type="number" id="s3"></div>
-    </div>
-    <div id="bizInput" style="display:none;">
-        <div class="input-group"><label>Annual Income Year 1 (₹)</label><input type="number" id="i1"></div>
-        <div class="input-group"><label>Annual Income Year 2 (₹)</label><input type="number" id="i2"></div>
-        <div style="padding:0 15px; font-size:10px; color:#e67e22; margin-top:-10px; margin-bottom:10px;">*For Entities: Use PAT (Profit After Tax)</div>
-    </div>
-    <div class="input-group">
-        <label>Existing Monthly Deductions (₹)</label>
-        <input type="number" id="ded" placeholder="Total Monthly EMIs">
-    </div>
-
-    <div class="section-header">4. Concessions & Risk</div>
-    
-    <div class="ins-toggle">
-        <input type="checkbox" id="cIns" checked>
-        <span>Opting for Credit Life Insurance?</span>
-    </div>
-    <div style="padding:0 15px 10px 15px; font-size:10px; color:#d35400;">*0.05% Risk Premium applicable if unchecked.</div>
-
-    <div class="checkbox-grid">
-        <div class="cb-item"><input type="checkbox" id="cEV"> New EV (0.25%)</div>
-        <div class="cb-item"><input type="checkbox" id="cColl"> >50% Collateral</div>
-        <div class="cb-item"><input type="checkbox" id="cICSI"> ICSI Member</div>
-        <div class="cb-item"><input type="checkbox" id="cHL"> Home Loan Cust</div>
-    </div>
-    <div id="hlWarn" style="display:none; padding:0 15px; font-size:10px; color:red; margin-top:5px;">* HL Concession not applicable for Entities</div>
-
-    <button class="btn-calc" onclick="calculate()">CALCULATE ELIGIBILITY</button>
-
-    <div id="resultArea">
-        <div class="final-box">
-            <div style="font-size:11px; text-transform:uppercase; color:#666; letter-spacing:1px;">Final Eligible Amount</div>
-            <span class="final-amt" id="outFinal">₹ 0</span>
-            <div style="font-size:11px; margin-top:5px;">(Lower of Income, LTV, or Product Cap)</div>
+        <div class="section-header">1. Loan &amp; Applicant</div>
+        <div class="input-group">
+            <label for="scheme">Loan scheme</label>
+            <select id="scheme"></select>
+            <div class="hint warn-hint" id="schemeHint"></div>
+        </div>
+        <div class="note-box" id="schemeNote" style="display:none"></div>
+        <div class="input-group">
+            <label for="roiType">Interest rate type</label>
+            <select id="roiType">
+                <option value="FL">Floating (linked to BRLLR)</option>
+                <option value="FX">Fixed (linked to MCLR)</option>
+            </select>
+            <div class="hint" id="roiHint"></div>
+        </div>
+        <div class="input-group">
+            <label for="borr">Applicant type</label>
+            <select id="borr"></select>
+        </div>
+        <div id="salBox" class="checks">
+            <label class="cb-item"><input type="checkbox" id="confirmed" checked><span>Confirmed employee (not on probation or contract)</span></label>
+            <label class="cb-item" id="usedYearBox"><input type="checkbox" id="usedYear" checked><span>At least 1 year with the current employer</span></label>
+        </div>
+        <div id="govtBox" class="checks" style="display:none">
+            <label class="cb-item"><input type="checkbox" id="govtSal" checked><span>Salary credited to my bank account in 6+ of the last 8 months, with no gap over 60 days</span></label>
+        </div>
+        <div id="evBox" class="checks" style="display:none">
+            <label class="cb-item"><input type="checkbox" id="evOk" checked><span>Fully electric car (not hybrid, petrol or diesel)</span></label>
+        </div>
+        <div class="input-group" id="viaBox" style="display:none">
+            <label for="via">How are you applying?</label>
+            <select id="via"><option value="DIRECT">Directly at a bank branch</option><option value="AGENT">Through a car dealer or loan agent</option></select>
         </div>
 
-        <div class="auth-box">
-            <div class="auth-label">Sanctioning Authority</div>
-            <div class="auth-val" id="outAuth">-</div>
+        <div id="indBox">
+            <div class="input-group"><label for="dob">Date of birth</label><input type="date" id="dob"></div>
+            <div class="input-group" id="retireBox"><label for="retire">Retirement age</label><input type="number" id="retire" value="60" inputmode="numeric"></div>
+            <div class="input-group">
+                <label for="cibil">CIBIL score</label>
+                <input type="number" id="cibil" value="750" placeholder="e.g. 750, or -1" inputmode="numeric">
+                <div class="hint">Minimum 701. Enter -1 if you have no credit history.</div>
+            </div>
+        </div>
+        <div id="entBox" style="display:none">
+            <div class="input-group"><label for="entConst">Type of business</label><select id="entConst"></select></div>
+            <div class="input-group">
+                <label for="entRating">Rating</label><select id="entRating"></select>
+                <div class="hint">CIBIL MSME Rank (CMR), or a rating from an external agency.</div>
+            </div>
+            <div class="input-group"><label for="tnw">Tangible net worth (₹)</label><input type="number" id="tnw" inputmode="decimal"></div>
+        </div>
+        <div class="checks"><label class="cb-item"><input type="checkbox" id="existCust"><span>I already have a Bank of Baroda account (6+ months old)</span></label></div>
+
+        <div class="section-header">2. Car &amp; Price</div>
+        <div id="newBox">
+            <div class="input-group"><label for="ex">Basic price / ex-showroom before GST (₹)</label><input type="number" id="ex" placeholder="0" inputmode="decimal"></div>
+            <div class="input-group"><label for="gst">GST + cess (₹)</label><input type="number" id="gst" placeholder="0" inputmode="decimal"></div>
+            <div class="input-group"><label for="rto">Road tax &amp; registration (₹)</label><input type="number" id="rto" placeholder="0" inputmode="decimal"></div>
+            <div class="input-group"><label for="ins">Insurance, 1 or 3 years (₹)</label><input type="number" id="ins" placeholder="0" inputmode="decimal"></div>
+            <div class="input-group"><label for="disc">Less: dealer discount (₹)</label><input type="number" id="disc" placeholder="0" inputmode="decimal"></div>
+            <div class="input-group">
+                <label for="acc">Accessories (not financed) (₹)</label>
+                <input type="number" id="acc" placeholder="0" inputmode="decimal">
+                <div class="hint">The quotation should be from an authorised dealer of the car maker.</div>
+            </div>
+        </div>
+        <div id="usedBox" style="display:none">
+            <div class="input-group">
+                <label for="usedSrc">Buying the car from</label>
+                <select id="usedSrc"><option value="OEM">A certified pre-owned dealer approved by the bank</option><option value="BANK">The bank (car sold by the bank)</option><option value="DEMO">A dealer (demo car)</option><option value="OTHER">Someone else (private seller / other dealer)</option></select>
+            </div>
+            <div class="input-group"><label for="usedPrice">Sale price (₹)</label><input type="number" id="usedPrice" inputmode="decimal"></div>
+            <div class="input-group"><label for="usedVal">Value as per the valuation report (₹)</label><input type="number" id="usedVal" inputmode="decimal"></div>
+            <div class="input-group"><label for="usedIdv">Insured value (IDV) in the car's insurance (₹)</label><input type="number" id="usedIdv" inputmode="decimal"></div>
+            <div class="input-group"><label for="usedInv">Date the car was first bought (original invoice)</label><input type="date" id="usedInv"></div>
+            <div class="input-group">
+                <label for="usedOwner">The seller is owner no. (as per RC)</label>
+                <select id="usedOwner"><option value="1">1 (first owner)</option><option value="2">2</option><option value="3">3 or more</option></select>
+            </div>
+            <div class="checks"><label class="cb-item"><input type="checkbox" id="usedDupRc"><span>The RC is a duplicate RC</span></label></div>
+        </div>
+        <div class="input-group"><label for="req">Loan amount you want (₹)</label><input type="number" id="req" placeholder="Blank = maximum you're eligible for" inputmode="decimal"></div>
+        <div class="input-group"><label for="prefTen">Preferred tenure (months)</label><input type="number" id="prefTen" placeholder="Blank = longest allowed" inputmode="numeric"></div>
+
+        <div class="section-header">3. Income &amp; Existing EMIs</div>
+        <div id="salInput">
+            <div class="input-group"><label for="s1" id="lbl_s1">Gross monthly salary – month 1 (₹)</label><input type="number" id="s1" inputmode="decimal"></div>
+            <div class="input-group"><label for="s2" id="lbl_s2">Gross monthly salary – month 2 (₹)</label><input type="number" id="s2" inputmode="decimal"></div>
+            <div class="input-group"><label for="s3" id="lbl_s3">Gross monthly salary – month 3 (₹)</label><input type="number" id="s3" inputmode="decimal"></div>
+            <div class="input-group">
+                <label for="dedM">Existing monthly EMIs / deductions (₹)</label>
+                <input type="number" id="dedM" placeholder="0" inputmode="decimal">
+                <div class="hint">All EMIs and loan deductions in your latest salary slip.</div>
+            </div>
+        </div>
+        <div id="bizInput" style="display:none">
+            <div class="input-group"><label for="i1" id="lbl_i1">Gross annual income – year 1 (₹)</label><input type="number" id="i1" inputmode="decimal"></div>
+            <div class="input-group"><label for="i2" id="lbl_i2">Gross annual income – year 2, latest (₹)</label><input type="number" id="i2" inputmode="decimal"></div>
+            <div class="hint pad" id="entIncHint" style="display:none">As per the audited balance sheet. For a sole proprietorship, use the proprietor's income in their income tax return.</div>
+            <div id="depBox" style="display:none">
+                <div class="input-group"><label for="d1">Depreciation – year 1 (₹, optional)</label><input type="number" id="d1" inputmode="decimal"></div>
+                <div class="input-group">
+                    <label for="d2">Depreciation – year 2, latest (₹, optional)</label>
+                    <input type="number" id="d2" inputmode="decimal">
+                    <div class="hint">The lower of the 2-year average and the latest year is added back to income, up to half of it.</div>
+                </div>
+            </div>
+            <div class="input-group">
+                <label for="dedA">Existing yearly EMIs / deductions (₹)</label>
+                <input type="number" id="dedA" placeholder="0" inputmode="decimal">
+                <div class="hint">All loan repayments for the last year.</div>
+            </div>
+        </div>
+        <div class="checks" id="coToggle"><label class="cb-item"><input type="checkbox" id="coOn"><span>Add a co-applicant (family member) to add their income</span></label></div>
+        <div id="coFields" class="co-box" style="display:none">
+            <div class="grid2">
+                <div><label for="coRel">Relationship</label><select id="coRel"></select></div>
+                <div><label for="coType">Income type</label><select id="coType"><option value="SAL">Salaried</option><option value="PEN">Pensioner</option><option value="BIZ">Self-employed / business</option></select></div>
+            </div>
+            <div class="grid2">
+                <div><label for="coDob">Date of birth</label><input type="date" id="coDob"></div>
+                <div><label for="coCibil">CIBIL score</label><input type="number" id="coCibil" placeholder="-1 if none" inputmode="numeric"></div>
+            </div>
+            <div id="coSal">
+                <label>Gross monthly income – last 3 months (₹)</label>
+                <div class="grid3"><input type="number" id="c1" placeholder="Month 1" inputmode="decimal"><input type="number" id="c2" placeholder="Month 2" inputmode="decimal"><input type="number" id="c3" placeholder="Month 3" inputmode="decimal"></div>
+            </div>
+            <div id="coBiz" style="display:none">
+                <label>Gross annual income – last 2 years (₹)</label>
+                <div class="grid2"><input type="number" id="cy1" placeholder="Year 1" inputmode="decimal"><input type="number" id="cy2" placeholder="Year 2" inputmode="decimal"></div>
+            </div>
+            <div class="mt8"><label for="coDed" id="lbl_coDed">Co-applicant's existing monthly EMIs / deductions (₹)</label><input type="number" id="coDed" placeholder="0" inputmode="decimal"></div>
         </div>
 
-        <div class="section-label">Eligibility Breakdown</div>
-        <div class="detail-row"><span>Applicant Age:</span><span id="outAge">-</span></div>
-        <div class="detail-row"><span>Max Tenure:</span><span id="outTen">-</span></div>
-        <div class="detail-row"><span>Avg. Monthly Income:</span><span id="outInc">-</span></div>
-        <div class="detail-row"><span>Monthly Deductions:</span><span id="outDed">-</span></div>
-        <div class="detail-row"><span>FOIR Applied:</span><span id="outFoir">-</span></div>
-        <div class="detail-row" style="color:#2ecc71;"><span>Net Available for EMI:</span><span id="outAvail">-</span></div>
-
-        <div class="section-label">Interest & Repayment</div>
-        <div class="detail-row"><span>Base ROI (CIBIL):</span><span id="outBase">-</span></div>
-        <div class="detail-row"><span>Risk Premium (No Ins):</span><span id="outRisk" style="color:red;">-</span></div>
-        <div class="detail-row"><span>Concession:</span><span id="outConc">-</span></div>
-        <div class="detail-row" style="color:#d35400;"><span>Effective ROI:</span><span id="outRoi">-</span></div>
-        <div class="detail-row"><span>Monthly EMI:</span><span id="outEmi">-</span></div>
-        <div class="detail-row"><span>Total Interest:</span><span id="outInt">-</span></div>
-
-        <div class="section-label">Limits Comparison</div>
-        <div class="detail-row"><span>1. By Income:</span><span id="limInc">-</span></div>
-        <div class="detail-row"><span>2. By LTV (Cost):</span><span id="limLtv">-</span></div>
-        <div class="detail-row"><span>3. Product Cap:</span><span id="limCap">-</span></div>
-
-        <div class="doc-container">
-            <div class="doc-header">REQUIRED DOCUMENTS CHECKLIST</div>
-            <ul class="doc-list" id="docList"></ul>
+        <div class="section-header">4. Concessions &amp; Insurance</div>
+        <div id="gcliBox">
+            <div class="ins-toggle"><label class="cb-item plain"><input type="checkbox" id="cIns" checked><span>Taking credit life insurance (GCLI) for the loan?</span></label></div>
+            <div class="hint pad" id="gcliHint"></div>
+            <div class="input-group" id="gcliPremBox">
+                <label for="gcliPrem">Credit life insurance premium to finance (₹, optional)</label>
+                <input type="number" id="gcliPrem" placeholder="0" inputmode="decimal">
+                <div class="hint">Can be added to the loan, up to 95% of the on-road price.</div>
+            </div>
+        </div>
+        <div class="checkbox-grid one" id="concList"></div>
+        <div class="input-group mt12" id="procAccBox">
+            <label for="procAcc">Processing fee offer (your Bank of Baroda account)</label>
+            <select id="procAcc"></select>
+        </div>
+        <div class="input-group mt12">
+            <label for="othCh">Other one-time charges, for APR (₹)</label>
+            <input type="number" id="othCh" placeholder="Optional" inputmode="decimal">
         </div>
 
-        <div class="action-grid">
-            <button class="btn-act btn-copy" onclick="copyData()">COPY REPORT</button>
-            <button class="btn-act btn-wa" onclick="shareWa()">WHATSAPP</button>
-        </div>
+        <div class="err-box" id="errBox" style="display:none"></div>
+        <button type="button" class="btn-calc" id="calcBtn">CALCULATE ELIGIBILITY</button>
 
-        <button class="btn-act btn-amort" onclick="toggleTable()">VIEW REPAYMENT SCHEDULE</button>
-        <div class="table-box" id="tBox">
-            <table id="amortTable">
-                <thead><tr><th>Mth</th><th>EMI</th><th>Int</th><th>Prin</th><th>Bal</th></tr></thead>
-                <tbody></tbody>
-            </table>
+        <div id="resultArea" style="display:none">
+            <div id="statusBox" class="status"></div>
+            <div class="final-box">
+                <div class="fb-cap">Loan you may be eligible for</div>
+                <span class="final-amount" id="outFinal">₹ 0</span>
+                <div class="fb-emi" id="outEmiBig"></div>
+                <div class="fb-sub" id="outDecided"></div>
+            </div>
+            <div id="resBody"></div>
+            <div class="doc-container">
+                <div class="doc-header">DOCUMENTS YOU'LL NEED</div>
+                <ul class="doc-list" id="docList"></ul>
+            </div>
+            <div class="action-grid">
+                <button type="button" class="btn-act btn-copy" id="btnCopy">COPY SUMMARY</button>
+                <button type="button" class="btn-act btn-wa" id="btnWa">WHATSAPP</button>
+            </div>
+            <button type="button" class="btn-act btn-amort" id="btnAmort">VIEW REPAYMENT SCHEDULE</button>
+            <div class="table-box" id="tBox" style="display:none">
+                <table id="amortTable">
+                    <thead><tr><th>Month</th><th>EMI</th><th>Interest</th><th>Principal</th><th>Balance</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
         </div>
     </div>
+
+    <!-- ============================ SETTINGS ============================ -->
+    <div id="panelSet" class="panel">
+        <div class="set-intro">The rates and rules the calculator uses. Update them here when rates change, then press <b>Save settings</b>. Changes are saved in this browser only.</div>
+        <div id="setMsgs"></div>
+        <div id="setWrap"></div>
+        <input type="file" id="importFile" accept="application/json,.json" style="display:none">
+        <div class="save-bar">
+            <button type="button" class="btn-save" data-a="save">Save settings</button>
+            <button type="button" class="btn-sm" data-a="discard">Discard</button>
+            <span class="set-status" id="setStatus"></span>
+        </div>
+    </div>
+    <div class="disclaimer">Indicative estimate only, not a loan offer. The final loan amount, interest rate and charges depend on the bank's assessment and its rates on the day. Please confirm current rates and terms with Bank of Baroda before you apply. This is an independent calculator, not an official Bank of Baroda tool.</div>
 </div>
+<div class="toast" id="toast"></div>
 
 <script>
-const INR = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 });
-const fmt = (n) => INR.format(n);
-let gData = {};
+'use strict';
+/* =====================================================================
+   Baroda Auto Loan – eligibility & EMI calculator (indicative)
+   All rates and rules can be changed in the Settings tab; they are
+   saved in this browser only.
+   ===================================================================== */
+
+/* ---------- formatting & small helpers ---------- */
+const $ = id => document.getElementById(id);
+const INR = new Intl.NumberFormat('en-IN', {style: 'currency', currency: 'INR', maximumFractionDigits: 0});
+const fmt = n => INR.format(Math.round(n || 0));
+const r2 = x => Math.round((x + Number.EPSILON) * 100) / 100;
+const pc = x => r2(x).toFixed(2) + '%';
+const sgn = x => (r2(x) < 0 ? '− ' : '+ ') + Math.abs(r2(x)).toFixed(2) + '%';
+const clone = o => JSON.parse(JSON.stringify(o));
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+const sum = a => a.reduce((x, y) => x + y, 0);
+const avg = a => sum(a) / a.length;
+const isNum = v => typeof v === 'number' && isFinite(v);
+
+/* ---------- dates ---------- */
+function parseDate(s) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || '');
+    if (!m) return null;
+    const d = new Date(+m[1], +m[2] - 1, +m[3]);
+    return d.getMonth() === +m[2] - 1 ? d : null;
+}
+function today() { const t = new Date(); return new Date(t.getFullYear(), t.getMonth(), t.getDate()); }
+function addMonths(d, n) {
+    const r = new Date(d.getFullYear(), d.getMonth() + n, 1);
+    const last = new Date(r.getFullYear(), r.getMonth() + 1, 0).getDate();
+    r.setDate(Math.min(d.getDate(), last));
+    return r;
+}
+const addYears = (d, n) => addMonths(d, 12 * n);
+/* Largest whole number of months n such that a + n months <= b (0 if b < a). */
+function monthsFit(a, b) {
+    if (b < a) return 0;
+    let n = (b.getFullYear() - a.getFullYear()) * 12 + (b.getMonth() - a.getMonth()) + 1;
+    while (n > 0 && addMonths(a, n) > b) n--;
+    return n;
+}
+const ym = m => `${Math.floor(m / 12)} yrs ${m % 12} mths`;
+const dmy = s => { const d = parseDate(s); return d ? `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}` : String(s || ''); };
+function inDates(now, from, to) { const f = parseDate(from), t = parseDate(to); return !!(f && t && now >= f && now <= t); }
+
+/* ---------- loan maths ---------- */
+function emiOf(p, r, n) { if (n <= 0 || p <= 0) return 0; if (r === 0) return p / n; const f = Math.pow(1 + r, n); return p * r * f / (f - 1); }
+function pvOf(e, r, n) { if (n <= 0 || e <= 0) return 0; if (r === 0) return e * n; return e * (1 - Math.pow(1 + r, -n)) / r; }
+/* APR: monthly IRR of (loan − upfront charges) against the EMIs, × 12. */
+function aprOf(net, e, n) {
+    if (!(net > 0) || !(e > 0) || n <= 0) return null;
+    if (e * n <= net) return 0;
+    let lo = 0, hi = 0.5;
+    for (let k = 0; k < 100; k++) { const m = (lo + hi) / 2; if (pvOf(e, m, n) > net) lo = m; else hi = m; }
+    return (lo + hi) / 2 * 1200;
+}
+
+/* ---------- reference lists ---------- */
+const SCHEMES = {
+    CAR:    {label: 'Baroda Car Loan – new car', short: 'Car Loan', product: 'NEW'},
+    GOVT:   {label: 'Car Loan for Central / State Govt & PSU employees', short: 'Govt & PSU employees', product: 'NEW'},
+    YODDHA: {label: 'Baroda Yoddha Auto Loan – Defence & paramilitary', short: 'Yoddha', product: 'NEW'},
+    DIRECT: {label: 'Baroda Direct Car Loan – apply at a branch', short: 'Direct', product: 'NEW'},
+    GREEN:  {label: 'bob Green Wheel – new electric car', short: 'Green Wheel (EV)', product: 'NEW'},
+    USED:   {label: 'Baroda Auto Loan – pre-owned car', short: 'Pre-owned', product: 'USED'}
+};
+const BORR = {
+    SAL: {label: 'Salaried (confirmed employee)', short: 'Salaried', ind: true, sal: true},
+    PEN: {label: 'Pensioner', short: 'Pensioner', ind: true, sal: true},
+    BIZ: {label: 'Self-employed / Business / Professional / Farmer', short: 'Self-employed', ind: true, sal: false},
+    ENT: {label: 'Business entity – firm / company / LLP / trust / society', short: 'Business entity', ind: false, sal: false}
+};
+const IND = ['SAL', 'PEN', 'BIZ'];
+const BASES = [['BRLLR', 'BRLLR'], ['BRLLR+SP', 'BRLLR+SP'], ['MCLR6', '6M MCLR'], ['MCLR1Y', '1Y MCLR'], ['MCLR1Y+SP', '1Y MCLR+SP']];
+const BASE_LABEL = Object.fromEntries(BASES);
+const RATINGS = [['CMR1', 'CMR-1'], ['CMR2', 'CMR-2'], ['CMR3', 'CMR-3'], ['CMR4', 'CMR-4'], ['CMR5', 'CMR-5'], ['CMR6', 'CMR-6'],
+    ['CMR7', 'CMR-7 to CMR-10'], ['AAA', 'External rating AAA'], ['AA', 'External rating AA'], ['A', 'External rating A'], ['BBB', 'External rating BBB'],
+    ['SUBBBB', 'External rating below BBB'], ['UNR', 'Not rated (no CMR / external rating)']];
+const RATING_LABEL = Object.fromEntries(RATINGS);
+const ENT_CONST = [['PROP', 'Sole proprietorship'], ['PART', 'Partnership firm'], ['LLP', 'LLP'], ['PVT', 'Private limited company'],
+    ['PUB', 'Public limited company'], ['TRUST', 'Trust'], ['SOC', 'Society'], ['OTHER', 'HUF / NBFC / charitable trust / other']];
+const DEP_OK = ['PROP', 'PART', 'LLP', 'PVT', 'PUB'];          // depreciation can be added back to income
+const CO_REL = [['SPOUSE', 'Spouse'], ['FATHER', 'Father'], ['MOTHER', 'Mother'], ['SON', 'Son'], ['DAUGHTER', 'Daughter'], ['BROTHER', 'Brother'], ['BWIFE', "Brother's wife"]];
+const FOIR_SETS = [['newSal', 'New car – salaried / pensioner (monthly income)'], ['newOth', 'New car – self-employed & entities (average annual income)'],
+    ['usedSal', 'Pre-owned – salaried / pensioner (monthly income)'], ['usedOth', 'Pre-owned – self-employed (average annual income)']];
+
+/* ---------- default rates & rules ---------- */
+const B_ = (from, to, base, spread) => ({from, to, base, spread});
+const N_ = (gmiFrom, gmiTo, base, spread) => ({gmiFrom, gmiTo, base, spread});
+const SPECIAL0 = () => ({on: false, name: 'Festive offer', from: '', to: '', suspend: false, floor: {base: '', spread: 0}, rows: [], flat: 0});
+function mkCard(o) {
+    return Object.assign({
+        id: '', name: '', kind: 'cibil', roi: 'FL', schemes: [], borrowers: IND.slice(),
+        floor: {base: '', spread: 0}, maxConc: null, ceiling: null, gcli: 'premium',
+        rows: [], ntc: [], special: SPECIAL0()
+    }, o);
+}
+const CORP_FL = {CMR1: ['BRLLR', -0.30], CMR2: ['BRLLR', -0.30], CMR3: ['BRLLR', -0.30], CMR4: ['BRLLR', 0], CMR5: ['BRLLR+SP', 0.25],
+    CMR6: ['BRLLR+SP', 0.25], CMR7: ['BRLLR+SP', 0.25], AAA: ['BRLLR', -0.30], AA: ['BRLLR', -0.30], A: ['BRLLR', -0.30],
+    BBB: ['BRLLR', -0.30], SUBBBB: ['BRLLR+SP', 0.25], UNR: ['BRLLR', 0]};
+const CORP_FX = {CMR1: ['MCLR6', 0], CMR2: ['MCLR6', 0], CMR3: ['MCLR6', 0], CMR4: ['MCLR6', 0.15], CMR5: ['MCLR6', 0.85],
+    CMR6: ['MCLR6', 0.85], CMR7: ['MCLR6', 0.85], AAA: ['MCLR6', 0], AA: ['MCLR6', 0], A: ['MCLR6', 0], BBB: ['MCLR6', 0],
+    SUBBBB: ['MCLR6', 0.85], UNR: ['MCLR6', 0.35]};
+const ratingRows = m => RATINGS.map(([code]) => ({code, base: m[code][0], spread: m[code][1]}));
+
+const DEFAULT_CARDS = [
+    mkCard({id: 'car_fl', name: 'Baroda Car Loan – floating', roi: 'FL', schemes: ['CAR', 'DIRECT', 'GREEN'],
+        floor: {base: 'BRLLR', spread: -0.30}, gcli: 'premium',
+        rows: [B_(771, 900, 'BRLLR', -0.30), B_(751, 770, 'BRLLR', -0.25), B_(726, 750, 'BRLLR', 0.10),
+            B_(701, 725, 'BRLLR+SP', 0.50), B_(681, 700, 'BRLLR+SP', 1.85), B_(300, 680, 'BRLLR+SP', 3.15)],
+        ntc: [N_(40000, null, 'BRLLR+SP', 0.05), N_(0, 39999, 'BRLLR+SP', 0.60)]}),
+    mkCard({id: 'corp_fl', name: 'Business entities (by rating) – floating', kind: 'rating', roi: 'FL', schemes: ['CAR', 'DIRECT', 'GREEN'],
+        borrowers: ['ENT'], floor: {base: 'BRLLR', spread: -0.30}, gcli: 'none', rows: ratingRows(CORP_FL)}),
+    mkCard({id: 'govt_fl', name: 'Govt & PSU employees – floating', roi: 'FL', schemes: ['GOVT'], borrowers: ['SAL'],
+        floor: {base: 'BRLLR', spread: 0}, gcli: 'premium',
+        rows: [B_(726, 900, 'BRLLR', -0.30), B_(701, 725, 'BRLLR+SP', 0.10)],
+        ntc: [N_(40000, null, 'BRLLR', -0.20), N_(0, 39999, 'BRLLR', 0.15)]}),
+    mkCard({id: 'yod_fl', name: 'Baroda Yoddha – floating', roi: 'FL', schemes: ['YODDHA'], borrowers: ['SAL', 'PEN'],
+        floor: {base: 'BRLLR', spread: 0}, gcli: 'premium',
+        rows: [B_(701, 900, 'BRLLR', -0.30), B_(681, 700, 'BRLLR+SP', 1.70), B_(300, 680, 'BRLLR+SP', 3.05)],
+        ntc: [N_(0, null, 'BRLLR', -0.20)]}),
+    mkCard({id: 'used_fl', name: 'Pre-owned car – floating', roi: 'FL', schemes: ['USED'],
+        floor: {base: 'BRLLR+SP', spread: 0}, maxConc: 0.50, gcli: 'premium',
+        rows: [B_(800, 900, 'BRLLR+SP', 2.50), B_(771, 799, 'BRLLR+SP', 2.85), B_(726, 770, 'BRLLR+SP', 3.10),
+            B_(701, 725, 'BRLLR+SP', 3.75), B_(650, 700, 'BRLLR+SP', 5.25), B_(300, 649, 'BRLLR+SP', 5.25)],
+        ntc: [N_(40000, null, 'BRLLR+SP', 3.10), N_(0, 39999, 'BRLLR+SP', 3.75)]}),
+    mkCard({id: 'car_fx', name: 'Baroda Car Loan – fixed', roi: 'FX', schemes: ['CAR', 'GREEN'],
+        floor: {base: 'MCLR6', spread: 0}, gcli: 'discount',
+        rows: [B_(771, 900, 'MCLR6', 0), B_(751, 770, 'MCLR6', 0.15), B_(726, 750, 'MCLR6', 0.35),
+            B_(701, 725, 'MCLR6', 0.85), B_(681, 700, 'MCLR6', 1.75), B_(300, 680, 'MCLR6', 2.70)],
+        ntc: [N_(40000, null, 'MCLR6', 0.15), N_(0, 39999, 'MCLR6', 0.60)]}),
+    mkCard({id: 'direct_fx', name: 'Direct Car Loan (individuals) – fixed', roi: 'FX', schemes: ['DIRECT'],
+        floor: {base: 'MCLR6', spread: 0}, gcli: 'discount',
+        rows: [B_(771, 900, 'MCLR6', 0), B_(751, 770, 'MCLR6', 0), B_(726, 750, 'MCLR6', 0.15),
+            B_(701, 725, 'MCLR6', 0.75), B_(681, 700, 'MCLR6', 1.75), B_(300, 680, 'MCLR6', 2.70)],
+        ntc: [N_(40000, null, 'MCLR6', 0), N_(0, 39999, 'MCLR6', 0.45)]}),
+    mkCard({id: 'corp_fx', name: 'Business entities (by rating) – fixed', kind: 'rating', roi: 'FX', schemes: ['CAR', 'DIRECT', 'GREEN'],
+        borrowers: ['ENT'], floor: {base: 'MCLR6', spread: 0}, gcli: 'none', rows: ratingRows(CORP_FX)}),
+    mkCard({id: 'govt_fx', name: 'Govt & PSU employees – fixed', roi: 'FX', schemes: ['GOVT'], borrowers: ['SAL'],
+        floor: {base: 'MCLR6', spread: 0}, gcli: 'discount',
+        rows: [B_(771, 900, 'MCLR6', 0), B_(726, 770, 'MCLR6', 0.15), B_(701, 725, 'MCLR6', 0.35)],
+        ntc: [N_(40000, null, 'MCLR6', 0.15), N_(0, 39999, 'MCLR6', 0.15)]}),
+    mkCard({id: 'yod_fx', name: 'Baroda Yoddha – fixed', roi: 'FX', schemes: ['YODDHA'], borrowers: ['SAL', 'PEN'],
+        floor: {base: 'MCLR6', spread: 0}, gcli: 'discount',
+        rows: [B_(771, 900, 'MCLR6', 0), B_(701, 770, 'MCLR6', 0.15), B_(681, 700, 'MCLR6', 1.75), B_(300, 680, 'MCLR6', 2.70)],
+        ntc: [N_(0, null, 'MCLR6', 0.15)]}),
+    mkCard({id: 'used_fx', name: 'Pre-owned car – fixed', roi: 'FX', schemes: ['USED'],
+        floor: {base: '', spread: 0}, maxConc: 0.50, gcli: 'premium',
+        rows: [B_(800, 900, 'MCLR1Y+SP', 2.90), B_(771, 799, 'MCLR1Y+SP', 3.25), B_(726, 770, 'MCLR1Y+SP', 3.50),
+            B_(701, 725, 'MCLR1Y+SP', 4.15), B_(650, 700, 'MCLR1Y+SP', 5.65), B_(300, 649, 'MCLR1Y+SP', 5.65)],
+        ntc: [N_(40000, null, 'MCLR1Y+SP', 3.50), N_(0, 39999, 'MCLR1Y+SP', 4.15)]})
+];
+
+const NEW_SCHEMES = ['CAR', 'GOVT', 'YODDHA', 'DIRECT', 'GREEN'];
+const DEFAULTS = {
+    v: 2,
+    subtitle: 'Car loan eligibility & EMI calculator',
+    base: {brllr: 7.90, sp: 0.25, mclr6: 8.50, mclr1y: 8.75, asOn: 'BRLLR w.e.f. 06-12-2025; MCLR as on 12-09-2026'},
+    cards: DEFAULT_CARDS,
+    conc: [
+        {id: 'coll', label: 'Pledging an FD / NSC / KVP / LIC policy worth 50% or more of the loan', pct: 0.50, schemes: NEW_SCHEMES.concat('USED'), indOnly: false},
+        {id: 'hl', label: 'Existing Bank of Baroda home loan, repaid on time', pct: 0.25, schemes: NEW_SCHEMES.slice(), indOnly: true},
+        {id: 'icsi', label: 'Member of ICSI (company secretaries)', pct: 0.25, schemes: NEW_SCHEMES.slice(), indOnly: true},
+        {id: 'uhl', label: 'Existing Bank of Baroda home or car loan, repaid on time', pct: 0.25, schemes: ['USED'], indOnly: true},
+        {id: 'ucl', label: 'Recently closed a Bank of Baroda car loan, repaid on time', pct: 0.25, schemes: ['USED'], indOnly: true}
+    ],
+    schemes: {
+        CAR:    {borrowers: ['SAL', 'PEN', 'BIZ', 'ENT'], flMax: 84, fxMin: 37, fxMax: 84, capInd: 30000000, capEnt: 50000000, minLoan: 0, schemeConc: 0},
+        GOVT:   {borrowers: ['SAL'], flMax: 84, fxMin: 37, fxMax: 84, capInd: 30000000, capEnt: 0, minLoan: 0, schemeConc: 0},
+        YODDHA: {borrowers: ['SAL', 'PEN'], flMax: 84, fxMin: 37, fxMax: 84, capInd: 30000000, capEnt: 0, minLoan: 0, schemeConc: 0},
+        DIRECT: {borrowers: ['SAL', 'PEN', 'BIZ', 'ENT'], flMax: 84, fxMin: 37, fxMax: 84, capInd: 30000000, capEnt: 50000000, minLoan: 0, schemeConc: 0},
+        GREEN:  {borrowers: ['SAL', 'PEN', 'BIZ', 'ENT'], flMax: 84, fxMin: 37, fxMax: 84, capInd: 30000000, capEnt: 50000000, minLoan: 0, schemeConc: 0.15, evMax: 96, evCibil: 726},
+        USED:   {borrowers: ['SAL', 'PEN', 'BIZ'], flMax: 60, fxMin: 0, fxMax: 60, capInd: 5000000, capEnt: 0, minLoan: 200000, schemeConc: 0}
+    },
+    foir: {
+        newSal: [{from: 0, pct: 60}, {from: 50000, pct: 70}, {from: 150000, pct: 80}],
+        newOth: [{from: 0, pct: 60}, {from: 600000, pct: 80}],
+        usedSal: [{from: 0, pct: 60}],
+        usedOth: [{from: 0, pct: 60}]
+    },
+    ltv: {newPct: 90, gcliMaxPct: 95, usedValPct: 75, usedInvPct: 75, usedIdvPct: 100},
+    used: {maxVehMonths: 60, vehPlusTenure: 96, maxOwner: 2, minIncSal: 250000, minIncOth: 300000},
+    age: {minApp: 21, minCo: 18, maxEnd: 70, othersEnd: 65, retire: 60},
+    cibil: {cutoff: 701, jointMin: 650, belowMin: 'block'},
+    ent: {depCapPct: 50, tnw: {CMR1: 5, CMR2: 5, CMR3: 5, CMR4: 5, CMR5: 5, CMR6: 10, CMR7: null, AAA: 5, AA: 5, A: 5, BBB: 5, SUBBBB: null, UNR: 10}},
+    proc: {CAR: {upTo: 1000000, low: 1500, high: 2000}, GREEN: {disc: 50}, DIRECT: {flat: 1000}, GOVT: {agent: 500, direct: 0},
+        YODDHA: {flat: 0}, USED: {pct: 0.50, min: 2500, max: 10000}},
+    procAcc: [['Baroda Salary Privilege account', 100], ['Baroda Salary Premium account', 75], ['Baroda Salary Super account', 50],
+        ['Baroda Salary Classic account', 25], ['Baroda Govt Employee Salary account', 100], ['Baroda Defence Salary Package', 100],
+        ['Member of ICSI', 100], ['Baroda Premium Current account', 100], ['Baroda Premium Current account – Privilege', 100],
+        ['Baroda Mahila Shakti savings account', 25], ['bob Masterstroke LITE savings account', 50],
+        ['bob Masterstroke savings account', 100]].map(([label, pct]) => ({label, pct})),
+    gst: 18, gcliAdj: 0.05, round: 1000
+};
+
+/* ---------- settings: load / normalise ---------- */
+const LS_KEY = 'bobAutoLoan.settings.v2';
+function lsGet() { try { return localStorage.getItem(LS_KEY); } catch (e) { return null; } }
+function lsSet(v) { try { localStorage.setItem(LS_KEY, v); return true; } catch (e) { return false; } }
+/* Copy only the keys the defaults know about, so stray keys in an imported file are ignored. */
+function mergeKnown(t, s) {
+    if (!s || typeof s !== 'object') return t;
+    for (const k of Object.keys(t)) {
+        if (!(k in s)) continue;
+        const sv = s[k], tv = t[k];
+        if (Array.isArray(tv)) { if (Array.isArray(sv)) t[k] = sv; }
+        else if (tv && typeof tv === 'object') { if (sv && typeof sv === 'object' && !Array.isArray(sv)) mergeKnown(tv, sv); }
+        else if (tv === null || typeof sv === typeof tv || sv === null) t[k] = sv;
+    }
+    return t;
+}
+function normCard(c) {
+    c = c && typeof c === 'object' ? c : {};
+    const n = mkCard({});
+    n.id = String(c.id || ('c' + Math.random().toString(36).slice(2, 9)));
+    n.name = String(c.name || 'Untitled table');
+    n.kind = c.kind === 'rating' ? 'rating' : 'cibil';
+    n.roi = c.roi === 'FX' ? 'FX' : 'FL';
+    n.floor = Object.assign({base: '', spread: 0}, c.floor);
+    n.maxConc = c.maxConc == null ? null : c.maxConc;
+    n.ceiling = c.ceiling == null ? null : c.ceiling;
+    n.gcli = ['premium', 'discount', 'none'].includes(c.gcli) ? c.gcli : 'premium';
+    n.special = Object.assign(SPECIAL0(), c.special);
+    n.special.floor = Object.assign({base: '', spread: 0}, c.special && c.special.floor);
+    n.special.rows = Array.isArray(n.special.rows) ? n.special.rows : [];
+    n.schemes = (Array.isArray(c.schemes) ? c.schemes : []).filter(s => SCHEMES[s]);
+    if (n.kind === 'rating') {
+        const m = Object.fromEntries((Array.isArray(c.rows) ? c.rows : []).map(r => [r.code, r]));
+        n.rows = RATINGS.map(([code]) => m[code] ? {code, base: m[code].base, spread: m[code].spread} : {code, base: 'BRLLR', spread: 0});
+        n.borrowers = ['ENT']; n.ntc = [];
+    } else {
+        n.rows = Array.isArray(c.rows) ? c.rows : [];
+        n.ntc = Array.isArray(c.ntc) ? c.ntc : [];
+        n.borrowers = (Array.isArray(c.borrowers) ? c.borrowers : IND).filter(b => IND.includes(b));
+    }
+    return n;
+}
+function normalize(o) {
+    const d = clone(DEFAULTS);
+    if (!o || typeof o !== 'object') return d;
+    const out = mergeKnown(d, clone(o));
+    out.cards = (Array.isArray(o.cards) ? o.cards : DEFAULTS.cards).map(normCard);
+    for (const k of Object.keys(out.schemes)) out.schemes[k].borrowers = (out.schemes[k].borrowers || []).filter(b => BORR[b]);
+    out.conc = (Array.isArray(out.conc) ? out.conc : []).map(k => ({id: String(k.id || 'k' + Math.random().toString(36).slice(2, 9)), label: String(k.label || ''),
+        pct: k.pct, schemes: (Array.isArray(k.schemes) ? k.schemes : []).filter(s => SCHEMES[s]), indOnly: !!k.indOnly}));
+    out.procAcc = (Array.isArray(out.procAcc) ? out.procAcc : []).map(a => ({label: String(a.label || ''), pct: a.pct}));
+    if (!['block', 'approval'].includes(out.cibil.belowMin)) out.cibil.belowMin = 'block';
+    return out;
+}
+function loadSettings() {
+    const raw = lsGet();
+    if (!raw) return clone(DEFAULTS);
+    try { return normalize(JSON.parse(raw)); } catch (e) { return clone(DEFAULTS); }
+}
+
+/* ---------- calculation ---------- */
+function pickSlab(slabs, basis) {
+    const s = slabs.filter(x => isNum(x.from) && isNum(x.pct)).slice().sort((a, b) => a.from - b.from);
+    let hit = null;
+    for (const x of s) if (basis >= x.from) hit = x;
+    return hit;
+}
+
+function compute(inp, S, now) {
+    now = now || today();
+    const R = {errs: [], issues: [], now, inp};
+    const err = t => R.errs.push(t);
+    const add = (sev, text) => R.issues.push({sev, text});
+    const SC = SCHEMES[inp.scheme], sch = S.schemes[inp.scheme], Bt = BORR[inp.borr];
+    if (!SC || !sch || !Bt) { err('Select a loan scheme and borrower type.'); return R; }
+    const isInd = Bt.ind, isSal = Bt.sal, used = SC.product === 'USED', fx = inp.roi === 'FX';
+    Object.assign(R, {SC, sch, Bt, isInd, isSal, used, fx});
+    const baseVal = b => b === 'BRLLR' ? S.base.brllr : b === 'BRLLR+SP' ? S.base.brllr + S.base.sp
+        : b === 'MCLR6' ? (isNum(S.base.mclr6) ? S.base.mclr6 : NaN) : b === 'MCLR1Y' ? (isNum(S.base.mclr1y) ? S.base.mclr1y : NaN)
+            : b === 'MCLR1Y+SP' ? (isNum(S.base.mclr1y) ? S.base.mclr1y + S.base.sp : NaN) : NaN;
+    const rateOf = (base, spread) => r2(baseVal(base) + (+spread || 0));
+    const working = inp.borr === 'SAL';
+
+    /* 1. who can apply */
+    if (!sch.borrowers.includes(inp.borr)) {
+        err(`${SC.label} is available only for: ${sch.borrowers.map(b => BORR[b].short).join(', ') || 'nobody (check Settings)'}.`);
+        return R;
+    }
+    if (inp.borr === 'ENT' && inp.entConst === 'OTHER') add('fail', 'HUFs, NBFCs, charitable trusts and other entities not listed are not eligible.');
+    if (inp.scheme === 'DIRECT' && inp.via === 'AGENT') add('fail', 'Direct Car Loan is only for customers who apply directly at a branch, not through a car dealer or loan agent.');
+    if (inp.scheme === 'GOVT' && !inp.govtSal) add('fail', 'This scheme needs your salary credited to your bank account in at least 6 of the last 8 months, with no gap of more than 60 days.');
+    if (inp.borr === 'SAL' && !inp.confirmed) add('fail', 'Only confirmed employees are eligible, not those on probation, contract or temporary employment.');
+    if (used && inp.borr === 'SAL' && !inp.usedYear) add('fail', 'For a pre-owned car, salaried applicants need at least 1 year with their current employer.');
+    if (inp.scheme === 'GREEN' && !inp.evOk) add('fail', 'Green Wheel finances only fully electric passenger cars; hybrid, petrol and diesel cars are not eligible.');
+    if (used && inp.usedSrc === 'OTHER') add('fail', "Pre-owned car loans are only for cars bought from a certified pre-owned dealer approved by the bank, sold by the bank, or a dealer's demo car.");
+
+    /* 2. credit scores */
+    const validCibil = (v, who) => {
+        if (v == null) { err(`Enter the ${who}'s CIBIL score (−1 if there is no credit history).`); return false; }
+        if (v !== -1 && !(Number.isInteger(v) && v >= 300 && v <= 900)) { err(`The ${who}'s CIBIL score must be −1 or a whole number from 300 to 900.`); return false; }
+        return true;
+    };
+    if (isInd) validCibil(inp.cibil, 'applicant');
+
+    /* 3. applicant age */
+    let ageM = null, ageCap = Infinity;
+    if (isInd) {
+        if (!inp.dob) err("Enter the applicant's date of birth.");
+        else if (inp.dob > now) err("The applicant's date of birth cannot be in the future.");
+        else {
+            ageM = monthsFit(inp.dob, now);
+            if (ageM < S.age.minApp * 12) add('fail', `The applicant must be at least ${S.age.minApp} years old.`);
+            ageCap = monthsFit(now, addYears(inp.dob, S.age.maxEnd));
+        }
+    }
+    R.ageM = ageM;
+
+    /* 4. co-applicant (family member whose income is added) */
+    let co = null;
+    if (isInd && inp.co && inp.co.on) {
+        co = {rel: inp.co.rel, type: inp.co.type, gmi: 0, gai: 0, dedM: 0, cap: Infinity, ageM: null};
+        if (!inp.co.dob) err("Enter the co-applicant's date of birth.");
+        else if (inp.co.dob > now) err("The co-applicant's date of birth cannot be in the future.");
+        else {
+            co.ageM = monthsFit(inp.co.dob, now);
+            co.cap = monthsFit(now, addYears(inp.co.dob, S.age.maxEnd));
+            if (co.ageM < S.age.minCo * 12) add('fail', `The co-applicant must be at least ${S.age.minCo} years old.`);
+        }
+        validCibil(inp.co.cibil, 'co-applicant');
+        if (co.type === 'BIZ') {
+            if (inp.co.y.some(v => v == null)) err("Enter the co-applicant's gross annual income for both years.");
+            else { co.gai = avg(inp.co.y); co.gmi = co.gai / 12; }
+            co.dedM = (inp.co.ded || 0) / 12;
+        } else {
+            if (inp.co.s.some(v => v == null)) err("Enter the co-applicant's gross monthly income for all three months.");
+            else { co.gmi = avg(inp.co.s); co.gai = co.gmi * 12; }
+            co.dedM = inp.co.ded || 0;
+        }
+        if (inp.scheme === 'YODDHA' && co.type === 'PEN') add('fail', 'For Yoddha loans, a co-applicant whose income is added must be working or running a business or profession.');
+    }
+    R.co = co;
+
+    /* 5. business entity */
+    let tnwMult = null;
+    if (!isInd) {
+        if (!inp.entRating) err("Select the business's rating (CMR or external rating).");
+        if (inp.tnw == null) err("Enter the business's tangible net worth.");
+        if (inp.entRating) {
+            tnwMult = S.ent.tnw[inp.entRating];
+            if (tnwMult === undefined) tnwMult = null;
+            if (inp.entRating === 'CMR7') add('fail', 'Businesses rated CMR-7 or worse are not eligible.');
+            else if (tnwMult == null) add('fail', `Businesses with ${RATING_LABEL[inp.entRating]} are not eligible. Eligible: CMR-1 to CMR-6, external BBB or better, or not rated.`);
+        }
+        if (inp.tnw != null && inp.tnw <= 0) add('fail', 'Tangible net worth must be positive.');
+    }
+    R.tnwMult = tnwMult;
+
+    /* 6. income (salaried: monthly figures; others: yearly figures) */
+    let gmiA = 0, gaiA = 0, dedMA = 0, depAdd = 0, depNote = '';
+    if (isSal) {
+        if (inp.s.some(v => v == null)) err(`Enter the gross monthly ${inp.borr === 'PEN' ? 'pension' : 'salary'} for all three months.`);
+        else { gmiA = avg(inp.s); gaiA = gmiA * 12; }
+        dedMA = inp.dedM || 0;
+    } else {
+        if (inp.y.some(v => v == null)) err(inp.borr === 'ENT' ? 'Enter the profit after tax for both years.' : 'Enter the gross annual income for both years.');
+        else gaiA = avg(inp.y);
+        if (inp.borr === 'ENT' && DEP_OK.includes(inp.entConst) && (inp.dep[0] != null || inp.dep[1] != null)) {
+            if (inp.dep.some(v => v == null)) err('Enter depreciation for both years, or leave both blank.');
+            else {
+                const [d1, d2] = inp.dep;
+                let a = Math.min((d1 + d2) / 2, d2);                          // lower of the 2-year average and the latest year
+                const cap = Math.max(0, gaiA) * S.ent.depCapPct / 100;
+                if (a > cap) { a = cap; depNote = `limited to ${r2(S.ent.depCapPct)}% of income`; }
+                depAdd = Math.max(0, a);
+            }
+        }
+        gaiA += depAdd; gmiA = gaiA / 12; dedMA = (inp.dedA || 0) / 12;
+    }
+    const gmi = gmiA + (co ? co.gmi : 0);
+    const dedM = dedMA + (co ? co.dedM : 0);
+    R.inc = {gmiA, gaiA, dedMA, depAdd, depNote, gmi, dedM, dedA: isSal ? null : (inp.dedA || 0)};
+    if (used && isInd && !R.errs.length) {
+        const min = isSal ? S.used.minIncSal : S.used.minIncOth;
+        if (gaiA < min) add('fail', `For a pre-owned car, the applicant's gross annual income must be at least ${fmt(min)} (here ${fmt(gaiA)}).`);
+    }
+
+    /* 7. repayment capacity (FOIR) */
+    const slabs = used ? (isSal ? S.foir.usedSal : S.foir.usedOth) : (isSal ? S.foir.newSal : S.foir.newOth);
+    const basis = isSal ? gmi : gmi * 12;
+    const slab = pickSlab(slabs, basis);
+    const foir = slab ? slab.pct : 0;
+    const capEmi = gmi * foir / 100 - dedM;
+    R.foir = {pct: foir, basis, slab, capEmi};
+
+    /* 8. CIBIL: average of the applicants' scores, −1 left out */
+    let ntcAll = false, avgSc = null, minSc = null, scTxt = '';
+    if (isInd) {
+        const scores = [inp.cibil].concat(co ? [inp.co.cibil] : []);
+        const hist = scores.filter(v => v != null && v !== -1);
+        ntcAll = scores.every(v => v === -1);
+        if (hist.length) { avgSc = avg(hist); minSc = Math.min(...hist); }
+        scTxt = hist.length > 1 ? `${r2(avgSc)} (average)` : String(avgSc);
+        const C = S.cibil, appr = C.belowMin === 'approval';
+        if (!ntcAll && avgSc != null) {
+            if (avgSc < C.cutoff) {
+                if (appr) add('dev', `The CIBIL score of ${scTxt} is below the usual minimum of ${C.cutoff}, so the loan needs the bank's approval and carries a higher rate.`);
+                else add('fail', `The minimum CIBIL score is ${C.cutoff}; the score here is ${scTxt}.`);
+            } else if (minSc < C.jointMin) {
+                if (appr) add('dev', `Each applicant's CIBIL score should be at least ${C.jointMin} (one is ${minSc}), so the loan needs the bank's approval.`);
+                else add('fail', `Each applicant's CIBIL score should be at least ${C.jointMin}; one applicant's score is ${minSc}.`);
+            }
+        }
+    }
+    R.cibil = {ntcAll, avgSc, minSc, scTxt};
+
+    /* 9. rate table */
+    const card = S.cards.find(c => c.roi === inp.roi && c.schemes.includes(inp.scheme) && c.borrowers.includes(inp.borr));
+    if (!card) err(`No ${fx ? 'fixed' : 'floating'} rate table is set up for ${SC.short} · ${Bt.short}. Add one in Settings.`);
+
+    /* 10. car price and LTV */
+    let ltvLim = 0, vehCap = Infinity;
+    const veh = {};
+    if (!used) {
+        if (!(inp.ex > 0)) err('Enter the basic / ex-showroom price of the car.');
+        const onRoad = (inp.ex || 0) + (inp.gst || 0) + (inp.rto || 0) + (inp.ins || 0) - (inp.dealerDisc || 0);
+        if (inp.ex > 0 && onRoad <= 0) err('The dealer discount cannot be more than the on-road price.');
+        const prem = (isInd && inp.gcli && inp.gcliPrem > 0) ? inp.gcliPrem : 0;
+        const base = onRoad * S.ltv.newPct / 100;
+        ltvLim = prem > 0 ? Math.min(base + prem, onRoad * S.ltv.gcliMaxPct / 100) : base;
+        Object.assign(veh, {onRoad, prem, base, acc: inp.acc || 0});
+    } else {
+        if (!(inp.usedPrice > 0)) err('Enter the sale price of the pre-owned car.');
+        if (!(inp.usedVal > 0)) err('Enter the value in the valuation report.');
+        if (!(inp.usedIdv > 0)) err("Enter the IDV from the car's insurance policy.");
+        if (!inp.usedInv) err("Enter the car's original purchase (invoice) date.");
+        else if (inp.usedInv > now) err("The car's original invoice date cannot be in the future.");
+        else {
+            veh.ageM = monthsFit(inp.usedInv, now);
+            if (now > addMonths(inp.usedInv, S.used.maxVehMonths)) add('fail', `The car must not be more than ${r2(S.used.maxVehMonths / 12)} years old.`);
+            vehCap = monthsFit(now, addMonths(inp.usedInv, S.used.vehPlusTenure));
+        }
+        if (inp.usedOwner > S.used.maxOwner) add('fail', `The car can have changed owners at most ${S.used.maxOwner} times before this sale.`);
+        if (inp.usedDupRc) add('fail', 'Cars with a duplicate RC cannot be financed.');
+        const a = (inp.usedVal || 0) * S.ltv.usedValPct / 100, b = (inp.usedPrice || 0) * S.ltv.usedInvPct / 100, c = (inp.usedIdv || 0) * S.ltv.usedIdvPct / 100;
+        ltvLim = Math.min(a, b, c);
+        Object.assign(veh, {a, b, c, price: inp.usedPrice || 0, val: inp.usedVal || 0, idv: inp.usedIdv || 0});
+    }
+    R.veh = veh;
+
+    /* 11. tenure */
+    let maxT = fx ? sch.fxMax : sch.flMax, tWhy = 'scheme maximum';
+    const evLong = inp.scheme === 'GREEN' && working && !ntcAll && avgSc != null && isNum(sch.evCibil) && avgSc >= sch.evCibil;
+    if (evLong && isNum(sch.evMax) && sch.evMax > maxT) { maxT = sch.evMax; tWhy = `electric car, salaried, CIBIL ${sch.evCibil}+`; }
+    if (ageCap < maxT) { maxT = ageCap; tWhy = `applicant turns ${S.age.maxEnd}`; }
+    if (co && co.cap < maxT) { maxT = co.cap; tWhy = `co-applicant turns ${S.age.maxEnd}`; }
+    if (vehCap < maxT) { maxT = vehCap; tWhy = `car's age + tenure up to ${S.used.vehPlusTenure} months`; }
+    maxT = Math.max(0, maxT);
+    const minT = fx && sch.fxMin > 0 ? sch.fxMin : 1;
+    let ten = maxT, prefUsed = false;
+    if (!R.errs.length) {
+        if (maxT < 1) add('fail', 'No repayment period is possible within the age and car-age limits.');
+        else if (maxT < minT) add('fail', `A fixed rate needs a tenure of at least ${minT} months, but only ${maxT} months are possible.`);
+        else if (inp.prefTen != null) {
+            if (!Number.isInteger(inp.prefTen) || inp.prefTen < minT || inp.prefTen > maxT) err(`Preferred tenure must be a whole number from ${minT} to ${maxT} months.`);
+            else { ten = inp.prefTen; prefUsed = true; }
+        }
+    }
+    R.ten = {maxT, tWhy, minT, ten, prefUsed};
+    if (isInd && ageM != null && ten > 0 && !R.errs.length) {
+        const limY = working ? (isNum(inp.retire) && inp.retire > 0 ? inp.retire : S.age.retire) : S.age.othersEnd;
+        if (ageM + ten > limY * 12) {
+            const what = working ? `the retirement age of ${limY}` : `age ${limY}`;
+            if (co) add('warn', `The loan runs past ${what}; having a co-applicant helps meet this condition.`);
+            else add('warn', `The loan runs past ${what}, so the bank may ask for a co-applicant, preferably a family member.`);
+        }
+    }
+    if (R.errs.length) return R;
+
+    /* 12. pick the rate row */
+    let row = null, band = '';
+    if (card.kind === 'rating') { row = card.rows.find(r => r.code === inp.entRating); band = RATING_LABEL[inp.entRating] || ''; }
+    else if (ntcAll) {
+        row = card.ntc.find(r => gmi >= (+r.gmiFrom || 0) && (r.gmiTo == null || gmi < r.gmiTo + 1));
+        band = `No credit history, income ${fmt(gmi)} a month`;
+    } else {
+        row = card.rows.find(r => avgSc >= r.from && avgSc < r.to + 1);
+        band = row ? `CIBIL ${row.from}–${row.to}${co && avgSc !== inp.cibil ? ` (average ${r2(avgSc)})` : ''}` : '';
+        if (!row) {
+            row = card.rows.reduce((m, r) => (!m || rateOf(r.base, r.spread) > rateOf(m.base, m.spread)) ? r : m, null);
+            band = 'Score outside the table – highest rate used';
+            add('warn', 'This score is not covered by the rate table, so the highest rate in the table is used.');
+        }
+    }
+    if (!row) { err(`The rate table "${card.name}" has no row for this applicant. Check its ${ntcAll ? 'no-credit-history' : 'rating'} rows in Settings.`); return R; }
+    const cardRate = rateOf(row.base, row.spread);
+    if (!isNum(cardRate)) { err(`Enter the ${String(row.base).includes('1Y') ? '1-year' : '6-month'} MCLR in Settings to use "${card.name}".`); return R; }
+
+    /* 13. concessions, special offer, floor, cap */
+    const concDefs = S.conc.filter(k => k.schemes.includes(inp.scheme) && (!k.indOnly || isInd));
+    const ticked = concDefs.filter(k => (inp.conc || []).includes(k.id));
+    const schem = sum(ticked.map(k => +k.pct || 0));
+    const schemeC = +sch.schemeConc || 0;
+    let sp = null;
+    const so = card.special;
+    if (so && so.on && inDates(now, so.from, so.to)) {
+        let v = 0;
+        if (card.kind === 'rating') v = +so.flat || 0;
+        else { const key = ntcAll ? -1 : avgSc; const sr = (so.rows || []).find(r => key >= r.from && key < r.to + 1); v = sr ? +sr.conc || 0 : 0; }
+        sp = {name: so.name || 'Special offer', v, to: so.to, suspend: !!so.suspend, floor: so.floor && so.floor.base ? so.floor : null};
+    }
+    const suspended = !!(sp && sp.suspend);
+    const normalReq = (suspended ? 0 : schem) + schemeC;
+    const capHit = card.maxConc != null && normalReq > card.maxConc + 1e-9;
+    const normal = capHit ? card.maxConc : normalReq;
+    const totalReq = normal + (sp ? sp.v : 0);
+    const floorDef = sp && sp.floor ? sp.floor : card.floor;
+    const floorAbs = floorDef && floorDef.base ? rateOf(floorDef.base, floorDef.spread) : -Infinity;
+    if (floorDef && floorDef.base && !isNum(floorAbs)) { err(`Enter the MCLR in Settings; it sets the minimum rate of "${card.name}".`); return R; }
+    const effFloor = Math.min(floorAbs, cardRate);
+    let roi = r2(Math.max(effFloor, cardRate - totalReq));
+    const applied = r2(cardRate - roi);
+    const tickedAll = r2((suspended ? 0 : schem) + schemeC + (sp ? sp.v : 0));
+    const why = [];
+    if (capHit) why.push(`capped at ${pc(card.maxConc)} in total`);
+    if (cardRate - totalReq < effFloor - 1e-9) why.push(cardRate <= floorAbs + 1e-9 ? `the rate is already at the minimum of ${pc(floorAbs)}` : `minimum rate ${pc(floorAbs)}`);
+    if (suspended && schem > 0) why.push(`regular concessions paused during ${sp.name}`);
+
+    /* 14. ceiling and credit life insurance (GCLI) */
+    let ceilHit = false;
+    if (isNum(card.ceiling) && roi > card.ceiling) { roi = r2(card.ceiling); ceilHit = true; }
+    let gAdj = 0;
+    const adj = +S.gcliAdj || 0;
+    if (isInd && adj > 0) {
+        if (card.gcli === 'premium' && !inp.gcli) { gAdj = adj; add('warn', `Without credit life insurance (GCLI), the rate is ${pc(adj)} higher.`); }
+        else if (card.gcli === 'discount' && inp.gcli) gAdj = r2(Math.max(Math.min(floorAbs, roi), roi - adj) - roi);
+        else if (card.gcli === 'discount' && !inp.gcli) add('warn', `With credit life insurance (GCLI) for the full loan, the fixed rate would be ${pc(adj)} lower.`);
+    }
+    const finalRoi = r2(roi + gAdj);
+    R.rate = {card, row, band, cardRate, ticked, schem, schemeC, sp, suspended, tickedAll, applied, why, floorAbs, ceilHit, gAdj, finalRoi};
+
+    /* 15. limits */
+    const r = finalRoi / 1200;
+    const ten0 = R.ten.ten;
+    const limInc = capEmi > 0 && ten0 > 0 ? pvOf(capEmi, r, ten0) : 0;
+    if (capEmi <= 0) add('fail', `Existing EMIs and deductions already use the full repayment capacity (${r2(foir)}% of income), so a new EMI does not fit.`);
+    const limCap = isInd ? sch.capInd : sch.capEnt;
+    const lims = [{k: 'inc', label: 'Repayment capacity (income)', v: limInc},
+        {k: 'ltv', label: used ? 'Car value (lowest of valuation, price, IDV)' : `Car value (${r2(S.ltv.newPct)}% of on-road price)`, v: ltvLim}];
+    if (!isInd && tnwMult != null && inp.tnw > 0) lims.push({k: 'tnw', label: `Net worth (TNW ÷ ${tnwMult})`, v: inp.tnw / tnwMult});
+    lims.push({k: 'cap', label: 'Scheme maximum', v: limCap});
+    if (inp.req > 0) lims.push({k: 'req', label: 'Amount you asked for', v: inp.req});
+    const minV = Math.min(...lims.map(l => l.v));
+    const dec = lims.find(l => l.v === minV);
+    let amt = Math.max(0, minV);
+    if (S.round > 0 && dec.k !== 'req') amt = Math.floor(amt / S.round + 1e-9) * S.round;
+    if (sch.minLoan > 0 && amt > 0 && amt < sch.minLoan) add('fail', `The eligible amount of ${fmt(amt)} is below the minimum loan of ${fmt(sch.minLoan)}.`);
+
+    /* 16. final amount, EMI */
+    const fails = R.issues.filter(i => i.sev === 'fail').length;
+    const fin = fails ? 0 : amt;
+    const emi = fin > 0 ? emiOf(fin, r, ten0) : 0;
+    R.lim = {lims, dec, amt, fin, limInc, ltvLim, limCap};
+    R.pay = {emi, totInt: fin > 0 ? emi * ten0 - fin : 0, r};
+
+    /* 17. charges and APR */
+    let fee = 0, feeNote = '';
+    if (fin > 0) {
+        if (inp.scheme === 'CAR' || inp.scheme === 'GREEN') {
+            const P = S.proc.CAR;
+            fee = fin <= P.upTo ? P.low : P.high;
+            const acc = inp.procAcc !== '' && inp.procAcc != null && S.procAcc[inp.procAcc] ? +S.procAcc[inp.procAcc].pct || 0 : 0;
+            const gd = inp.scheme === 'GREEN' ? +S.proc.GREEN.disc || 0 : 0;
+            const d = Math.max(acc, gd);
+            if (d > 0) { fee = fee * (1 - d / 100); feeNote = `${r2(d)}% off (${acc >= gd ? S.procAcc[inp.procAcc].label : 'Green Wheel offer'}); offers are not combined`; }
+        } else if (inp.scheme === 'DIRECT') fee = +S.proc.DIRECT.flat || 0;
+        else if (inp.scheme === 'GOVT') { fee = inp.via === 'AGENT' ? +S.proc.GOVT.agent || 0 : +S.proc.GOVT.direct || 0; feeNote = inp.via === 'AGENT' ? 'Applied through a dealer or agent' : 'Applied directly'; }
+        else if (inp.scheme === 'YODDHA') fee = +S.proc.YODDHA.flat || 0;
+        else if (inp.scheme === 'USED') { const P = S.proc.USED; fee = Math.min(Math.max(fin * P.pct / 100, P.min), P.max); feeNote = `${r2(P.pct)}% of the loan, min ${fmt(P.min)}, max ${fmt(P.max)}`; }
+    }
+    fee = Math.round(fee);
+    const gst = Math.round(fee * S.gst / 100);
+    const feeTot = fee + gst;
+    const apr = fin > 0 ? aprOf(fin - feeTot - (inp.oth || 0), emi, ten0) : null;
+    let pre;
+    if (inp.scheme === 'DIRECT') pre = 'Nil';
+    else if (fx) pre = '2% + GST on amounts above ₹40,000 prepaid in the first 2 years';
+    else pre = isInd ? 'Nil' : '4% if closed within 6 months of disbursement; nil after that';
+    R.ch = {fee, gst, feeTot, feeNote, apr, pre};
+
+    /* 18. status and documents */
+    const failN = R.issues.filter(i => i.sev === 'fail').length;
+    const devN = R.issues.filter(i => i.sev === 'dev').length;
+    R.status = failN ? 'fail' : (devN ? 'dev' : 'ok');
+    R.docs = buildDocs(inp, R);
+    return R;
+}
+
+/* ---------- documents you'll need ---------- */
+function buildDocs(inp, R) {
+    const L = [], a = (h, t) => L.push([h, t]);
+    const used = R.used, co = R.co;
+    a('Application', 'Filled-in loan application with recent photographs' + (co ? ' of the applicant and co-applicant' : '') + ', and a statement of assets and liabilities.');
+    a('Identity & address (KYC)', inp.existCust ? 'Usually not needed again if your KYC with the bank is up to date.' : 'PAN card, plus Aadhaar, passport, voter ID or driving licence.');
+    a('Bank statement', inp.existCust ? 'Not needed for your Bank of Baroda account.' : 'Last 6 months of your main bank account.');
+    switch (inp.borr) {
+        case 'SAL': a('Income proof', "Last 3 months' salary slips" + (used ? ", and last year's ITR or Form 16" : '') + '.'); break;
+        case 'PEN': a('Income proof', "Last 3 months' pension slips, or a bank statement showing the pension credits."); break;
+        case 'BIZ':
+            a('Income proof', 'Income tax returns with computation for the last 2 years. Farmers without ITR: income certificate from the revenue authority.');
+            a('Business proof', 'GST certificate, Udyam registration or shop & establishment licence.'); break;
+        case 'ENT': {
+            a('Financials', 'Income tax returns and audited balance sheets for the last 2 years.');
+            const c = inp.entConst;
+            if (c === 'PROP') a('Business proof', "GST certificate, Udyam registration or shop & establishment licence, and the proprietor's KYC.");
+            if (c === 'PART' || c === 'LLP') a('Constitution', "Partnership deed or LLP agreement, and the partners' KYC; partners give personal guarantees.");
+            if (c === 'PVT' || c === 'PUB') a('Constitution', 'Certificate of incorporation, MOA & AOA, and a board resolution for the loan; promoter directors give personal guarantees.');
+            if (c === 'TRUST' || c === 'SOC') a('Constitution', 'Trust deed or registration certificate and bye-laws, and a resolution for the loan.');
+            a('Use of the car', "The car is for the use of the business's owners, partners, directors or executives, and is not registered as a commercial vehicle.");
+            break;
+        }
+    }
+    if (co) a('Co-applicant', 'KYC and income proof, as for the applicant.');
+    if (!used) a('Car quotation', 'Proforma invoice from an authorised dealer of the car maker, showing the price, GST, registration, insurance and any discount separately.');
+    if (inp.scheme === 'GREEN') a('Electric car', 'The quotation should be for a fully electric car (not a hybrid).');
+    if (used) a('Pre-owned car', 'Quotation or invoice from the seller, a valuation report from a certified pre-owned dealer, and copies of the RC and insurance policy.');
+    if (inp.scheme === 'GOVT') a('Employment', 'Employee ID card and a salary account statement showing regular salary credits.');
+    if (inp.scheme === 'YODDHA') a('Service proof', 'Service ID card or pension papers (Armed Forces or Central Armed Police Forces).');
+    const CD = {coll: 'Fixed deposit, NSC, KVP or LIC policy worth at least 50% of the loan, to be pledged to the bank.', hl: 'Statement of your home loan showing regular repayment.',
+        uhl: 'Statement of your home or car loan showing regular repayment.', icsi: 'ICSI membership certificate.', ucl: 'Closure letter of your earlier car loan.'};
+    if (R.rate) R.rate.ticked.forEach(k => a('For the concession', CD[k.id] || `Proof for: ${k.label}.`));
+    if (R.isInd && inp.gcli) a('Credit life insurance', 'Group credit life insurance (GCLI) covering the full loan amount.');
+    a('After you buy', 'Comprehensive car insurance and RC showing the bank as financier, and an e-mandate (NACH) for the EMIs.');
+    return L;
+}
+
+/* =====================================================================
+   Calculator UI
+   ===================================================================== */
+let S = loadSettings();
+let gRes = null;
+
+const show = (id, on) => { const e = $(id); if (e) e.style.display = on ? '' : 'none'; };
+/* hidden = inside an element switched off with show(); works even while the Settings tab is open */
+const visible = el => { if (!el) return false; for (let e = el; e && e.id !== 'panelCalc'; e = e.parentElement) if (e.style && e.style.display === 'none') return false; return true; };
+
+function schemeNote(k) {
+    const s = S.schemes[k] || {};
+    switch (k) {
+        case 'GOVT': return 'For employees of Central or State Governments and public sector undertakings. New cars only.';
+        case 'YODDHA': return 'For serving and retired (pensioned) personnel of the Armed Forces and Central Armed Police Forces. New cars only.';
+        case 'DIRECT': return `For customers who apply directly at a branch, without a car dealer or loan agent. Processing fee ${fmt(S.proc.DIRECT.flat)} + GST; no pre-payment charges.`;
+        case 'GREEN': return `Fully electric cars only: ${pc(s.schemeConc || 0)} lower interest rate and ${r2(S.proc.GREEN.disc)}% off the processing fee; up to ${s.evMax} months for salaried applicants with CIBIL ${s.evCibil}+.`;
+        case 'USED': return `For individuals. Cars up to ${r2(S.used.maxVehMonths / 12)} years old from a certified pre-owned dealer approved by the bank, sold by the bank, or a dealer's demo car. Loan ${fmt(s.minLoan)} to ${fmt(s.capInd)}.`;
+        default: return '';
+    }
+}
+function currentCard() {
+    const sch = $('scheme').value, b = $('borr').value, roi = $('roiType').value;
+    return S.cards.find(c => c.roi === roi && c.schemes.includes(sch) && c.borrowers.includes(b));
+}
+function applyHeader() {
+    $('hdrSub').textContent = S.subtitle || '';
+    const b = S.base;
+    $('rateLine').innerHTML = `BRLLR <b>${pc(b.brllr)}</b> · SP <b>${pc(b.sp)}</b> · 6M MCLR <b>${isNum(b.mclr6) ? pc(b.mclr6) : '—'}</b> · 1Y MCLR <b>${isNum(b.mclr1y) ? pc(b.mclr1y) : '—'}</b>` +
+        `<span class="rl-sub">${esc(b.asOn || '')}${b.asOn ? ' · ' : ''}<a href="#" id="toSettings">Change in Settings</a></span>`;
+    $('toSettings').addEventListener('click', e => { e.preventDefault(); switchTab('set'); });
+}
+function fillProcAcc() {
+    const cur = $('procAcc').value;
+    $('procAcc').innerHTML = '<option value="">None of these</option>' + S.procAcc.map((p, i) => `<option value="${i}">${esc(p.label)} – ${r2(p.pct)}% off</option>`).join('');
+    if (cur !== '' && S.procAcc[cur]) $('procAcc').value = cur;
+}
+function renderConcList(sch, ind) {
+    const box = $('concList');
+    const prev = new Set([...box.querySelectorAll('input:checked')].map(e => e.dataset.id));
+    const list = S.conc.filter(k => k.schemes.includes(sch) && (!k.indOnly || ind));
+    box.innerHTML = list.length ? list.map(k => `<label class="cb-item"><input type="checkbox" data-id="${esc(k.id)}"${prev.has(k.id) ? ' checked' : ''}><span>${esc(k.label)} <b>(${pc(k.pct)})</b></span></label>`).join('')
+        : '<div class="hint">No interest rate concessions apply to this scheme.</div>';
+}
 
 function updateUI() {
-    const t = document.getElementById('borr').value;
-    const isEnt = (t === 'ENT');
-    const isBizOrEnt = (t === 'BIZ' || t === 'ENT');
+    const sch = $('scheme').value, b = $('borr').value, roi = $('roiType').value;
+    const Bt = BORR[b], used = SCHEMES[sch].product === 'USED', sv = S.schemes[sch];
+    show('salBox', b === 'SAL'); show('usedYearBox', b === 'SAL' && used);
+    show('govtBox', sch === 'GOVT'); show('evBox', sch === 'GREEN');
+    show('viaBox', sch === 'DIRECT' || sch === 'GOVT');
+    const note = schemeNote(sch); $('schemeNote').textContent = note; show('schemeNote', !!note);
+    $('schemeHint').textContent = sv.borrowers.includes(b) ? '' : `This scheme is not available for ${Bt.short.toLowerCase()} applicants.`;
+    show('indBox', Bt.ind); show('retireBox', b === 'SAL'); show('entBox', !Bt.ind);
+    show('newBox', !used); show('usedBox', used);
+    show('salInput', Bt.sal); show('bizInput', !Bt.sal);
+    [1, 2, 3].forEach(i => { $('lbl_s' + i).textContent = `Gross monthly ${b === 'PEN' ? 'pension' : 'salary'} – month ${i} (₹)`; });
+    $('lbl_i1').textContent = b === 'ENT' ? 'Profit after tax – year 1 (₹)' : 'Gross annual income – year 1 (₹)';
+    $('lbl_i2').textContent = b === 'ENT' ? 'Profit after tax – year 2, latest (₹)' : 'Gross annual income – year 2, latest (₹)';
+    show('entIncHint', b === 'ENT');
+    show('depBox', b === 'ENT' && DEP_OK.includes($('entConst').value));
+    show('coToggle', Bt.ind); show('coFields', Bt.ind && $('coOn').checked);
+    const ct = $('coType').value;
+    show('coSal', ct !== 'BIZ'); show('coBiz', ct === 'BIZ');
+    $('lbl_coDed').textContent = ct === 'BIZ' ? "Co-applicant's existing yearly EMIs / deductions (₹)" : "Co-applicant's existing monthly EMIs / deductions (₹)";
+    show('gcliBox', Bt.ind); show('gcliPremBox', Bt.ind && !used && $('cIns').checked);
+    const card = currentCard(), mode = card ? card.gcli : 'none';
+    $('gcliHint').textContent = mode === 'premium' ? `Without it, the interest rate is ${pc(S.gcliAdj)} higher.`
+        : mode === 'discount' ? `With it, the fixed rate is ${pc(S.gcliAdj)} lower.` : '';
+    $('roiHint').textContent = roi === 'FX'
+        ? `Stays the same for the whole loan${sv.fxMin > 0 ? `; tenure ${sv.fxMin} to ${sv.fxMax} months` : `; up to ${sv.fxMax} months`}. Pre-payment charge of 2% + GST on amounts above ₹40,000 in the first 2 years.`
+        : 'Moves with BRLLR, the repo-linked benchmark rate.';
+    renderConcList(sch, Bt.ind);
+    show('procAccBox', sch === 'CAR' || sch === 'GREEN');
+}
 
-    document.getElementById('salInput').style.display = isBizOrEnt ? 'none' : 'block';
-    document.getElementById('bizInput').style.display = isBizOrEnt ? 'block' : 'none';
-    
-    document.getElementById('dobLbl').innerText = isEnt ? "Date of Incorporation" : "Date of Birth";
-    document.getElementById('hlWarn').style.display = isEnt ? 'block' : 'none';
-    if(isEnt) {
-        document.getElementById('cHL').checked = false; 
-        document.getElementById('cHL').disabled = true;
+/* ---------- read the form ---------- */
+function collectInputs() {
+    const errs = [];
+    const n = (id, label, opt = {}) => {
+        const el = $(id);
+        if (!el || !visible(el)) return null;
+        const raw = String(el.value).trim().replace(/,/g, '');
+        if (raw === '') return null;
+        const v = Number(raw);
+        if (!isFinite(v)) { errs.push(`${label}: enter a valid number.`); return null; }
+        if (v < 0 && !opt.neg && !(opt.m1 && v === -1)) { errs.push(`${label} cannot be negative.`); return null; }
+        return v;
+    };
+    const d = id => (visible($(id)) ? parseDate($(id).value) : null);
+    const dates = {dob: 'date of birth', coDob: "co-applicant's date of birth", usedInv: 'original invoice date'};
+    Object.keys(dates).forEach(id => { if (visible($(id)) && $(id).value && !parseDate($(id).value)) errs.push(`Enter a valid ${dates[id]}.`); });
+    const ck = id => !!($(id) && $(id).checked);
+    const v = id => ($(id) ? $(id).value : '');
+    const inp = {
+        scheme: v('scheme'), roi: v('roiType'), borr: v('borr'),
+        confirmed: ck('confirmed'), usedYear: ck('usedYear'), govtSal: ck('govtSal'), evOk: ck('evOk'), via: v('via'),
+        dob: d('dob'), retire: n('retire', 'Retirement age'),
+        entConst: v('entConst'), entRating: v('entRating'), tnw: n('tnw', 'Tangible net worth', {neg: true}),
+        cibil: n('cibil', 'CIBIL score', {m1: true}), existCust: ck('existCust'),
+        ex: n('ex', 'Basic price'), gst: n('gst', 'GST + cess'), rto: n('rto', 'Road tax & registration'), ins: n('ins', 'Insurance'),
+        dealerDisc: n('disc', 'Dealer discount'), acc: n('acc', 'Accessories'), gcliPrem: n('gcliPrem', 'GCLI premium'),
+        usedSrc: v('usedSrc'), usedPrice: n('usedPrice', 'Sale price'), usedVal: n('usedVal', 'Valuation'), usedIdv: n('usedIdv', 'IDV'),
+        usedInv: d('usedInv'), usedOwner: Number(v('usedOwner')) || 1, usedDupRc: ck('usedDupRc'),
+        req: n('req', 'Loan amount you want'), prefTen: n('prefTen', 'Preferred tenure'),
+        s: [n('s1', 'Month 1 income'), n('s2', 'Month 2 income'), n('s3', 'Month 3 income')], dedM: n('dedM', 'Monthly EMIs / deductions'),
+        y: [n('i1', 'Year 1 income', {neg: true}), n('i2', 'Year 2 income', {neg: true})], dedA: n('dedA', 'Yearly EMIs / deductions'),
+        dep: [n('d1', 'Depreciation year 1'), n('d2', 'Depreciation year 2')],
+        co: {on: ck('coOn') && visible($('coOn')), rel: v('coRel'), dob: d('coDob'), cibil: n('coCibil', "Co-applicant's CIBIL score", {m1: true}), type: v('coType'),
+            s: [n('c1', "Co-applicant's month 1 income"), n('c2', "Co-applicant's month 2 income"), n('c3', "Co-applicant's month 3 income")],
+            y: [n('cy1', "Co-applicant's year 1 income", {neg: true}), n('cy2', "Co-applicant's year 2 income", {neg: true})], ded: n('coDed', "Co-applicant's EMIs / deductions")},
+        gcli: ck('cIns'), conc: [...document.querySelectorAll('#concList input:checked')].map(e => e.dataset.id),
+        procAcc: visible($('procAcc')) ? v('procAcc') : '', oth: n('othCh', 'Other one-time charges')
+    };
+    return {inp, errs};
+}
+
+/* ---------- calculate & show ---------- */
+function calculate(quiet) {
+    const {inp, errs} = collectInputs();
+    let R = null;
+    if (!errs.length) { R = compute(inp, S); errs.push(...R.errs); }
+    if (errs.length) {
+        $('errBox').innerHTML = '<b>Please check:</b><ul>' + errs.map(e => `<li>${esc(e)}</li>`).join('') + '</ul>';
+        show('errBox', true); show('resultArea', false); gRes = null;
+        if (!quiet) $('errBox').scrollIntoView({behavior: 'smooth', block: 'center'});
+        return;
+    }
+    show('errBox', false);
+    gRes = R; render(R);
+    show('resultArea', true);
+    if (!quiet) $('resultArea').scrollIntoView({behavior: 'smooth', block: 'start'});
+}
+
+const row = (l, v, cls) => `<div class="detail-row${cls ? ' ' + cls : ''}"><span>${l}</span><span>${v}</span></div>`;
+const lab = t => `<div class="section-label">${t}</div>`;
+const STATUS = {ok: 'Eligible', dev: 'Eligible – subject to bank approval', fail: 'Not eligible'};
+const TAG = {fail: 'Not eligible', dev: 'Bank approval', warn: 'Note'};
+
+function render(R) {
+    const inp = R.inp, ord = {fail: 0, dev: 1, warn: 2};
+    const items = R.issues.slice().sort((a, b) => ord[a.sev] - ord[b.sev])
+        .map(i => `<li><span class="tg tg-${i.sev}">${TAG[i.sev]}</span> ${esc(i.text)}</li>`).join('');
+    $('statusBox').className = 'status st-' + R.status;
+    $('statusBox').innerHTML = `<h3>${STATUS[R.status]}</h3>` + (items ? `<ul class="issues">${items}</ul>` : '<div class="st-sub">Meets all the scheme conditions checked here.</div>');
+    $('outFinal').textContent = fmt(R.lim.fin);
+    $('outDecided').innerHTML = R.status === 'fail' ? `Amount before the eligibility checks: ${fmt(R.lim.amt)}` : `Limited by: <b>${esc(R.lim.dec.label)}</b>`;
+    $('outEmiBig').textContent = R.lim.fin > 0 ? `EMI ${fmt(R.pay.emi)} a month for ${R.ten.ten} months at ${pc(R.rate.finalRoi)}` : '';
+
+    const h = [], rt = R.rate, inc = R.inc, t = R.ten, co = R.co;
+    h.push(lab('Your details'));
+    h.push(row('Scheme:', esc(R.SC.label)));
+    h.push(row('Applicant:', R.isInd ? esc(R.Bt.label) : `Business entity – ${esc((ENT_CONST.find(x => x[0] === inp.entConst) || ['', ''])[1])}`));
+    if (R.isInd && R.ageM != null) h.push(row('Age:', ym(R.ageM)));
+    if (co) h.push(row('Co-applicant:', `${esc((CO_REL.find(x => x[0] === co.rel) || ['', ''])[1])}${co.ageM != null ? ', ' + ym(co.ageM) : ''}`));
+    h.push(row('Maximum tenure:', `${t.maxT} months <small>(${esc(t.tWhy)})</small>`));
+    h.push(row('Tenure used:', `${t.ten} months${t.prefUsed ? ' (your choice)' : ''}`));
+    if (R.isSal) {
+        h.push(row('Average monthly income:', fmt(inc.gmi) + (co ? ` <small>(applicant ${fmt(inc.gmiA)} + co-applicant ${fmt(co.gmi)})</small>` : '')));
+        h.push(row('Existing EMIs / deductions:', fmt(inc.dedM) + ' a month' + (co ? ` <small>(incl. co-applicant ${fmt(co.dedM)})</small>` : '')));
     } else {
-        document.getElementById('cHL').disabled = false;
+        h.push(row('Average yearly income:', fmt(inc.gaiA) + (inc.depAdd > 0 ? ` <small>(incl. depreciation ${fmt(inc.depAdd)}${inc.depNote ? ', ' + esc(inc.depNote) : ''})</small>` : '') + ` <small>= ${fmt(inc.gmiA)} a month</small>`));
+        if (co) h.push(row('Co-applicant income:', `${fmt(co.gmi)} a month`));
+        h.push(row('Existing EMIs / deductions:', `${fmt(inc.dedA)} a year <small>(${fmt(inc.dedMA)} a month)</small>` + (co ? ` <small>+ co-applicant ${fmt(co.dedM)} a month</small>` : '')));
     }
-}
+    const sl = R.foir.slab;
+    h.push(row('Share of income for EMIs:', `${r2(R.foir.pct)}%` + (sl ? ` <small>(${R.isSal ? 'monthly' : 'yearly'} income from ${fmt(sl.from)})</small>` : '')));
+    h.push(row('Available for the new EMI:', fmt(Math.max(0, R.foir.capEmi)) + ' a month', 'green-row'));
 
-function calculate() {
-    // 1. INPUTS
-    const type = document.getElementById('borr').value;
-    const prod = document.getElementById('prod').value;
-    const dobVal = document.getElementById('dob').value;
-    if(!dobVal) return alert("Please select Date.");
-
-    // 2. CIBIL LOGIC
-    const cibil = parseInt(document.getElementById('cibil').value) || 0;
-    if(cibil !== -1 && cibil < 701) {
-        return alert("Applicant NOT ELIGIBLE.\nCIBIL Credit Vision score is below 701.");
+    h.push(lab('Interest & EMI'));
+    h.push(row('Rate table:', esc(rt.card.name)));
+    h.push(row('Your band:', `${esc(rt.band)}: ${esc(BASE_LABEL[rt.row.base] || rt.row.base)} ${sgn(rt.row.spread)}`));
+    h.push(row('Rate before concessions:', pc(rt.cardRate)));
+    if (rt.tickedAll > 0 || rt.ticked.length) {
+        const parts = rt.ticked.map(k => `${esc(k.label)} ${pc(k.pct)}`);
+        if (rt.schemeC > 0) parts.push(`${esc(R.SC.short)} ${pc(rt.schemeC)}`);
+        if (rt.sp) parts.push(`${esc(rt.sp.name)} ${pc(rt.sp.v)}`);
+        h.push(row('Concessions:', `${pc(rt.tickedAll)} eligible, <b>${pc(rt.applied)} given</b>` + (rt.why.length ? ` <small>(${esc(rt.why.join('; '))})</small>` : '') + (parts.length ? `<br><small>${parts.join(' · ')}</small>` : '')));
+    } else h.push(row('Concessions:', 'None'));
+    if (rt.sp) h.push(row('Special offer:', `${esc(rt.sp.name)}: ${pc(rt.sp.v)} off <small>(until ${esc(dmy(rt.sp.to))})</small>`));
+    if (rt.ceilHit) h.push(row('Maximum rate:', `Capped at ${pc(rt.card.ceiling)}`));
+    if (R.isInd) {
+        let g;
+        if (rt.gAdj > 0) g = `+ ${pc(rt.gAdj)} (not taken)`;
+        else if (rt.gAdj < 0) g = `− ${pc(-rt.gAdj)} (taken)`;
+        else g = inp.gcli ? 'Taken' : 'Not taken';
+        h.push(row('Credit life insurance:', g, rt.gAdj > 0 ? 'red-row' : ''));
     }
+    h.push(row('Interest rate:', `<b>${pc(rt.finalRoi)}</b> <small>(${R.fx ? 'fixed' : 'floating'})</small>`, 'roi-row'));
+    h.push(row('Monthly EMI:', R.lim.fin > 0 ? fmt(R.pay.emi) : '—'));
+    h.push(row('Total interest:', R.lim.fin > 0 ? fmt(R.pay.totInt) : '—'));
 
-    // 3. AGE/TENURE
-    const age = new Date().getFullYear() - new Date(dobVal).getFullYear();
-    let maxTenure = (type === 'ENT') ? (prod==='NEW'?84:60) : Math.min((70-age)*12, (prod==='NEW'?84:60));
-    const tenure = Math.max(0, maxTenure);
-    if(tenure <= 0) return alert("Age exceeds eligibility limits.");
+    h.push(lab('How the amount is worked out'));
+    R.lim.lims.forEach((l, i) => h.push(row(`${i + 1}. ${esc(l.label)}:`, fmt(l.v) + (l === R.lim.dec ? ' <span class="dec-tag">Lowest</span>' : ''), l === R.lim.dec ? 'decider' : '')));
+    if (S.round > 0 && R.lim.dec.k !== 'req' && R.lim.amt > 0) h.push(row('Rounded down to:', `${fmt(R.lim.amt)} <small>(nearest ${fmt(S.round)})</small>`));
 
-    // 4. INCOME
-    let avgInc = 0;
-    if(type === 'SAL' || type === 'STAFF') {
-        avgInc = ((parseFloat(document.getElementById('s1').value)||0) + (parseFloat(document.getElementById('s2').value)||0) + (parseFloat(document.getElementById('s3').value)||0))/3;
+    h.push(lab('Cost & your contribution'));
+    const v = R.veh, fin = R.lim.fin;
+    if (!R.used) {
+        h.push(row('On-road price (after discount):', fmt(v.onRoad)));
+        if (v.prem > 0) h.push(row('Insurance premium financed:', fmt(v.prem)));
+        h.push(row('Accessories (not financed):', fmt(v.acc)));
+        const tot = v.onRoad + v.acc + v.prem;
+        h.push(row('Total cost:', fmt(tot)));
+        h.push(row('Loan:', fmt(fin)));
+        h.push(row('Your contribution:', `${fmt(Math.max(0, tot - fin))}${tot > 0 ? ` <small>(${r2(Math.max(0, tot - fin) / tot * 100)}%)</small>` : ''}`));
     } else {
-        avgInc = ((parseFloat(document.getElementById('i1').value)||0) + (parseFloat(document.getElementById('i2').value)||0))/24;
+        h.push(row('Sale price:', `${fmt(v.price)} <small>→ ${r2(S.ltv.usedInvPct)}% = ${fmt(v.b)}</small>`));
+        h.push(row('Valuation:', `${fmt(v.val)} <small>→ ${r2(S.ltv.usedValPct)}% = ${fmt(v.a)}</small>`));
+        h.push(row('Insured value (IDV):', `${fmt(v.idv)} <small>→ ${r2(S.ltv.usedIdvPct)}% = ${fmt(v.c)}</small>`));
+        if (v.ageM != null) h.push(row('Age of the car:', ym(v.ageM)));
+        h.push(row('Loan:', fmt(fin)));
+        h.push(row('Your contribution:', fmt(Math.max(0, v.price - fin))));
     }
 
-    // 5. FOIR
-    let foir = 0.60;
-    const annualInc = avgInc * 12;
-    if(type === 'SAL' || type === 'STAFF') {
-        if(avgInc >= 150000) foir = 0.80; else if(avgInc >= 50000) foir = 0.70;
+    h.push(lab('Charges'));
+    const c = R.ch;
+    h.push(row('Processing fee:', fin > 0 ? `${fmt(c.fee)} + GST ${fmt(c.gst)} = <b>${fmt(c.feeTot)}</b>` + (c.feeNote ? `<br><small>${esc(c.feeNote)}</small>` : '') : '—'));
+    if (inp.oth > 0) h.push(row('Other one-time charges:', fmt(inp.oth)));
+    h.push(row('APR (annual percentage rate):', c.apr != null ? c.apr.toFixed(2) + '%' : '—'));
+    h.push(row('Pre-payment charges:', `<small>${esc(c.pre)}</small>`));
+
+    if (R.isInd) {
+        h.push(lab('Credit profile'));
+        h.push(row('CIBIL score used:', R.cibil.ntcAll ? 'No credit history (−1)' : esc(R.cibil.scTxt) + (co ? ` <small>(applicant ${inp.cibil}, co-applicant ${inp.co.cibil}; −1 not counted)</small>` : '')));
     } else {
-        if(annualInc >= 600000) foir = 0.80;
+        h.push(lab('Business profile'));
+        h.push(row('Rating:', esc(RATING_LABEL[inp.entRating] || '—')));
+        h.push(row('Tangible net worth:', `${fmt(inp.tnw)}` + (R.tnwMult ? ` <small>(needs ${R.tnwMult}× the loan)</small>` : '')));
     }
-
-    const dedMonth = (parseFloat(document.getElementById('ded').value)||0)/12;
-    const avail = (avgInc * foir) - dedMonth;
-
-    // 6. ROI CALCULATION
-    const brllr = 7.90; const sp = 0.25; const floor = 8.15;
-    
-    // Spread Logic
-    let spread = 0.75; 
-    if(type === 'STAFF') spread = 0;
-    else if(cibil >= 771) spread = 0;
-    else if(cibil >= 751) spread = 0.20;
-    else if(cibil >= 726) spread = 0.30;
-    else if(cibil === -1) spread = 0.75; // -1 is eligible
-    
-    // Concessions
-    let conc = 0;
-    if(document.getElementById('cEV').checked) conc += 0.25;
-    if(document.getElementById('cColl').checked) conc += 0.50;
-    if(document.getElementById('cICSI').checked) conc += 0.25;
-    if(document.getElementById('cHL').checked && type !== 'ENT') conc += 0.25;
-
-    // Risk Premium Logic (If Insurance is CHECKED, ADD 0. If UNCHECKED, ADD 0.05)
-    let riskPrem = 0;
-    if(!document.getElementById('cIns').checked) {
-        riskPrem = 0.05;
-    }
-
-    // Final ROI
-    // Formula: Max(Floor, Base - Concession) + Risk Premium
-    // The Risk Premium is usually added OVER the final rate.
-    const calcBase = (brllr + sp + spread) - conc;
-    const finalRoi = Math.max(floor, calcBase) + riskPrem;
-    const r = (finalRoi/100)/12;
-
-    // 7. LIMITS
-    const limInc = avail > 0 ? avail * ((1 - Math.pow(1+r, -tenure))/r) : 0;
-    
-    const ex = parseFloat(document.getElementById('ex').value)||0;
-    const gst = parseFloat(document.getElementById('gst').value)||0;
-    const rto = parseFloat(document.getElementById('rto').value)||0;
-    const ins = parseFloat(document.getElementById('ins').value)||0;
-    const disc = parseFloat(document.getElementById('disc').value)||0;
-    const baseLtv = (ex + gst + rto + ins) - disc;
-    const limLtv = baseLtv * (prod === 'NEW' ? 0.90 : 0.75);
-    
-    // Product Cap
-    let limCap = (prod === 'USED') ? 5000000 : (type === 'ENT' ? 50000000 : 30000000);
-
-    const req = parseFloat(document.getElementById('req').value)||30000000;
-    const final = Math.max(0, Math.min(req, limInc, limLtv, limCap));
-    const emi = final > 0 ? final * r * Math.pow(1+r, tenure) / (Math.pow(1+r, tenure)-1) : 0;
-    const totInt = (emi * tenure) - final;
-
-    // Sanctioning Authority
-    let authority = "-";
-    if(final > 0) {
-        if(final <= 10000000) authority = "DLP of Sanctioning Authority";
-        else if(final <= 20000000) authority = "RMCC headed by AGM/DGM";
-        else authority = "ZOCC headed by GM";
-    }
-
-    // 8. RENDER
-    document.getElementById('resultArea').style.display = 'block';
-    document.getElementById('outFinal').innerText = fmt(final);
-    document.getElementById('outAuth').innerText = authority;
-    
-    document.getElementById('outAge').innerText = (type==='ENT'?'N/A':age+" Yrs");
-    document.getElementById('outTen').innerText = tenure+" Months";
-    
-    document.getElementById('outInc').innerText = fmt(avgInc);
-    document.getElementById('outDed').innerText = fmt(dedMonth);
-    document.getElementById('outFoir').innerText = (foir*100)+"%";
-    document.getElementById('outAvail').innerText = fmt(Math.max(0, avail));
-
-    document.getElementById('outBase').innerText = (brllr+sp+spread).toFixed(2)+"%";
-    document.getElementById('outRisk').innerText = riskPrem > 0 ? "+"+riskPrem+"%" : "NIL";
-    document.getElementById('outConc').innerText = conc.toFixed(2)+"%";
-    document.getElementById('outRoi').innerText = finalRoi.toFixed(2)+"%";
-    document.getElementById('outEmi').innerText = fmt(emi);
-    document.getElementById('outInt').innerText = fmt(totInt);
-
-    document.getElementById('limInc').innerText = fmt(limInc);
-    document.getElementById('limLtv').innerText = fmt(limLtv);
-    document.getElementById('limCap').innerText = fmt(limCap);
-
-    // 9. DOCUMENTS
-    let d = `<li><b>Proforma Invoice:</b> From Auth Dealer (OEM). Details: Basic, GST, RTO, Ins, Discount separate.</li>`;
-    d += `<li><b>KYC/App:</b> Application Form, Form 135, Photos, KYC Docs.</li>`;
-    
-    if(type === 'SAL') {
-        d += `<li><b>Income:</b> Latest 3 Month Salary Slips AND Form No. 16.</li>`;
-        d += `<li><b>Banking:</b> Latest 6 Months Bank Statement (Salary A/c).</li>`;
-    } else if(type === 'STAFF') {
-        d += `<li><b>Income:</b> Latest Salary Slip / HR Confirmation.</li>`;
-    } else if(type === 'BIZ') {
-        d += `<li><b>Income:</b> 2 Year ITR + Assessment Orders.</li>`;
-        d += `<li><b>Banking:</b> 1 Year Bank Statement.</li>`;
-    } else if(type === 'ENT') {
-        d += `<li><b>Income:</b> 2 Year ITR (Entity) + Audited Balance Sheet (PAT).</li>`;
-        d += `<li><b>Banking:</b> 1 Year Entity Operating Account Statement.</li>`;
-        d += `<li><b>Proof:</b> GST Cert / Partnership Deed / MOA.</li>`;
-    }
-    
-    if(prod === 'USED') d += `<li><b>Used Car:</b> Valuation Report, Annexure 13, Copy of RC/Ins.</li>`;
-    document.getElementById('docList').innerHTML = d;
-
-    gData = { final, authority, tenure, roi: finalRoi, emi, docList: document.getElementById('docList').innerText };
-    genTable(final, r, emi, tenure);
+    $('resBody').innerHTML = h.join('');
+    $('docList').innerHTML = R.docs.map(([hd, tx]) => `<li><b>${esc(hd)}:</b> ${esc(tx)}</li>`).join('');
+    genTable(fin, R.pay.r, R.pay.emi, t.ten);
+    show('tBox', false);
+    show('btnAmort', fin > 0);
 }
 
-function genTable(bal, r, emi, m) {
-    const b = document.querySelector('#amortTable tbody');
-    b.innerHTML = '';
-    for(let i=1; i<=m; i++){
-        let int = bal*r; let prin = emi-int; let end = bal-prin;
-        b.innerHTML += `<tr><td>${i}</td><td>${Math.round(emi)}</td><td>${Math.round(int)}</td><td>${Math.round(prin)}</td><td>${Math.round(Math.max(0,end))}</td></tr>`;
-        bal = end; if(bal<=0) break;
+function genTable(P, r, emi, n) {
+    const rows = [];
+    let bal = P;
+    for (let i = 1; i <= n && bal > 0.5; i++) {
+        const int = bal * r;
+        let prin = emi - int;
+        if (i === n || prin > bal) prin = bal;
+        bal -= prin;
+        rows.push(`<tr><td>${i}</td><td>${Math.round(int + prin).toLocaleString('en-IN')}</td><td>${Math.round(int).toLocaleString('en-IN')}</td><td>${Math.round(prin).toLocaleString('en-IN')}</td><td>${Math.round(Math.max(0, bal)).toLocaleString('en-IN')}</td></tr>`);
+    }
+    document.querySelector('#amortTable tbody').innerHTML = rows.join('');
+}
+
+function reportText(short) {
+    const R = gRes; if (!R) return '';
+    const L = [`BARODA AUTO LOAN – ESTIMATE`, `${R.SC.label}`, `${R.Bt.short} · ${R.fx ? 'fixed' : 'floating'} rate`, `Result: ${STATUS[R.status]}`,
+        `Loan amount: ${fmt(R.lim.fin)}` + (R.status !== 'fail' ? ` – limited by ${R.lim.dec.label.toLowerCase()}` : '')];
+    if (R.lim.fin > 0) {
+        L.push(`Interest rate: ${pc(R.rate.finalRoi)} | Tenure: ${R.ten.ten} months | EMI: ${fmt(R.pay.emi)}`);
+        L.push(`Processing fee: ${fmt(R.ch.feeTot)} incl. GST | APR: ${R.ch.apr != null ? R.ch.apr.toFixed(2) + '%' : '-'}`);
+    }
+    if (R.issues.length) { L.push(''); R.issues.forEach(i => L.push(`- ${i.text}`)); }
+    L.push('', 'DOCUMENTS:');
+    R.docs.forEach(([hd, tx]) => L.push(short ? `- ${hd}` : `- ${hd}: ${tx}`));
+    L.push('', `Rates: BRLLR ${pc(S.base.brllr)}${S.base.asOn ? ' (' + S.base.asOn + ')' : ''}.`, 'Indicative estimate only, not a loan offer. Confirm the current rates and terms with the bank.');
+    return L.join('\n');
+}
+function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove('on'), 1800); }
+function copyData() {
+    const txt = reportText(false);
+    const fallback = () => { const ta = document.createElement('textarea'); ta.value = txt; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); toast('Copied'); } catch (e) { toast('Copy failed'); } ta.remove(); };
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(txt).then(() => toast('Copied'), fallback); else fallback();
+}
+function shareWa() { window.open(`https://wa.me/?text=${encodeURIComponent(reportText(true))}`, '_blank'); }
+
+/* ---------- tabs ---------- */
+function switchTab(tab) {
+    $('tabCalc').classList.toggle('active', tab === 'calc'); $('tabSet').classList.toggle('active', tab === 'set');
+    $('panelCalc').classList.toggle('active', tab === 'calc'); $('panelSet').classList.toggle('active', tab === 'set');
+    if (tab === 'set' && !D) openSettings();
+    window.scrollTo(0, 0);
+}
+function afterSettingsChange() {
+    applyHeader(); fillProcAcc(); updateUI();
+    if (gRes && $('resultArea').style.display !== 'none') calculate(true);
+}
+
+function initCalc() {
+    $('scheme').innerHTML = Object.entries(SCHEMES).map(([k, s]) => `<option value="${k}">${esc(s.label)}</option>`).join('');
+    $('borr').innerHTML = Object.entries(BORR).map(([k, b]) => `<option value="${k}">${esc(b.label)}</option>`).join('');
+    $('entConst').innerHTML = ENT_CONST.map(([k, l]) => `<option value="${k}">${esc(l)}</option>`).join('');
+    $('entRating').innerHTML = '<option value="">— Select —</option>' + RATINGS.map(([k, l]) => `<option value="${k}">${esc(l)}</option>`).join('');
+    $('coRel').innerHTML = CO_REL.map(([k, l]) => `<option value="${k}">${esc(l)}</option>`).join('');
+    fillProcAcc(); applyHeader();
+    ['scheme', 'borr', 'roiType', 'entConst', 'coOn', 'coType', 'cIns'].forEach(id => $(id).addEventListener('change', updateUI));
+    $('calcBtn').addEventListener('click', () => calculate());
+    $('btnCopy').addEventListener('click', copyData);
+    $('btnWa').addEventListener('click', shareWa);
+    $('btnAmort').addEventListener('click', () => show('tBox', $('tBox').style.display === 'none'));
+    $('tabCalc').addEventListener('click', () => switchTab('calc'));
+    $('tabSet').addEventListener('click', () => switchTab('set'));
+    updateUI();
+}
+
+/* =====================================================================
+   Settings tab – rates and rules used by the calculator
+   ===================================================================== */
+let D = null;          // draft being edited
+let dirty = false;
+let pendingOpen = null;
+
+const BASE_OPTS = BASES;
+const BASE_OPTS_NONE = [['', 'None']].concat(BASES);
+const SCHEME_OPTS = Object.entries(SCHEMES).map(([k, s]) => [k, s.short]);
+const IND_OPTS = IND.map(k => [k, BORR[k].short]);
+const BORR_OPTS = Object.keys(BORR).map(k => [k, BORR[k].short]);
+
+/* ---------- small builders (inputs are bound to D by data-p paths) ---------- */
+function fIn(p, t, v, ph) {
+    const val = v == null || (typeof v === 'number' && !isFinite(v)) ? '' : v;
+    const type = t === 'num' ? 'number' : t === 'date' ? 'date' : 'text';
+    return `<input type="${type}"${type === 'number' ? ' step="any" inputmode="decimal"' : ''} data-p="${p}" data-t="${t}" value="${esc(val)}"${ph ? ` placeholder="${esc(ph)}"` : ''}>`;
+}
+function fSel(p, v, opts, rr) {
+    return `<select data-p="${p}" data-t="sel"${rr ? ' data-rr="1"' : ''}>${opts.map(([k, l]) => `<option value="${esc(k)}"${String(k) === String(v == null ? '' : v) ? ' selected' : ''}>${esc(l)}</option>`).join('')}</select>`;
+}
+function fChk(p, v, label, rr) {
+    return `<label class="cb-item"><input type="checkbox" data-p="${p}" data-t="bool"${v ? ' checked' : ''}${rr ? ' data-rr="1"' : ''}><span>${esc(label)}</span></label>`;
+}
+function fList(p, arr, opts) {
+    return opts.map(([k, l]) => `<label class="cb-item"><input type="checkbox" data-p="${p}" data-t="list" data-v="${esc(k)}"${(arr || []).includes(k) ? ' checked' : ''}><span>${esc(l)}</span></label>`).join('');
+}
+const fld = (label, html, hint) => `<div class="sf"><label>${label}</label>${html}${hint ? `<div class="hint">${hint}</div>` : ''}</div>`;
+const g2 = (...a) => `<div class="grid2">${a.join('')}</div>`;
+const sec = (k, title, body, sub) => `<details class="set-sec" data-k="${k}"><summary>${title}${sub ? `<span class="sum-sub">${sub}</span>` : ''}</summary><div class="set-body">${body}</div></details>`;
+const btn = (a, label, extra, cls) => `<button type="button" class="btn-sm${cls ? ' ' + cls : ''}" data-a="${a}"${extra || ''}>${label}</button>`;
+const xbtn = (a, extra) => `<button type="button" class="x" data-a="${a}"${extra} title="Delete" aria-label="Delete">✕</button>`;
+
+/* ---------- path helpers ---------- */
+function getPath(o, p) { return p.split('.').reduce((x, k) => (x == null ? x : x[k]), o); }
+function setPath(o, p, v) { const ks = p.split('.'); let x = o; for (let i = 0; i < ks.length - 1; i++) x = x[ks[i]]; x[ks[ks.length - 1]] = v; }
+
+/* ---------- sections ---------- */
+function secBase() {
+    return sec('base', 'Benchmark rates',
+        g2(fld('BRLLR %', fIn('base.brllr', 'num', D.base.brllr)), fld('Strategic premium (SP) %', fIn('base.sp', 'num', D.base.sp)),
+            fld('6-month MCLR %', fIn('base.mclr6', 'num', D.base.mclr6)), fld('1-year MCLR %', fIn('base.mclr1y', 'num', D.base.mclr1y))) +
+        fld('Rates effective from (note)', fIn('base.asOn', 'text', D.base.asOn)) +
+        fld('Page subtitle', fIn('subtitle', 'text', D.subtitle)),
+        `BRLLR ${isNum(D.base.brllr) ? pc(D.base.brllr) : '—'}`);
+}
+
+function cardHtml(c, ci) {
+    const P = `cards.${ci}`;
+    const isR = c.kind === 'rating';
+    let h = `<details class="card-ed" data-k="card-${esc(c.id)}"><summary><span class="ce-name">${esc(c.name || 'Untitled table')}</span>` +
+        `<span class="tag">${c.roi === 'FX' ? 'Fixed' : 'Floating'}</span>${isR ? '<span class="tag">Rating</span>' : ''}${c.special && c.special.on ? '<span class="tag sp">Offer</span>' : ''}` +
+        `<span class="ce-sub">${c.schemes.map(s => SCHEMES[s] ? SCHEMES[s].short : s).join(', ') || 'not linked'} · ${isR ? 'business entities' : c.borrowers.map(b => BORR[b].short).join(', ')}</span></summary><div class="card-body">`;
+    h += fld('Table name', fIn(`${P}.name`, 'text', c.name));
+    h += g2(fld('Rate type', fSel(`${P}.roi`, c.roi, [['FL', 'Floating'], ['FX', 'Fixed']], true)),
+        fld('Credit life insurance', fSel(`${P}.gcli`, c.gcli, [['premium', '+ if not taken'], ['discount', '− if taken'], ['none', 'No effect']])));
+    h += `<div class="sf"><label>Used for schemes</label><div class="cb-wrap">${fList(`${P}.schemes`, c.schemes, SCHEME_OPTS)}</div></div>`;
+    h += `<div class="sf"><label>Used for applicants</label><div class="cb-wrap">${isR ? '<span class="hint">Business entities, priced by rating</span>' : fList(`${P}.borrowers`, c.borrowers, IND_OPTS)}</div></div>`;
+    h += g2(fld('Minimum rate: base', fSel(`${P}.floor.base`, c.floor.base, BASE_OPTS_NONE)), fld('Minimum rate: spread %', fIn(`${P}.floor.spread`, 'num', c.floor.spread)));
+    h += g2(fld('Max concession %', fIn(`${P}.maxConc`, 'num', c.maxConc, 'No cap')), fld('Max rate % (ceiling)', fIn(`${P}.ceiling`, 'num', c.ceiling, 'None')));
+    h += `<div class="hint">The minimum rate is the lowest the rate can go after concessions (e.g. BRLLR − 0.30). Max concession caps the total of the concessions (pre-owned 0.50%).</div>`;
+    if (!isR) {
+        h += `<div class="tbl-title">CIBIL bands</div><table class="set-table"><colgroup><col style="width:17%"><col style="width:17%"><col style="width:33%"><col style="width:22%"><col style="width:11%"></colgroup>` +
+            `<thead><tr><th>From</th><th>To</th><th>Base</th><th>Spread %</th><th></th></tr></thead><tbody>` +
+            c.rows.map((r, i) => `<tr><td>${fIn(`${P}.rows.${i}.from`, 'num', r.from)}</td><td>${fIn(`${P}.rows.${i}.to`, 'num', r.to)}</td><td>${fSel(`${P}.rows.${i}.base`, r.base, BASE_OPTS)}</td><td>${fIn(`${P}.rows.${i}.spread`, 'num', r.spread)}</td><td>${xbtn('delRow', ` data-c="${ci}" data-i="${i}"`)}</td></tr>`).join('') +
+            `</tbody></table>${btn('addRow', '+ Add band', ` data-c="${ci}"`)}`;
+        h += `<div class="tbl-title">No credit history (CIBIL −1), by monthly income</div><table class="set-table"><colgroup><col style="width:22%"><col style="width:21%"><col style="width:27%"><col style="width:19%"><col style="width:11%"></colgroup>` +
+            `<thead><tr><th>Income from ₹</th><th>to ₹</th><th>Base</th><th>Spread %</th><th></th></tr></thead><tbody>` +
+            c.ntc.map((r, i) => `<tr><td>${fIn(`${P}.ntc.${i}.gmiFrom`, 'num', r.gmiFrom)}</td><td>${fIn(`${P}.ntc.${i}.gmiTo`, 'num', r.gmiTo, 'No limit')}</td><td>${fSel(`${P}.ntc.${i}.base`, r.base, BASE_OPTS)}</td><td>${fIn(`${P}.ntc.${i}.spread`, 'num', r.spread)}</td><td>${xbtn('delNtc', ` data-c="${ci}" data-i="${i}"`)}</td></tr>`).join('') +
+            `</tbody></table>${btn('addNtc', '+ Add −1 row', ` data-c="${ci}"`)}`;
+    } else {
+        h += `<div class="tbl-title">Rates by rating</div><table class="set-table"><colgroup><col style="width:40%"><col style="width:35%"><col style="width:25%"></colgroup>` +
+            `<thead><tr><th>Rating</th><th>Base</th><th>Spread %</th></tr></thead><tbody>` +
+            c.rows.map((r, i) => `<tr><td class="lbl">${esc(RATING_LABEL[r.code])}</td><td>${fSel(`${P}.rows.${i}.base`, r.base, BASE_OPTS)}</td><td>${fIn(`${P}.rows.${i}.spread`, 'num', r.spread)}</td></tr>`).join('') +
+            `</tbody></table><div class="hint">Which ratings are eligible, and the net worth needed, are set under “Business entities”.</div>`;
+    }
+    const sp = c.special;
+    h += `<div class="sp-box"><div class="tbl-title">Special offer (e.g. festive season)</div>${fChk(`${P}.special.on`, sp.on, 'Run a special offer between two dates', true)}`;
+    if (sp.on) {
+        h += fld('Offer name', fIn(`${P}.special.name`, 'text', sp.name));
+        h += g2(fld('From', fIn(`${P}.special.from`, 'date', sp.from)), fld('To', fIn(`${P}.special.to`, 'date', sp.to)));
+        h += fChk(`${P}.special.suspend`, sp.suspend, 'Pause the regular concessions during the offer');
+        h += g2(fld('Minimum rate during offer: base', fSel(`${P}.special.floor.base`, sp.floor.base, [['', 'Same as table']].concat(BASES))), fld('Spread %', fIn(`${P}.special.floor.spread`, 'num', sp.floor.spread)));
+        if (!isR) {
+            h += `<table class="set-table"><colgroup><col style="width:28%"><col style="width:28%"><col style="width:33%"><col style="width:11%"></colgroup><thead><tr><th>CIBIL from</th><th>To</th><th>Extra off %</th><th></th></tr></thead><tbody>` +
+                sp.rows.map((r, i) => `<tr><td>${fIn(`${P}.special.rows.${i}.from`, 'num', r.from)}</td><td>${fIn(`${P}.special.rows.${i}.to`, 'num', r.to)}</td><td>${fIn(`${P}.special.rows.${i}.conc`, 'num', r.conc)}</td><td>${xbtn('delSp', ` data-c="${ci}" data-i="${i}"`)}</td></tr>`).join('') +
+                `</tbody></table>${btn('addSp', '+ Add offer band', ` data-c="${ci}"`)}<div class="hint">Use −1 to −1 for applicants with no credit history.</div>`;
+        } else h += fld('Extra off % (all ratings)', fIn(`${P}.special.flat`, 'num', sp.flat));
+        h += `<div class="hint">The offer applies only between the two dates, inclusive. It is added on top of the regular concessions (or replaces them if paused) and does not count toward the max concession.</div>`;
+    }
+    h += `</div>`;
+    h += `<div class="btn-row">${btn('dupCard', 'Duplicate', ` data-c="${ci}"`)}${btn('upCard', '↑ Move up', ` data-c="${ci}"`)}${btn('downCard', '↓ Move down', ` data-c="${ci}"`)}${btn('delCard', 'Delete table', ` data-c="${ci}"`, 'danger')}</div>`;
+    return h + `</div></details>`;
+}
+function secCards() {
+    const body = `<p class="hint">The first table that matches the scheme, applicant type and rate type sets the rate, so order matters. Bands include both ends (701–725 covers 701 to 725); an average score such as 725.5 falls in 701–725.</p>` +
+        D.cards.map(cardHtml).join('') +
+        `<div class="btn-row">${btn('addCard', '+ Add CIBIL table', ' data-kind="cibil"')}${btn('addCard', '+ Add rating table', ' data-kind="rating"')}</div>`;
+    return sec('cards', 'Interest rate tables (CIBIL matrix)', body, `${D.cards.length} tables`);
+}
+function secConc() {
+    const body = `<p class="hint">Ticked concessions add up, but the rate never goes below the table's minimum rate, and tables with a cap limit the total.</p>` +
+        D.conc.map((k, i) => `<div class="mini-card">${fld('Label', fIn(`conc.${i}.label`, 'text', k.label))}` +
+            g2(fld('Concession %', fIn(`conc.${i}.pct`, 'num', k.pct)), `<div class="sf"><label>&nbsp;</label>${fChk(`conc.${i}.indOnly`, k.indOnly, 'Individuals only')}</div>`) +
+            `<div class="sf"><label>Schemes</label><div class="cb-wrap">${fList(`conc.${i}.schemes`, k.schemes, SCHEME_OPTS)}</div></div>` +
+            `<div class="btn-row">${btn('delConc', 'Delete', ` data-i="${i}"`, 'danger')}</div></div>`).join('') +
+        btn('addConc', '+ Add concession') +
+        `<div class="mini-card" style="margin-top:12px">${fld('Green Wheel (electric car) concession %', fIn('schemes.GREEN.schemeConc', 'num', D.schemes.GREEN.schemeConc), 'Given on every Green Wheel loan, down to the minimum rate.')}</div>`;
+    return sec('conc', 'Interest rate concessions', body, `${D.conc.length}`);
+}
+function secCibil() {
+    const c = D.cibil;
+    const body = g2(fld('Minimum CIBIL score', fIn('cibil.cutoff', 'num', c.cutoff)), fld('Joint applicants: each at least', fIn('cibil.jointMin', 'num', c.jointMin))) +
+        fld('Scores below the minimum', fSel('cibil.belowMin', c.belowMin, [['block', 'Not eligible'], ['approval', "Show the rate, subject to the bank's approval"]]),
+            'With joint applicants, the average of their scores is used; −1 (no credit history) is left out.');
+    return sec('cibil', 'Credit score rules', body);
+}
+function secSchemes() {
+    const body = Object.keys(SCHEMES).map(k => {
+        const s = D.schemes[k], P = `schemes.${k}`;
+        return `<div class="mini-card"><div class="tbl-title">${esc(SCHEMES[k].label)}</div>` +
+            `<div class="sf"><label>Available for</label><div class="cb-wrap">${fList(`${P}.borrowers`, s.borrowers, BORR_OPTS)}</div></div>` +
+            g2(fld('Floating: max months', fIn(`${P}.flMax`, 'num', s.flMax)), fld('Fixed: min months', fIn(`${P}.fxMin`, 'num', s.fxMin)),
+                fld('Fixed: max months', fIn(`${P}.fxMax`, 'num', s.fxMax)), fld('Minimum loan ₹', fIn(`${P}.minLoan`, 'num', s.minLoan)),
+                fld('Max loan – individual ₹', fIn(`${P}.capInd`, 'num', s.capInd)), fld('Max loan – business ₹', fIn(`${P}.capEnt`, 'num', s.capEnt))) +
+            (k === 'GREEN' ? g2(fld('Electric car: max months', fIn(`${P}.evMax`, 'num', s.evMax)), fld('…for CIBIL of at least', fIn(`${P}.evCibil`, 'num', s.evCibil))) : '') + `</div>`;
+    }).join('');
+    return sec('schemes', 'Schemes: tenure, loan size, applicants', body);
+}
+function secFoir() {
+    const body = FOIR_SETS.map(([k, l]) => `<div class="tbl-title">${esc(l)}</div><table class="set-table"><colgroup><col style="width:55%"><col style="width:35%"><col style="width:10%"></colgroup><thead><tr><th>Income from ₹</th><th>Share for EMIs %</th><th></th></tr></thead><tbody>` +
+        D.foir[k].map((s, i) => `<tr><td>${fIn(`foir.${k}.${i}.from`, 'num', s.from)}</td><td>${fIn(`foir.${k}.${i}.pct`, 'num', s.pct)}</td><td>${xbtn('delFoir', ` data-f="${k}" data-i="${i}"`)}</td></tr>`).join('') +
+        `</tbody></table>${btn('addFoir', '+ Add slab', ` data-f="${k}"`)}`).join('') +
+        `<div class="hint">The share of income that all EMIs together (including the new one) may take. Salaried slabs use average monthly gross income; others use the 2-year average yearly income.</div>`;
+    return sec('foir', 'Repayment capacity (FOIR)', body);
+}
+function secLtvUsed() {
+    const l = D.ltv, u = D.used;
+    const body = `<div class="tbl-title">Loan to value</div>` + g2(fld('New car: % of on-road price', fIn('ltv.newPct', 'num', l.newPct)), fld('With insurance premium financed: up to %', fIn('ltv.gcliMaxPct', 'num', l.gcliMaxPct)),
+            fld('Pre-owned: % of valuation', fIn('ltv.usedValPct', 'num', l.usedValPct)), fld('Pre-owned: % of sale price', fIn('ltv.usedInvPct', 'num', l.usedInvPct)),
+            fld('Pre-owned: % of IDV', fIn('ltv.usedIdvPct', 'num', l.usedIdvPct))) +
+        `<div class="tbl-title">Pre-owned car</div>` + g2(fld('Max age of car (months)', fIn('used.maxVehMonths', 'num', u.maxVehMonths)), fld('Car age + tenure up to (months)', fIn('used.vehPlusTenure', 'num', u.vehPlusTenure)),
+            fld('Seller can be owner no. up to', fIn('used.maxOwner', 'num', u.maxOwner)), fld('Min income: salaried / pensioner ₹ a year', fIn('used.minIncSal', 'num', u.minIncSal)),
+            fld('Min income: self-employed ₹ a year', fIn('used.minIncOth', 'num', u.minIncOth)));
+    return sec('ltv', 'Loan to value & pre-owned rules', body);
+}
+function secAge() {
+    const a = D.age;
+    const body = g2(fld('Applicant: minimum age', fIn('age.minApp', 'num', a.minApp)), fld('Co-applicant: minimum age', fIn('age.minCo', 'num', a.minCo)),
+        fld('Age at end of loan: maximum', fIn('age.maxEnd', 'num', a.maxEnd)), fld('Co-applicant suggested beyond age (non-salaried)', fIn('age.othersEnd', 'num', a.othersEnd)),
+        fld('Default retirement age', fIn('age.retire', 'num', a.retire)));
+    return sec('age', 'Age limits', body);
+}
+function secEnt() {
+    const e = D.ent;
+    const body = `<div class="tbl-title">Net worth needed (times the loan); blank = not eligible</div><table class="set-table"><colgroup><col style="width:60%"><col style="width:40%"></colgroup><thead><tr><th>Rating</th><th>TNW ×</th></tr></thead><tbody>` +
+        RATINGS.map(([k, l]) => `<tr><td class="lbl">${esc(l)}</td><td>${fIn(`ent.tnw.${k}`, 'num', e.tnw[k], 'Not eligible')}</td></tr>`).join('') + `</tbody></table>` +
+        fld('Depreciation added back: max % of income', fIn('ent.depCapPct', 'num', e.depCapPct));
+    return sec('ent', 'Business entities', body);
+}
+function secCharges() {
+    const p = D.proc;
+    const body = g2(fld('GST %', fIn('gst', 'num', D.gst)), fld('Credit life insurance effect %', fIn('gcliAdj', 'num', D.gcliAdj)),
+            fld('Round loan down to ₹', fIn('round', 'num', D.round), '0 = no rounding')) +
+        `<div class="tbl-title">Processing fee (before GST)</div>` +
+        g2(fld('Car Loan: loans up to ₹', fIn('proc.CAR.upTo', 'num', p.CAR.upTo)), fld('Fee up to that ₹', fIn('proc.CAR.low', 'num', p.CAR.low)),
+            fld('Fee above that ₹', fIn('proc.CAR.high', 'num', p.CAR.high)), fld('Green Wheel: % off', fIn('proc.GREEN.disc', 'num', p.GREEN.disc)),
+            fld('Direct: flat ₹', fIn('proc.DIRECT.flat', 'num', p.DIRECT.flat)), fld('Yoddha: flat ₹', fIn('proc.YODDHA.flat', 'num', p.YODDHA.flat)),
+            fld('Govt & PSU: via dealer / agent ₹', fIn('proc.GOVT.agent', 'num', p.GOVT.agent)), fld('Govt & PSU: applied directly ₹', fIn('proc.GOVT.direct', 'num', p.GOVT.direct)),
+            fld('Pre-owned: % of loan', fIn('proc.USED.pct', 'num', p.USED.pct)), fld('Pre-owned: min ₹', fIn('proc.USED.min', 'num', p.USED.min)),
+            fld('Pre-owned: max ₹', fIn('proc.USED.max', 'num', p.USED.max))) +
+        `<div class="tbl-title">Processing fee offers by account (Car Loan & Green Wheel; not combined)</div><table class="set-table"><colgroup><col style="width:70%"><col style="width:20%"><col style="width:10%"></colgroup><thead><tr><th>Account / membership</th><th>% off</th><th></th></tr></thead><tbody>` +
+        D.procAcc.map((a, i) => `<tr><td>${fIn(`procAcc.${i}.label`, 'text', a.label)}</td><td>${fIn(`procAcc.${i}.pct`, 'num', a.pct)}</td><td>${xbtn('delAcc', ` data-i="${i}"`)}</td></tr>`).join('') +
+        `</tbody></table>${btn('addAcc', '+ Add account type')}`;
+    return sec('charges', 'Charges & rounding', body);
+}
+function secBackup() {
+    const body = `<p class="hint">Settings are saved in this browser only. Export them to a file to use them on another device, then Import there.</p>` +
+        `<div class="btn-row">${btn('export', 'Export to file')}${btn('import', 'Import from file')}${btn('reset', 'Reset to default rates', '', 'danger')}</div>`;
+    return sec('backup', 'Backup & reset', body);
+}
+
+function renderSettings() {
+    const wrap = $('setWrap');
+    const first = !wrap.innerHTML;
+    const open = new Set([...wrap.querySelectorAll('details[open]')].map(d => d.dataset.k));
+    wrap.innerHTML = [secBase(), secCards(), secConc(), secCibil(), secSchemes(), secFoir(), secLtvUsed(), secAge(), secEnt(), secCharges(), secBackup()].join('');
+    wrap.querySelectorAll('details').forEach(d => {
+        if (open.has(d.dataset.k) || (first && (d.dataset.k === 'base' || d.dataset.k === 'cards')) || d.dataset.k === pendingOpen) d.open = true;
+    });
+    if (pendingOpen) {
+        const el = wrap.querySelector(`details[data-k="${CSS.escape(pendingOpen)}"]`);
+        if (el) { const cards = wrap.querySelector('details[data-k="cards"]'); if (cards) cards.open = true; el.scrollIntoView({block: 'center'}); }
+        pendingOpen = null;
     }
 }
+function setStatus(t, cls) { const e = $('setStatus'); e.textContent = t; e.className = 'set-status ' + (cls || ''); }
+function markDirty() { dirty = true; setStatus('Unsaved changes', 'warn'); }
+function openSettings() { D = clone(S); dirty = false; renderSettings(); setStatus(''); $('setMsgs').innerHTML = ''; }
 
-function toggleTable() {
-    const d = document.getElementById('tBox');
-    d.style.display = (d.style.display==='block')?'none':'block';
+function onSetEdit(e) {
+    const el = e.target, p = el.dataset && el.dataset.p;
+    if (!p) return;
+    const t = el.dataset.t;
+    if (t === 'list') {
+        if (e.type !== 'change') return;
+        const arr = getPath(D, p), item = el.dataset.v, i = arr.indexOf(item);
+        if (el.checked && i < 0) arr.push(item);
+        if (!el.checked && i >= 0) arr.splice(i, 1);
+        markDirty(); return;
+    }
+    let v;
+    if (t === 'bool') v = el.checked;
+    else if (t === 'num') { const raw = el.value.trim(); v = raw === '' ? null : Number(raw); if (raw !== '' && !isFinite(v)) v = NaN; }
+    else v = el.value;
+    setPath(D, p, v);
+    markDirty();
+    if (el.dataset.rr && e.type === 'change') renderSettings();
+}
+function onSetClick(e) {
+    const b = e.target.closest('[data-a]');
+    if (!b || !$('panelSet').contains(b)) return;
+    e.preventDefault();
+    const a = b.dataset.a, ci = +b.dataset.c, i = +b.dataset.i, c = D ? D.cards[ci] : null;
+    switch (a) {
+        case 'save': return saveSettings();
+        case 'discard': return discardSettings();
+        case 'export': return exportSettings();
+        case 'import': return $('importFile').click();
+        case 'reset':
+            if (!confirm('Replace every setting with the default rates and rules? Press Save afterwards to apply.')) return;
+            D = clone(DEFAULTS); markDirty(); renderSettings(); setStatus('Defaults loaded – press Save to apply', 'warn'); return;
+        case 'addRow': c.rows.push({from: null, to: null, base: 'BRLLR', spread: 0}); break;
+        case 'delRow': c.rows.splice(i, 1); break;
+        case 'addNtc': c.ntc.push({gmiFrom: 0, gmiTo: null, base: 'BRLLR+SP', spread: 0}); break;
+        case 'delNtc': c.ntc.splice(i, 1); break;
+        case 'addSp': c.special.rows.push({from: null, to: null, conc: 0}); break;
+        case 'delSp': c.special.rows.splice(i, 1); break;
+        case 'addCard': {
+            const kind = b.dataset.kind;
+            const nc = normCard({id: 'c' + Date.now().toString(36), name: kind === 'rating' ? 'New rating table' : 'New CIBIL table', kind,
+                roi: 'FL', schemes: [], borrowers: kind === 'rating' ? ['ENT'] : IND.slice(), floor: {base: 'BRLLR', spread: 0}, gcli: kind === 'rating' ? 'none' : 'premium',
+                rows: kind === 'rating' ? [] : [{from: 701, to: 900, base: 'BRLLR', spread: 0}], ntc: kind === 'rating' ? [] : [{gmiFrom: 0, gmiTo: null, base: 'BRLLR+SP', spread: 0}]});
+            D.cards.push(nc); pendingOpen = 'card-' + nc.id; break;
+        }
+        case 'dupCard': { const nc = clone(c); nc.id = 'c' + Date.now().toString(36); nc.name = c.name + ' (copy)'; D.cards.splice(ci + 1, 0, nc); pendingOpen = 'card-' + nc.id; break; }
+        case 'upCard': if (ci > 0) [D.cards[ci - 1], D.cards[ci]] = [D.cards[ci], D.cards[ci - 1]]; pendingOpen = 'card-' + c.id; break;
+        case 'downCard': if (ci < D.cards.length - 1) [D.cards[ci + 1], D.cards[ci]] = [D.cards[ci], D.cards[ci + 1]]; pendingOpen = 'card-' + c.id; break;
+        case 'delCard': if (!confirm(`Delete the table "${c.name}"?`)) return; D.cards.splice(ci, 1); break;
+        case 'addConc': D.conc.push({id: 'k' + Date.now().toString(36), label: 'New concession', pct: 0, schemes: [], indOnly: true}); break;
+        case 'delConc': D.conc.splice(i, 1); break;
+        case 'addFoir': D.foir[b.dataset.f].push({from: null, pct: null}); break;
+        case 'delFoir': D.foir[b.dataset.f].splice(i, 1); break;
+        case 'addAcc': D.procAcc.push({label: '', pct: 0}); break;
+        case 'delAcc': D.procAcc.splice(i, 1); break;
+        default: return;
+    }
+    markDirty(); renderSettings();
 }
 
-function getTxt() {
-    return `BARODA AUTO LOAN\nEligible: ${fmt(gData.final)}\nAuth: ${gData.authority}\nEMI: ${fmt(gData.emi)}\nROI: ${gData.roi.toFixed(2)}%\nTenure: ${gData.tenure}m\n\nDOCS:\n${gData.docList}`;
+/* ---------- validation ---------- */
+function validateSettings(X) {
+    const E = [], W = [];
+    const req = (v, label, min, max, allowNull) => {
+        if (v == null) { if (!allowNull) E.push(`${label}: enter a value.`); return; }
+        if (!isNum(v)) { E.push(`${label} must be a number.`); return; }
+        if (min != null && v < min) E.push(`${label} must be at least ${min}.`);
+        if (max != null && v > max) E.push(`${label} must be at most ${max}.`);
+    };
+    req(X.base.brllr, 'BRLLR', 0.01); req(X.base.sp, 'SP', 0);
+    req(X.base.mclr6, '6-month MCLR', 0.01, null, true); req(X.base.mclr1y, '1-year MCLR', 0.01, null, true);
+    const usesM = b => b && String(b).includes('MCLR');
+    const scoreOk = r => Number.isInteger(r.from) && Number.isInteger(r.to);
+    X.cards.forEach((c, ci) => {
+        const nm = `Table “${c.name || ci + 1}”`;
+        if (!String(c.name || '').trim()) E.push(`Table ${ci + 1}: enter a name.`);
+        if (!c.schemes.length) W.push(`${nm} is not linked to any scheme, so it is never used.`);
+        if (c.kind === 'cibil' && !c.borrowers.length) W.push(`${nm} has no applicant types, so it is never used.`);
+        if (c.floor.base) req(c.floor.spread, `${nm}: minimum rate spread`);
+        req(c.maxConc, `${nm}: max concession`, 0, null, true);
+        req(c.ceiling, `${nm}: max rate`, 0.01, null, true);
+        let mclr = usesM(c.floor.base);
+        if (c.kind === 'cibil') {
+            if (!c.rows.length) E.push(`${nm}: add at least one CIBIL band.`);
+            c.rows.forEach((r, i) => {
+                if (!scoreOk(r)) E.push(`${nm}, band ${i + 1}: From and To must be whole numbers.`);
+                else if (r.from < 300 || r.to > 900 || r.from > r.to) E.push(`${nm}, band ${r.from}–${r.to}: keep it within 300–900 with From ≤ To.`);
+                req(r.spread, `${nm}, band ${i + 1}: spread`); if (usesM(r.base)) mclr = true;
+            });
+            const s = c.rows.filter(scoreOk).sort((a, b) => a.from - b.from);
+            for (let i = 1; i < s.length; i++) {
+                if (s[i].from <= s[i - 1].to) E.push(`${nm}: bands ${s[i - 1].from}–${s[i - 1].to} and ${s[i].from}–${s[i].to} overlap.`);
+                else if (s[i].from > s[i - 1].to + 1) W.push(`${nm}: scores ${s[i - 1].to + 1}–${s[i].from - 1} are not in any band (the highest rate is used).`);
+            }
+            if (!c.ntc.length) W.push(`${nm}: no −1 rows, so applicants with no credit history can't be priced.`);
+            c.ntc.forEach((r, i) => {
+                req(r.gmiFrom, `${nm}, −1 row ${i + 1}: income from`, 0);
+                req(r.gmiTo, `${nm}, −1 row ${i + 1}: income to`, 0, null, true);
+                if (isNum(r.gmiFrom) && isNum(r.gmiTo) && r.gmiTo < r.gmiFrom) E.push(`${nm}, −1 row ${i + 1}: income “to” is below “from”.`);
+                req(r.spread, `${nm}, −1 row ${i + 1}: spread`); if (usesM(r.base)) mclr = true;
+            });
+            const n = c.ntc.filter(r => isNum(r.gmiFrom)).sort((a, b) => a.gmiFrom - b.gmiFrom);
+            for (let i = 1; i < n.length; i++) if (n[i - 1].gmiTo == null || n[i].gmiFrom <= n[i - 1].gmiTo) E.push(`${nm}: the −1 income ranges overlap.`);
+        } else c.rows.forEach(r => { req(r.spread, `${nm}, ${RATING_LABEL[r.code]}: spread`); if (usesM(r.base)) mclr = true; });
+        const sp = c.special;
+        if (sp.on) {
+            if (!parseDate(sp.from) || !parseDate(sp.to)) E.push(`${nm}: the special offer needs From and To dates.`);
+            else if (sp.from > sp.to) E.push(`${nm}: the special offer starts after it ends.`);
+            if (sp.floor.base) req(sp.floor.spread, `${nm}: offer minimum rate spread`);
+            if (c.kind === 'cibil') {
+                if (!sp.rows.length) W.push(`${nm}: the special offer has no bands, so it gives nothing.`);
+                sp.rows.forEach((r, i) => {
+                    if (!scoreOk(r)) E.push(`${nm}, offer band ${i + 1}: From and To must be whole numbers.`);
+                    else if (!((r.from === -1 && r.to === -1) || (r.from >= 300 && r.to <= 900 && r.from <= r.to))) E.push(`${nm}, offer band ${r.from}–${r.to}: use −1 to −1, or a range within 300–900.`);
+                    req(r.conc, `${nm}, offer band ${i + 1}: extra off`, 0);
+                });
+                const s2 = sp.rows.filter(scoreOk).sort((a, b) => a.from - b.from);
+                for (let i = 1; i < s2.length; i++) if (s2[i].from <= s2[i - 1].to) E.push(`${nm}: special offer bands overlap.`);
+            } else req(sp.flat, `${nm}: offer extra off`, 0);
+        }
+        if (mclr && (!isNum(X.base.mclr6) || !isNum(X.base.mclr1y))) W.push(`${nm} uses MCLR; enter both MCLR values under Benchmark rates.`);
+    });
+    for (const [sk, sv] of Object.entries(X.schemes)) for (const b of sv.borrowers) for (const roi of ['FL', 'FX']) {
+        const m = X.cards.filter(c => c.roi === roi && c.schemes.includes(sk) && c.borrowers.includes(b));
+        const nm = `${SCHEMES[sk].short} · ${BORR[b].short} · ${roi === 'FL' ? 'floating' : 'fixed'}`;
+        if (!m.length) W.push(`No table for ${nm}.`);
+        else if (m.length > 1) W.push(`${nm}: “${m[0].name}” is used because it is above “${m[1].name}”.`);
+    }
+    X.conc.forEach((k, i) => { if (!String(k.label || '').trim()) E.push(`Concession ${i + 1}: enter a label.`); req(k.pct, `Concession “${k.label || i + 1}”`, 0); });
+    req(X.schemes.GREEN.schemeConc, 'Green Wheel concession', 0);
+    const C = X.cibil;
+    req(C.cutoff, 'Minimum CIBIL score', 300, 900); req(C.jointMin, 'Joint applicant minimum', 300, 900);
+    for (const [k, s] of Object.entries(X.schemes)) {
+        const nm = SCHEMES[k].short;
+        if (!s.borrowers.length) W.push(`${nm} is not available to anyone.`);
+        req(s.flMax, `${nm}: floating max months`, 1); req(s.fxMax, `${nm}: fixed max months`, 1); req(s.fxMin, `${nm}: fixed min months`, 0);
+        req(s.capInd, `${nm}: max loan (individual)`, 0); req(s.capEnt, `${nm}: max loan (business)`, 0); req(s.minLoan, `${nm}: minimum loan`, 0);
+        if (isNum(s.fxMin) && isNum(s.fxMax) && s.fxMin > s.fxMax) E.push(`${nm}: fixed min months is above the max.`);
+        if (k === 'GREEN') { req(s.evMax, 'Green Wheel: electric car max months', 1); req(s.evCibil, 'Green Wheel: CIBIL for max months', 300, 900); }
+    }
+    for (const [k, l] of FOIR_SETS) {
+        const arr = X.foir[k];
+        if (!arr.length) E.push(`FOIR (${l}): add at least one slab.`);
+        arr.forEach((s, i) => { req(s.from, `FOIR (${l}), slab ${i + 1}: income from`, 0); req(s.pct, `FOIR (${l}), slab ${i + 1}: share %`, 1, 100); });
+        if (arr.length && !arr.some(s => s.from === 0)) E.push(`FOIR (${l}): the first slab must start at 0.`);
+        const fr = arr.map(s => s.from).filter(isNum); if (new Set(fr).size !== fr.length) E.push(`FOIR (${l}): two slabs start at the same income.`);
+    }
+    const L = X.ltv; [['newPct', 'New car loan to value'], ['gcliMaxPct', 'Loan to value with insurance financed'], ['usedValPct', 'Pre-owned % of valuation'], ['usedInvPct', 'Pre-owned % of sale price'], ['usedIdvPct', 'Pre-owned % of IDV']].forEach(([k, l]) => req(L[k], l, 1, 100));
+    const U = X.used; req(U.maxVehMonths, 'Max age of car', 1); req(U.vehPlusTenure, 'Car age + tenure', 1); req(U.maxOwner, 'Owner number', 1); req(U.minIncSal, 'Min income salaried', 0); req(U.minIncOth, 'Min income self-employed', 0);
+    const A = X.age; req(A.minApp, 'Applicant minimum age', 1); req(A.minCo, 'Co-applicant minimum age', 1); req(A.maxEnd, 'Maximum age at end of loan', 1); req(A.othersEnd, 'Co-applicant age (non-salaried)', 1); req(A.retire, 'Retirement age', 1);
+    RATINGS.forEach(([k, l]) => req(X.ent.tnw[k], `Net worth multiple for ${l}`, 0.01, null, true));
+    req(X.ent.depCapPct, 'Depreciation limit', 0, 100);
+    req(X.gst, 'GST', 0, 100); req(X.gcliAdj, 'Credit life insurance effect', 0); req(X.round, 'Rounding', 0);
+    const P = X.proc; req(P.CAR.upTo, 'Car Loan fee slab', 0); req(P.CAR.low, 'Car Loan fee (lower)', 0); req(P.CAR.high, 'Car Loan fee (higher)', 0); req(P.GREEN.disc, 'Green Wheel fee discount', 0, 100);
+    req(P.DIRECT.flat, 'Direct fee', 0); req(P.YODDHA.flat, 'Yoddha fee', 0); req(P.GOVT.agent, 'Govt & PSU fee (via dealer / agent)', 0); req(P.GOVT.direct, 'Govt & PSU fee (direct)', 0);
+    req(P.USED.pct, 'Pre-owned fee %', 0, 100); req(P.USED.min, 'Pre-owned fee min', 0); req(P.USED.max, 'Pre-owned fee max', 0);
+    if (isNum(P.USED.min) && isNum(P.USED.max) && P.USED.min > P.USED.max) E.push('Pre-owned fee: minimum is above maximum.');
+    X.procAcc.forEach((a, i) => { if (!String(a.label || '').trim()) E.push(`Processing fee offer ${i + 1}: enter a name.`); req(a.pct, `Processing fee offer “${a.label || i + 1}”`, 0, 100); });
+    return {errors: [...new Set(E)], warnings: [...new Set(W)]};
+}
+function tidy(X) {
+    X.cards.forEach(c => {
+        if (c.kind === 'cibil') { c.rows.sort((a, b) => b.from - a.from); c.ntc.sort((a, b) => b.gmiFrom - a.gmiFrom); }
+        c.special.rows.sort((a, b) => b.from - a.from);
+        c.name = String(c.name).trim();
+    });
+    Object.values(X.foir).forEach(a => a.sort((x, y) => x.from - y.from));
+}
+function showSetMsgs(E, W) {
+    const m = [];
+    if (E.length) m.push(`<div class="msg-err"><b>Fix before saving:</b><ul>${E.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>`);
+    if (W.length) m.push(`<div class="msg-warn"><b>Check:</b><ul>${W.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>`);
+    $('setMsgs').innerHTML = m.join('');
+    if (m.length) $('setMsgs').scrollIntoView({behavior: 'smooth', block: 'start'});
+}
+function saveSettings() {
+    const {errors, warnings} = validateSettings(D);
+    showSetMsgs(errors, warnings);
+    if (errors.length) { setStatus('Not saved – fix the errors above', 'err'); return; }
+    tidy(D);
+    S = clone(D);
+    const ok = lsSet(JSON.stringify(S));
+    dirty = false;
+    renderSettings();
+    setStatus(ok ? 'Saved on this device' : 'Applied for this visit only (browser storage unavailable)', ok ? 'ok' : 'warn');
+    afterSettingsChange();
+}
+function discardSettings() { D = clone(S); dirty = false; renderSettings(); $('setMsgs').innerHTML = ''; setStatus('Changes discarded'); }
+function exportSettings() {
+    const blob = new Blob([JSON.stringify(D || S, null, 2)], {type: 'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = 'auto-loan-calculator-settings.json';
+    document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    setStatus(dirty ? 'Exported, including unsaved changes' : 'Exported', 'ok');
+}
+function initSettings() {
+    const ps = $('panelSet');
+    ps.addEventListener('input', onSetEdit);
+    ps.addEventListener('change', onSetEdit);
+    ps.addEventListener('click', onSetClick);
+    $('importFile').addEventListener('change', e => {
+        const f = e.target.files[0];
+        if (!f) return;
+        const rd = new FileReader();
+        rd.onload = () => {
+            try { D = normalize(JSON.parse(rd.result)); markDirty(); renderSettings(); setStatus('Imported – review, then press Save', 'warn'); }
+            catch (x) { setStatus('That file is not a valid settings export', 'err'); }
+            e.target.value = '';
+        };
+        rd.readAsText(f);
+    });
+    window.addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
 }
 
-function copyData() { navigator.clipboard.writeText(getTxt()).then(()=>alert("Copied!")); }
-function shareWa() { window.open(`https://wa.me/?text=${encodeURIComponent(getTxt())}`); }
+initCalc();
+initSettings();
+
 </script>
 </body>
 </html>
