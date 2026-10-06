@@ -131,7 +131,6 @@
         .fb-emi { font-size: 13px; font-weight: 700; color: #1b5e20; }
         .final-amount { font-size: 28px; font-weight: 900; color: #2e7d32; display: block; margin: 5px 0; }
 
-
         .detail-row { display: flex; justify-content: space-between; gap: 10px; padding: 8px 15px; font-size: 13px; border-bottom: 1px dashed #eee; }
         .detail-row span:first-child { flex: 0 0 auto; max-width: 48%; }
         .detail-row span:last-child { font-weight: 700; color: var(--dark); text-align: right; }
@@ -213,6 +212,29 @@
         .set-status.ok { color: #1e8449; }
         .set-status.err { color: #c0392b; }
         .disclaimer { margin: 18px 15px 0; padding-top: 12px; border-top: 1px solid #eee; font-size: 10.5px; color: #888; line-height: 1.5; }
+
+        /* ---------- Forms ---------- */
+        .set-intro.priv { padding-top: 4px; color: #1e8449; font-weight: 600; font-size: 11px; }
+        .btn-row.pad { padding: 4px 15px 0; }
+        .fsec .set-body { padding: 10px 12px 12px; }
+        .fgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .fgrid > * { min-width: 0; }
+        .ff.full { grid-column: 1 / -1; }
+        .ff label { font-size: 10px; margin-bottom: 4px; }
+        .set-body .ff input:not([type="checkbox"]), .set-body .ff select, .ff textarea { padding: 9px 8px; font-size: 14px; border-radius: 6px; }
+        .ff textarea { width: 100%; box-sizing: border-box; border: 1px solid #ddd; font-family: inherit; color: #333; resize: vertical; }
+        .ff textarea:focus { border-color: var(--primary); outline: none; }
+        .ff input:disabled { background: #f4f4f4; color: #999; }
+        .fsub { font-size: 11px; font-weight: 800; color: var(--primary); text-transform: uppercase; margin: 16px 0 8px; padding-top: 10px; border-top: 1px dashed #f0d9c8; letter-spacing: .3px; }
+        .set-body > .fsub:first-child, .set-body > .fgrid + .fsub { }
+        .set-body > .fsub:first-child { margin-top: 0; padding-top: 0; border-top: none; }
+        .fchk { display: grid; gap: 6px; margin-bottom: 10px; }
+        .fchk.two { grid-template-columns: 1fr 1fr; }
+        .fchk .cb-item { background: #fff8f4; border: 1px solid #ffe0cc; padding: 8px 10px; border-radius: 6px; font-size: 12px; }
+        .dl-bar { position: sticky; bottom: 0; background: #fff; border-top: 1px solid #eee; padding: 10px 15px 12px; display: grid; gap: 8px; z-index: 5; box-shadow: 0 -4px 10px rgba(0,0,0,.05); margin-top: 12px; }
+        .btn-dl { padding: 13px; background: var(--primary); color: #fff; border: none; border-radius: 8px; font-weight: 800; font-size: 14px; cursor: pointer; font-family: inherit; }
+        .dl-bar .cb-item { font-size: 12px; }
+        .btn-forms { background: var(--primary); width: calc(100% - 30px); margin: 0 15px 12px 15px; display: block; }
     </style>
 </head>
 <body>
@@ -236,6 +258,7 @@
     </div>
     <div class="tabs" role="tablist">
         <button type="button" class="tab-btn active" id="tabCalc" role="tab">Calculator</button>
+        <button type="button" class="tab-btn" id="tabForms" role="tab">Forms</button>
         <button type="button" class="tab-btn" id="tabSet" role="tab">Settings</button>
     </div>
 
@@ -413,6 +436,7 @@
                 <div class="doc-header">DOCUMENTS YOU'LL NEED</div>
                 <ul class="doc-list" id="docList"></ul>
             </div>
+            <button type="button" class="btn-act btn-forms" id="btnForms">FILL APPLICATION FORM &amp; FORM 135 (PDF)</button>
             <div class="action-grid">
                 <button type="button" class="btn-act btn-copy" id="btnCopy">COPY SUMMARY</button>
                 <button type="button" class="btn-act btn-wa" id="btnWa">WHATSAPP</button>
@@ -424,6 +448,20 @@
                     <tbody></tbody>
                 </table>
             </div>
+        </div>
+    </div>
+
+    <!-- ============================ FORMS ============================ -->
+    <div id="panelForms" class="panel">
+        <div class="set-intro">Fill in your details once to download the bank's <b>Loan Application Form</b> and <b>Form 135</b> (statement of assets and liabilities) as PDFs, ready to print on A4 and sign. Anything left blank stays blank on the form, to write by hand. Figures from the Calculator tab are filled in for you.</div>
+        <div class="set-intro priv">Nothing you type here is saved or sent anywhere; it stays on this page until you close it.</div>
+        <div class="btn-row pad"><button type="button" class="btn-sm" id="fRefresh">Fill from calculator again</button><button type="button" class="btn-sm danger" id="fClear">Clear all</button></div>
+        <div id="formWrap"></div>
+        <div class="err-box" id="fErr" style="display:none"></div>
+        <div class="dl-bar">
+            <button type="button" class="btn-dl" id="dlApp">Download Application Form (PDF)</button>
+            <button type="button" class="btn-dl" id="dl135">Download Form 135 (PDF)</button>
+            <label class="cb-item"><input type="checkbox" id="f_fBlank"><span>Blank forms, to fill in by hand</span></label>
         </div>
     </div>
 
@@ -1082,8 +1120,8 @@ let S = loadSettings();
 let gRes = null;
 
 const show = (id, on) => { const e = $(id); if (e) e.style.display = on ? '' : 'none'; };
-/* hidden = inside an element switched off with show(); works even while the Settings tab is open */
-const visible = el => { if (!el) return false; for (let e = el; e && e.id !== 'panelCalc'; e = e.parentElement) if (e.style && e.style.display === 'none') return false; return true; };
+/* hidden = inside an element switched off with show(); works even while another tab is open */
+const visible = el => { if (!el) return false; for (let e = el; e && !(e.classList && e.classList.contains('panel')); e = e.parentElement) if (e.style && e.style.display === 'none') return false; return true; };
 
 function schemeNote(k) {
     const s = S.schemes[k] || {};
@@ -1207,6 +1245,7 @@ function calculate(quiet) {
     gRes = R; render(R);
     show('resultArea', true);
     if (!quiet) $('resultArea').scrollIntoView({behavior: 'smooth', block: 'start'});
+    if (typeof formsAfterCalc === 'function') formsAfterCalc();
 }
 
 const row = (l, v, cls) => `<div class="detail-row${cls ? ' ' + cls : ''}"><span>${l}</span><span>${v}</span></div>`;
@@ -1348,10 +1387,11 @@ function copyData() {
 function shareWa() { window.open(`https://wa.me/?text=${encodeURIComponent(reportText(true))}`, '_blank'); }
 
 /* ---------- tabs ---------- */
+const TABS = {calc: ['tabCalc', 'panelCalc'], forms: ['tabForms', 'panelForms'], set: ['tabSet', 'panelSet']};
 function switchTab(tab) {
-    $('tabCalc').classList.toggle('active', tab === 'calc'); $('tabSet').classList.toggle('active', tab === 'set');
-    $('panelCalc').classList.toggle('active', tab === 'calc'); $('panelSet').classList.toggle('active', tab === 'set');
+    for (const [k, [t, p]] of Object.entries(TABS)) { $(t).classList.toggle('active', k === tab); $(p).classList.toggle('active', k === tab); }
     if (tab === 'set' && !D) openSettings();
+    if (tab === 'forms' && typeof formsOnOpen === 'function') formsOnOpen();
     window.scrollTo(0, 0);
 }
 function afterSettingsChange() {
@@ -1371,8 +1411,8 @@ function initCalc() {
     $('btnCopy').addEventListener('click', copyData);
     $('btnWa').addEventListener('click', shareWa);
     $('btnAmort').addEventListener('click', () => show('tBox', $('tBox').style.display === 'none'));
-    $('tabCalc').addEventListener('click', () => switchTab('calc'));
-    $('tabSet').addEventListener('click', () => switchTab('set'));
+    $('btnForms').addEventListener('click', () => switchTab('forms'));
+    for (const [k, [t]] of Object.entries(TABS)) $(t).addEventListener('click', () => switchTab(k));
     updateUI();
 }
 
@@ -1792,8 +1832,1197 @@ function initSettings() {
     window.addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
 }
 
+/* ---------- font data for the PDF writer ---------- */
+/* Advance widths (1/1000 em) of the PDF base fonts Helvetica and Helvetica-Bold for WinAnsi codes 32-255. */
+const HELV_W = [278,278,355,556,556,889,667,191,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,278,278,584,584,584,556,1015,667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,667,778,722,667,611,722,667,944,667,667,611,278,278,278,469,556,333,556,556,500,556,556,278,556,556,222,222,500,222,833,556,556,556,556,333,500,278,556,500,722,500,500,500,334,260,334,584,761,556,0,222,556,333,1000,556,556,333,1000,667,333,1000,0,611,0,0,222,222,333,333,350,556,1000,333,1000,500,333,944,0,500,667,278,333,556,556,556,556,260,556,333,737,370,556,584,333,737,333,400,584,333,333,333,556,537,278,333,333,365,556,834,834,834,611,667,667,667,667,667,667,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,500,556,556,556,556,278,278,278,278,556,556,556,556,556,556,556,584,611,556,556,556,556,500,556,500];
+const HELVB_W = [278,333,474,556,556,889,722,238,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,333,333,584,584,584,611,975,722,722,722,722,667,611,778,722,278,556,722,611,833,722,778,667,778,722,667,611,722,667,944,667,667,611,333,278,333,584,556,333,556,611,556,611,556,333,611,611,278,278,556,278,889,611,611,611,611,389,556,333,611,556,778,556,556,500,389,280,389,584,761,556,0,278,556,500,1000,556,556,333,1000,667,333,1000,0,611,0,0,278,278,500,500,350,556,1000,333,1000,556,333,944,0,500,667,278,333,556,556,556,556,280,556,333,737,370,556,584,333,737,333,400,584,333,333,333,611,556,278,333,333,365,556,834,834,834,611,722,722,722,722,722,722,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,556,556,556,556,556,278,278,278,278,611,611,611,611,611,611,611,584,611,611,611,611,611,556,611,556];
+/* Rupee sign outline (1/1000 em), from DejaVu Sans (Bitstream Vera / DejaVu fonts licence). */
+const RUPEE = {adv: 636, path: '52 669 m 79 729 l 585 729 l 559 669 l 386 669 l 411 644 428 610 435 568 c 585 568 l 559 508 l 438 508 l 437 467 426 432 406 405 c 385 375 354 354 313 342 c 335 335 355 319 375 296 c 394 274 414 242 436 199 c 536 0 l 430 0 l 336 187 l 312 236 289 269 267 284 c 244 300 213 308 174 308 c 66 308 l 66 389 l 190 389 l 238 389 274 400 298 422 c 320 442 332 471 334 508 c 52 508 l 79 568 l 329 568 l 323 590 312 609 298 626 c 274 655 238 669 190 669 c h'};
+
+/* =====================================================================
+   Printable forms: Loan Application Form and Form 135.
+   A small PDF writer (A4, the PDF base fonts Helvetica and Symbol, no
+   external libraries) and the two form layouts.
+   ===================================================================== */
+const PW = 595.28, PH = 841.89;
+const BLACK = [0, 0, 0], BLUE = [0.04, 0.16, 0.55];
+const WIN_EXTRA = {0x20AC: 128, 0x201A: 130, 0x0192: 131, 0x201E: 132, 0x2026: 133, 0x2020: 134, 0x2021: 135, 0x02C6: 136, 0x2030: 137,
+    0x0160: 138, 0x2039: 139, 0x0152: 140, 0x017D: 142, 0x2018: 145, 0x2019: 146, 0x201C: 147, 0x201D: 148, 0x2022: 149, 0x2013: 150,
+    0x2014: 151, 0x02DC: 152, 0x2122: 153, 0x0161: 154, 0x203A: 155, 0x0153: 156, 0x017E: 158, 0x0178: 159};
+/* Byte for a character in WinAnsiEncoding, or -1 if it cannot be printed with the PDF base fonts. */
+function winCode(ch) {
+    const c = ch.codePointAt(0);
+    if (c >= 32 && c <= 126) return c;
+    if (c >= 160 && c <= 255) return c;
+    return WIN_EXTRA[c] || -1;
+}
+const printable = ch => ch === '₹' || winCode(ch) > 0;
+function tWidth(str, f, size) {
+    const W = f === 'HB' ? HELVB_W : HELV_W;
+    let w = 0;
+    for (const ch of String(str)) {
+        if (ch === '₹') { w += RUPEE.adv; continue; }
+        const c = winCode(ch);
+        w += W[(c >= 32 ? c : 63) - 32];
+    }
+    return w * size / 1000;
+}
+const nf = v => { const r = Math.round(v * 100) / 100; return Object.is(r, -0) ? '0' : String(r); };
+function pdfLit(str) {
+    let s = '(';
+    for (const ch of String(str)) {
+        let c = winCode(ch);
+        if (c < 0) c = 63;
+        if (c === 40 || c === 41 || c === 92) s += '\\' + String.fromCharCode(c);
+        else if (c < 32 || c > 126) s += '\\' + c.toString(8).padStart(3, '0');
+        else s += String.fromCharCode(c);
+    }
+    return s + ')';
+}
+const FONT_RES = {H: 'F1', HB: 'F2', HI: 'F3'};
+const col = (c, stroke) => `${nf(c[0])} ${nf(c[1])} ${nf(c[2])} ${stroke ? 'RG' : 'rg'}`;
+
+/* One page. Coordinates are in points from the top-left corner; text y is the baseline. */
+class PdfPage {
+    constructor() { this.o = []; }
+    text(str, x, y, opt = {}) {
+        str = String(str == null ? '' : str);
+        if (!str) return 0;
+        const f = opt.f || 'H', s = opt.s || 10, c = opt.c || BLACK, ws = opt.ws || 0;
+        const spaces = t => (t.match(/ /g) || []).length;
+        const w = tWidth(str, f, s) + ws * spaces(str);
+        let x0 = x;
+        if (opt.align === 'center') x0 = x - w / 2; else if (opt.align === 'right') x0 = x - w;
+        let cx = x0;
+        str.split('₹').forEach((p, i) => {
+            if (i) { this.rupee(cx, y, s, c); cx += RUPEE.adv * s / 1000; }
+            if (p) {
+                this.o.push(`BT /${FONT_RES[f]} ${nf(s)} Tf ${col(c)} ${nf(ws)} Tw ${nf(cx)} ${nf(PH - y)} Td ${pdfLit(p)} Tj ET`);
+                cx += tWidth(p, f, s) + ws * spaces(p);
+            }
+        });
+        if (opt.u) this.line(x0, y + 1.4, x0 + w, y + 1.4, {w: opt.uw || 0.6, c});
+        return w;
+    }
+    radical(x, y, s) { this.o.push(`BT /F4 ${nf(s)} Tf 0 0 0 rg ${nf(x)} ${nf(PH - y)} Td (\\326) Tj ET`); }
+    line(x1, y1, x2, y2, opt = {}) {
+        this.o.push(`${nf(opt.w || 0.5)} w ${col(opt.c || BLACK, true)} ${nf(x1)} ${nf(PH - y1)} m ${nf(x2)} ${nf(PH - y2)} l S`);
+    }
+    rect(x, y, w, h, opt = {}) {
+        this.o.push(`${nf(opt.w || 0.5)} w ${col(opt.c || BLACK, true)} ${nf(x)} ${nf(PH - y - h)} ${nf(w)} ${nf(h)} re S`);
+    }
+    bar(x, y, w, h) { this.o.push(`0 0 0 rg ${nf(x)} ${nf(PH - y - h)} ${nf(w)} ${nf(h)} re f`); }
+    ellipse(cx, cy, rx, ry, opt = {}) {
+        const k = 0.5523, X = cx, Y = PH - cy, a = rx * k, b = ry * k;
+        this.o.push(`${nf(opt.w || 0.8)} w ${col(opt.c || BLUE, true)} ${nf(X + rx)} ${nf(Y)} m ` +
+            `${nf(X + rx)} ${nf(Y + b)} ${nf(X + a)} ${nf(Y + ry)} ${nf(X)} ${nf(Y + ry)} c ` +
+            `${nf(X - a)} ${nf(Y + ry)} ${nf(X - rx)} ${nf(Y + b)} ${nf(X - rx)} ${nf(Y)} c ` +
+            `${nf(X - rx)} ${nf(Y - b)} ${nf(X - a)} ${nf(Y - ry)} ${nf(X)} ${nf(Y - ry)} c ` +
+            `${nf(X + a)} ${nf(Y - ry)} ${nf(X + rx)} ${nf(Y - b)} ${nf(X + rx)} ${nf(Y)} c S`);
+    }
+    /* A hand-drawn style tick inside the box with top-left (x, y) and size w × h. */
+    tick(x, y, w, h) {
+        const p = (fx, fy) => `${nf(x + fx * w)} ${nf(PH - (y + fy * h))}`;
+        this.o.push(`q 1 J 1 j ${nf(Math.max(1, w * 0.13))} w ${col(BLUE, true)} ${p(0.16, 0.52)} m ${p(0.42, 0.84)} l ${p(0.9, 0.08)} l S Q`);
+    }
+    rupee(x, y, s, c) { this.o.push(`q ${col(c || BLACK)} ${nf(s / 1000)} 0 0 ${nf(s / 1000)} ${nf(x)} ${nf(PH - y)} cm ${RUPEE.path} f Q`); }
+}
+class PdfDoc {
+    constructor(title) { this.pages = []; this.title = title; }
+    page() { const p = new PdfPage(); this.pages.push(p); return p; }
+    bytes() {
+        const objs = [null, null];
+        const add = b => { objs.push(b); return objs.length; };
+        const F = ['Helvetica', 'Helvetica-Bold', 'Helvetica-Oblique'].map(n => add(`<< /Type /Font /Subtype /Type1 /BaseFont /${n} /Encoding /WinAnsiEncoding >>`));
+        F.push(add('<< /Type /Font /Subtype /Type1 /BaseFont /Symbol >>'));
+        const res = `<< /Font << ${F.map((id, i) => `/F${i + 1} ${id} 0 R`).join(' ')} >> >>`;
+        const kids = this.pages.map(p => {
+            const content = p.o.join('\n');
+            const cid = add(`<< /Length ${content.length} >>\nstream\n${content}\nendstream`);
+            return add(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PW} ${PH}] /Resources ${res} /Contents ${cid} 0 R >>`);
+        });
+        objs[0] = '<< /Type /Catalog /Pages 2 0 R >>';
+        objs[1] = `<< /Type /Pages /Kids [${kids.map(k => k + ' 0 R').join(' ')}] /Count ${kids.length} >>`;
+        const t = new Date(), p2 = n => String(n).padStart(2, '0');
+        const stamp = `${t.getFullYear()}${p2(t.getMonth() + 1)}${p2(t.getDate())}${p2(t.getHours())}${p2(t.getMinutes())}${p2(t.getSeconds())}`;
+        const info = add(`<< /Title ${pdfLit(this.title)} /CreationDate (D:${stamp}) >>`);
+        let out = '%PDF-1.4\n%âãÏÓ\n';
+        const offs = [];
+        objs.forEach((b, i) => { offs.push(out.length); out += `${i + 1} 0 obj\n${b}\nendobj\n`; });
+        const xref = out.length;
+        out += `xref\n0 ${objs.length + 1}\n0000000000 65535 f \n` + offs.map(o => String(o).padStart(10, '0') + ' 00000 n \n').join('');
+        out += `trailer\n<< /Size ${objs.length + 1} /Root 1 0 R /Info ${info} 0 R >>\nstartxref\n${xref}\n%%EOF\n`;
+        const b = new Uint8Array(out.length);
+        for (let i = 0; i < out.length; i++) b[i] = out.charCodeAt(i) & 255;
+        return b;
+    }
+}
+
+/* ---------- filling helpers ---------- */
+const sval = v => String(v == null ? '' : v).replace(/\s*\n\s*/g, ', ').replace(/\s+/g, ' ').trim();
+/* Draw a value in the space [x, x + maxW], shrinking the type to fit and cutting it short as a last resort. */
+function fitIn(pg, val, x, y, maxW, o = {}) {
+    val = sval(val);
+    if (!val || maxW <= 3) return;
+    const f = o.f || 'H', min = o.min || 5.5;
+    let s = o.s || 9;
+    while (s > min && tWidth(val, f, s) > maxW) s -= 0.25;
+    if (tWidth(val, f, s) > maxW) {
+        while (val.length > 1 && tWidth(val + '…', f, s) > maxW) val = val.slice(0, -1);
+        val = val.trimEnd() + '…';
+    }
+    const ax = o.align === 'center' ? x + maxW / 2 : o.align === 'right' ? x + maxW : x;
+    pg.text(val, ax, y, {f, s, c: o.c || BLUE, align: o.align});
+}
+function wrapWords(text, widths, f, s) {
+    const lines = [];
+    let cur = '', li = 0;
+    for (const w of text.split(' ')) {
+        const t = cur ? cur + ' ' + w : w;
+        if (tWidth(t, f, s) <= widths[li]) { cur = t; continue; }
+        if (!cur || li + 1 >= widths.length) return null;
+        lines.push(cur); li++; cur = w;
+        if (tWidth(cur, f, s) > widths[li]) return null;
+    }
+    if (cur) lines.push(cur);
+    return lines;
+}
+/* Spread a value over several blank lines ("slots" of {x, y, w}), word by word. */
+function wrapInto(pg, val, slots, o = {}) {
+    val = sval(val);
+    if (!val || !slots.length) return;
+    const f = o.f || 'H';
+    for (let s = o.s || 9; s >= (o.min || 6); s -= 0.25) {
+        const lines = wrapWords(val, slots.map(sl => sl.w), f, s);
+        if (lines) { lines.forEach((ln, i) => pg.text(ln, slots[i].x, slots[i].y, {f, s, c: o.c || BLUE})); return; }
+    }
+    const s = o.min || 6;
+    let rest = val;
+    slots.forEach((sl, i) => {
+        if (!rest) return;
+        let n = rest.length;
+        while (n > 1 && tWidth(rest.slice(0, n), f, s) > sl.w) n--;
+        let piece = rest.slice(0, n);
+        rest = rest.slice(n).trim();
+        if (rest && i === slots.length - 1) { fitIn(pg, piece + rest, sl.x, sl.y, sl.w, {s, min: s, f}); rest = ''; return; }
+        pg.text(piece, sl.x, sl.y, {f, s, c: o.c || BLUE});
+    });
+}
+/* Justified paragraph between x and x + w, first baseline y, line step `lead`. Returns the next baseline. */
+function para(pg, text, x, y, w, s, lead, o = {}) {
+    const words = text.split(' ');
+    let cur = [], lines = [];
+    for (const wd of words) {
+        const t = cur.concat(wd).join(' ');
+        if (cur.length && tWidth(t, o.f || 'H', s) > w) { lines.push(cur); cur = [wd]; } else cur.push(wd);
+    }
+    if (cur.length) lines.push(cur);
+    lines.forEach((ln, i) => {
+        const t = ln.join(' ');
+        const gaps = ln.length - 1;
+        const ws = i < lines.length - 1 && gaps > 0 ? (w - tWidth(t, o.f || 'H', s)) / gaps : 0;
+        pg.text(t, x, y + i * lead, {s, f: o.f, ws});
+    });
+    return y + lines.length * lead;
+}
+const amtTxt = v => { if (v == null || v === '' || !isFinite(+v)) return sval(v); return Math.round(+v).toLocaleString('en-IN'); };
+const UP = v => sval(v).toUpperCase();
+function dmyTxt(s) { const d = parseDate(s); return d ? `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}` : ''; }
+function myTxt(s) { const d = parseDate(s); return d ? `${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}` : ''; }
+function ageOn(dobS, onS) {
+    const b = parseDate(dobS), t = parseDate(onS) || today();
+    if (!b || b > t) return '';
+    return String(Math.floor(monthsFit(b, t) / 12));
+}
+function yearsSince(s, onS) { const b = parseDate(s), t = parseDate(onS) || today(); return b && b <= t ? monthsFit(b, t) / 12 : null; }
+
+/* Pixel grid of the original form → points on A4. The form fills the page height, is centred across it,
+   and keeps its original proportions (ratio = horizontal scale / vertical scale). */
+function pxMap(x0, x1, y0, y1, ratio) {
+    const T = 22, B = PH - 24;
+    const sy = (B - T) / (y1 - y0), sx = sy * ratio, L = (PW - (x1 - x0) * sx) / 2;
+    return {X: p => L + (p - x0) * sx, Y: p => T + (p - y0) * sy, sx, sy};
+}
+const AP1 = pxMap(40, 963, 12, 1683, 181 / 169), AP2 = pxMap(21, 996, 2, 1701, 179 / 170);
+function painter(pg, M, base) {
+    const {X, Y, sx, sy} = M;
+    const P = {
+        X, Y,
+        t: (s, xp, yp, o = {}) => pg.text(s, X(xp), Y(yp), Object.assign({s: base}, o)),
+        hl: (x1, x2, yp, w = 0.5) => pg.line(X(x1), Y(yp), X(x2), Y(yp), {w}),
+        vl: (xp, y1, y2, w = 0.9) => pg.line(X(xp), Y(y1), X(xp), Y(y2), {w}),
+        box: (x1, y1, x2, y2, w = 1.2) => pg.rect(X(x1), Y(y1), X(x2) - X(x1), Y(y2) - Y(y1), {w}),
+        /* a tick box of the given point size, top-left at the pixel position */
+        cb: (xp, ytop, on, size = 8.6) => { const x = X(xp), y = Y(ytop); pg.rect(x, y, size, size, {w: 0.7}); if (on) pg.tick(x, y, size, size); return x + size; },
+        /* a tick box given by its pixel corners, as drawn on the original */
+        cbx: (x1, y1, x2, y2, on) => { const x = X(x1), y = Y(y1), w = X(x2) - x, h = Y(y2) - y; pg.rect(x, y, w, h, {w: 0.7}); if (on) pg.tick(x + w * 0.12, y, w * 0.76, h); return X(x2); },
+        /* tick inside an existing pixel box */
+        tickPx: (x1, y1, x2, y2) => pg.tick(X(x1) + 1, Y(y1) + 1, X(x2) - X(x1) - 2, Y(y2) - Y(y1) - 2),
+        ring: (x1, y1, x2, y2) => pg.ellipse((X(x1) + X(x2)) / 2, (Y(y1) + Y(y2)) / 2, (X(x2) - X(x1)) / 2 + 2.2, (Y(y2) - Y(y1)) / 2 + 2.2),
+        ringPt: (x, y, w, h) => pg.ellipse(x + w / 2, y + h / 2, w / 2 + 2, h / 2 + 2),
+        /* value written on a blank line that runs from x1 to x2 at pixel height yp */
+        fv: (val, x1, x2, yp, o = {}) => fitIn(pg, val, X(x1) + 2, Y(yp) - 1.6, X(x2) - X(x1) - 4, Object.assign({s: 8.5}, o)),
+        fw: (val, segs, o = {}) => wrapInto(pg, val, segs.map(([x1, x2, yp]) => ({x: X(x1) + 2, y: Y(yp) - 1.6, w: X(x2) - X(x1) - 4})), Object.assign({s: 8.5}, o)),
+        sx, sy
+    };
+    return P;
+}
+
+/* ===================== Loan Application Form ===================== */
+function appPage1(pg, d) {
+    const P = painter(pg, AP1, 8.5), {t, hl, vl, box, cbx, ring, fv, fw, X, Y} = P;
+    const C = 233;
+    /* heading */
+    box(405, 23, 606, 190, 1.3);
+    ['RETAIL  LENDING', 'Application Form', 'for VEHICLE LOAN', 'PERSONAL LOAN &', 'CONSUMER  LOAN'].forEach((s, i) => t(s, 505.5, [49, 80, 111, 142, 174][i], {f: 'HB', s: 10.2, align: 'center'}));
+    box(816, 12, 963, 203, 1);
+    ['Please Affix', 'Recent', 'Photograph'].forEach((s, i) => t(s, 889.5, [89, 110, 131][i], {align: 'center'}));
+    box(40, 183, 295, 221, 1);
+    t('ALPHA CODE :', 48, 209, {s: 10});
+    t('Borrower Number :', 402, 209);
+    hl(548, 640, 211);
+    t('I/We request you to grant me/us a loan facility for', 44, 256);
+    hl(415, 603, 259.5);
+    fv(UP(d.facility), 415, 603, 259.5);
+    t('To enable you to consider the proposal, I/We submit the following particulars.', 44, 284);
+    const w1 = t('Please complete all sections in BLOCK LETTERS and tick', 45, 338);
+    const bx = X(45) + w1 + 6;
+    pg.rect(bx, Y(338) - 9.5, 11, 12, {w: 0.8});
+    pg.radical(bx + 2.2, Y(338) + 0.5, 9.5);
+    pg.text('boxes wherever applicable', bx + 17, Y(338), {s: 8.5});
+
+    /* personal details */
+    box(40, 350, 963, 737, 1.3);
+    t('Name', 57, 378); t(':', C, 378); hl(245, 951, 381); fv(UP(d.name), 245, 951, 381);
+    t('Category', 56, 426);
+    const cats = ['SC', 'ST', 'OBC', 'OTHERS', 'MINORITY COMMUNITY'];
+    const cx0 = X(C) + t(':', C, 426);
+    let cx = cx0 + tWidth(' ', 'H', 8.2);
+    cats.forEach((c, i) => {
+        const w = pg.text(c, cx, Y(426), {s: 8.2});
+        if (d.category === c) P.ringPt(cx - 0.5, Y(426) - 7, w + 1, 8.8);
+        cx += w;
+        if (i < cats.length - 1) cx += pg.text('/', cx, Y(426), {s: 8.2});
+    });
+    t('PAN/GIR No. :', 674, 426); hl(785, 951, 429); fv(UP(d.pan), 785, 951, 429);
+    t('Residence Address', 56, 450); t(':', C, 450);
+    hl(245, 951, 454); hl(245, 951, 477); hl(245, 757, 501);
+    fw(UP(d.resAddr), [[245, 951, 454], [245, 951, 477], [245, 757, 501]]);
+    t('PIN :', 765, 499); hl(810, 951, 501); fv(d.resPin, 810, 951, 501);
+    t('Telephone', 56, 523); t(':', C, 523);
+    hl(245, 405, 526); fv(d.tel, 245, 405, 526);
+    t('Fax :', 416, 523); hl(460, 674, 526); fv(d.fax, 460, 674, 526);
+    t('Mobile No. :', 681, 523); hl(785, 951, 526); fv(d.mobile, 785, 951, 526);
+    t('No. of Years at Residence :', 57, 572);
+    box(268, 547, 343, 585, 0.8); vl(305.5, 547, 585, 0.6);
+    const yr = String(d.yrsRes || '').replace(/\D/g, '').slice(-2).padStart(String(d.yrsRes || '').trim() ? 2 : 0, '0');
+    if (yr) { t(yr[0], 286.75, 573, {align: 'center', c: BLUE, s: 9.5}); t(yr[1], 324.25, 573, {align: 'center', c: BLUE, s: 9.5}); }
+    t('Changed Residence in past 3 years :', 358, 572);
+    [['NC', 'Not Changed', 630, 736], ['ONCE', 'Once', 748, 793], ['MORE', 'More than Once', 805, 934]].forEach(([k, s, a, b]) => {
+        box(a, 548, b, 585, 0.8); t(s, (a + b) / 2, 572, {align: 'center'});
+        if (d.resChange === k) ring(a, 548, b, 585);
+    });
+    t('Date of Birth', 57, 621); t(':', C, 621);
+    hl(243, 313, 624); t('( DD )', 319, 621); hl(367, 465, 624); t('( MM )', 470, 621); hl(525, 683, 624); t('( YYYY )', 688, 621);
+    const dob = parseDate(d.dob);
+    if (dob) {
+        fv(String(dob.getDate()).padStart(2, '0'), 243, 313, 624, {align: 'center'});
+        fv(String(dob.getMonth() + 1).padStart(2, '0'), 367, 465, 624, {align: 'center'});
+        fv(String(dob.getFullYear()), 525, 683, 624, {align: 'center'});
+    }
+    t('Age', 790, 621); t(':', 838, 621);
+    box(849, 597, 924, 635, 0.8); vl(886.5, 597, 635, 0.6);
+    const age = d.dob ? ageOn(d.dob, d.date) : '';
+    if (age) { const a2 = age.padStart(2, '0').slice(-2); t(a2[0], 867.75, 622, {align: 'center', c: BLUE, s: 9.5}); t(a2[1], 905.25, 622, {align: 'center', c: BLUE, s: 9.5}); }
+    t('Permanent Address', 57, 669); t(':', C, 669);
+    hl(245, 951, 672); hl(245, 757, 697);
+    fw(UP(d.permAddr), [[245, 951, 672], [245, 757, 697]]);
+    t('PIN :', 765, 695); hl(810, 951, 697); fv(d.permPin, 810, 951, 697);
+    t('Tel.', 56, 722); t(':', C, 722);
+    hl(245, 345, 724); fv(d.permTel, 245, 345, 724);
+    t('Fax :', 354, 722); hl(397, 553, 724); fv(d.permFax, 397, 553, 724);
+    t('E-mail :', 562, 722); hl(625, 951, 724); fv(d.email, 625, 951, 724);
+
+    /* about yourself + net worth + credit cards */
+    box(40, 755, 963, 1212, 1.3);
+    hl(40, 963, 784, 0.9); hl(40, 963, 1104, 0.9);
+    vl(592, 755, 1104); vl(295, 784, 1104); vl(521, 1104, 1212);
+    t('About Yourself', 47, 775, {f: 'HB', s: 9});
+    t('Net Worth', 600, 775, {f: 'HB', s: 9});
+    [815, 855, 899, 942, 986, 1030, 1061].forEach(y => hl(592, 963, y, 0.7));
+    vl(723, 784, 1030, 0.7); vl(848.5, 784, 1030, 0.7);
+    t('Applicant', 785.75, 805, {align: 'center'}); t('Guarantor', 905.75, 805, {align: 'center'});
+    const nw = d.nw || {};
+    const tot = (a, b) => (isFinite(+a) && a !== '' && a != null) || (isFinite(+b) && b !== '' && b != null) ? (+a || 0) + (+b || 0) : '';
+    const net = (a, l) => a === '' ? '' : a - (+l || 0);
+    const at = tot(nw.appMov, nw.appImm), gt = tot(nw.guaMov, nw.guaImm);
+    const cells = [[nw.appMov, nw.guaMov], [nw.appImm, nw.guaImm], [at, gt], [nw.appLiab, nw.guaLiab], [net(at, nw.appLiab), net(gt, nw.guaLiab)]];
+    [['1.', 'Total', 'Moveable', 815, 855], ['2.', 'Total', 'Immoveable', 855, 899], ['3.', 'Total', 'Assets 1+2', 899, 942],
+        ['4.', 'Total', 'Liabilities', 942, 986], ['5.', 'Net', 'Assets 3-4', 986, 1030]].forEach(([n, a, b, y1, y2], i) => {
+        t(n, 598, y1 + 17, {s: 8}); t(a, 637, y1 + 17, {s: 8}); t(b, 637, y1 + 35, {s: 8});
+        const mid = (y1 + y2) / 2 + 8;
+        fv(amtTxt(cells[i][0]), 723, 848.5, mid, {align: 'center'});
+        fv(amtTxt(cells[i][1]), 848.5, 963, mid, {align: 'center'});
+    });
+    t('6.', 598, 1052, {s: 8}); t('Amount of Collaterals', 637, 1051, {s: 8.4});
+    fv(amtTxt(nw.coll), 800, 960, 1054, {align: 'center'});
+    t('7.', 598, 1079, {s: 8});
+    const pw = t('Presence of Guarantor : ', 637, 1079, {s: 8.2});
+    const yx = X(637) + pw, ywid = tWidth('Yes', 'H', 8.2), nwid = tWidth('No', 'H', 8.2), sl = tWidth('/', 'H', 8.2);
+    pg.text('Yes/No', yx, Y(1079), {s: 8.2});
+    if (d.guaPresent === 'Y') P.ringPt(yx - 0.5, Y(1079) - 6.6, ywid + 1, 8.6);
+    if (d.guaPresent === 'N') P.ringPt(yx + ywid + sl - 0.5, Y(1079) - 6.6, nwid + 1, 8.6);
+    t('(If yes, give details in above column)', 637, 1098, {s: 8.3});
+
+    t('Sex :', 47, 826);
+    cbx(176, 808, 202, 829, d.sex === 'Male'); t('Male', 224, 825);
+    cbx(176, 856, 202, 877, d.sex === 'Female'); t('Female', 224, 874);
+    t('Marital Status :', 46, 922);
+    [['Single', 907, 927, 922], ['Married', 930, 951, 946], ['Divorced', 953, 973, 970], ['Widowed', 1005, 1026, 1021]].forEach(([s, y1, y2, bl]) => { cbx(176, y1, 202, y2, d.marital === s); t(s, 224, bl); });
+    t('No. of Dependents :', 47, 1046); hl(195, 289, 1048); fv(d.dependents, 195, 289, 1048, {align: 'center'});
+    t('(Excluding spouse)', 47, 1069);
+    t('No. of Children :', 47, 1093); hl(172, 289, 1095); fv(d.children, 172, 289, 1095, {align: 'center'});
+
+    t('Education :', 302, 826);
+    ['Matric', 'Under Graduate', 'Graduate', 'Post-Graduate', 'Doctorate'].forEach((s, i) => {
+        const top = 811 + i * 22.4;
+        box(423, top, 450, top + 22.4, 0.7);
+        if (d.education === s) P.tickPx(423, top, 450, top + 22.4);
+        t(s, 456, [825, 849, 873, 897, 921][i]);
+    });
+    t('If Professional :', 302, 969);
+    ['Doctor', 'Architect', 'CA', 'MBA', 'Engineer', 'Lawyer'].forEach((s, i) => {
+        const top = 952 + i * 21.33;
+        box(423, top, 450, top + 21.33, 0.7);
+        if (d.profession === s) P.tickPx(423, top, 450, top + 21.33);
+        t(s, 456, [969, 990, 1012, 1033, 1054, 1076][i]);
+    });
+    t('Others', 302, 1093); hl(361, 574, 1095); fv(d.profession === 'Other' ? UP(d.profOther) : '', 361, 574, 1095);
+
+    t('Credit Card Details :', 52, 1122, {f: 'HB', s: 8.5, u: true});
+    t('Credit Cards Owned :', 52, 1142, {s: 8.2}); hl(213, 275, 1144); fv(d.cardCount, 213, 275, 1144, {align: 'center'});
+    t('Card Issuer :', 282, 1142, {s: 8.2}); hl(378, 479, 1144); fv(UP(d.cardIssuer), 378, 516, 1144);
+    t('Card No.', 52, 1164, {s: 8.2}); hl(121, 479, 1166); fv(d.cardNo, 121, 479, 1166);
+    t('Bank of Baroda Account No.', 52, 1185, {s: 8.2}); hl(265, 417, 1187); fv(d.bobAcc, 265, 417, 1187);
+    const caX = X(423), caW = tWidth('CA', 'H', 8.2), sbX = caX + tWidth('CA / ', 'H', 8.2), sbW = tWidth('SB', 'H', 8.2);
+    pg.text('CA / SB', caX, Y(1185), {s: 8.2});
+    if (d.bobAccType === 'CA') P.ringPt(caX - 0.5, Y(1185) - 6.8, caW + 1, 8.6);
+    if (d.bobAccType === 'SB') P.ringPt(sbX - 0.5, Y(1185) - 6.8, sbW + 1, 8.6);
+    t('Branch Name :', 52, 1205, {s: 8.2}); hl(168, 476, 1207); fv(UP(d.bobBranch), 168, 476, 1207);
+    t('Other Assets', 532, 1136);
+    [['tv', 'Color TV', 689, 716, 1120, 1140, 720, 1137], ['fridge', 'Refrigerator', 787, 813, 1119, 1140, 816, 1137], ['car', 'Car', 903, 929, 1119, 1140, 933, 1137],
+        ['two', 'Two Wheeler', 689, 716, 1141, 1162, 720, 1158], ['phone', 'Telephone', 838, 864, 1141, 1162, 868, 1158],
+        ['cell', 'Cellular Phone', 689, 716, 1164, 1184, 720, 1179], ['pc', 'PC', 837, 864, 1163, 1184, 868, 1179], ['wash', 'Washing Machine', 689, 716, 1186, 1206, 720, 1200]]
+        .forEach(([k, s, x1, x2, y1, y2, tx, bl]) => { cbx(x1, y1, x2, y2, (d.oa || []).includes(k)); t(s, tx, bl, {s: 8.2}); });
+
+    /* work */
+    box(40, 1222, 963, 1679, 1.3); vl(507, 1222, 1679);
+    const sal = d.workType === 'SAL', se = d.workType === 'SE';
+    t('Salaried : Please tell us about your Work :', 52, 1251, {f: 'HB', s: 8.15, u: true});
+    t('Name of Organisation :', 53, 1274); if (sal) fv(UP(d.org), 226, 502, 1276);
+    t('Designation', 53, 1297); t(':', 195, 1297);
+    [['Executive', 215, 291], ['Managerial', 302, 394], ['Clerk', 416, 492]].forEach(([s, a, b]) => {
+        box(a, 1279, b, 1300, 0.8); t(s, (a + b) / 2, 1295, {align: 'center'});
+        if (sal && d.desigLevel === s) ring(a, 1279, b, 1300);
+    });
+    t('Department', 53, 1318); t(':', 195, 1318); hl(219, 496, 1320); if (sal) fv(UP(d.dept), 219, 496, 1320);
+    t('Office Address', 53, 1340); t(':', 195, 1340); hl(219, 496, 1343); hl(52, 498, 1364);
+    hl(52, 338, 1385); t('PIN :', 346, 1383); hl(392, 496, 1385);
+    if (sal) { fw(UP(d.offAddr), [[219, 496, 1343], [52, 498, 1364], [52, 338, 1385]]); fv(d.offPin, 392, 496, 1385); }
+    t('Tel. :', 52, 1403); hl(86, 176, 1407); t('Extn. No.:', 182, 1403); hl(258, 341, 1407); t('Fax :', 347, 1403); hl(395, 496, 1407);
+    if (sal) { fv(d.offTel, 86, 176, 1407); fv(d.offExt, 258, 341, 1407); fv(d.offFax, 395, 496, 1407); }
+    t('E-mail :', 53, 1425); hl(117, 496, 1429); if (sal) fv(d.offEmail, 117, 496, 1429);
+    t('Working with :', 52, 1446);
+    [['GOVT', 'Govt./Public Sector', 164, 187, 1434, 1451], ['PVT', 'Pvt. Ltd.', 164, 187, 1455, 1473], ['PROP', 'Proprietorship', 164, 187, 1477, 1494],
+        ['PUBLTD', 'Public Ltd.', 359, 383, 1432, 1450], ['PART', 'Partnership', 359, 383, 1455, 1472], ['MNC', 'MNC', 359, 383, 1476, 1494]]
+        .forEach(([k, s, x1, x2, y1, y2]) => { cbx(x1, y1, x2, y2, sal && d.workWith === k); t(s, x2 + 6, y2 - 3); });
+    t('Working Since :', 52, 1513); hl(176, 284, 1515); if (sal) fv(myTxt(d.workSince), 176, 284, 1515, {align: 'center'});
+    t('Retirement Age :', 291, 1513); hl(413, 496, 1515); if (sal) fv(d.retireAge, 413, 496, 1515, {align: 'center'});
+    t('Years at Current Job :', 53, 1533);
+    const yj = sal ? yearsSince(d.workSince, d.date) : null;
+    const yjk = yj == null ? '' : yj > 5 ? 'A' : yj >= 3 ? 'B' : yj >= 1 ? 'C' : 'D';
+    [['A', 'Greater than 5 Years', 1558, 1541, 1560], ['B', 'Between 3 to 5 Years', 1579, 1564, 1581], ['C', 'Between 1 to 3 Years', 1600, 1585, 1602], ['D', 'Less than 1 Year', 1624, 1607, 1625]]
+        .forEach(([k, s, bl, y1, y2]) => { t(s, 53, bl); cbx(297, y1, 321, y2, yjk === k); });
+    t('Gross Monthly Income : Rs.', 53, 1668); hl(264, 496, 1670); if (sal) fv(amtTxt(d.gmi), 264, 496, 1670);
+
+    t('Self Employed / Professional/Business : Please tell', 518, 1251, {f: 'HB', s: 8.15, u: true});
+    t('us about your Work :', 518, 1274, {f: 'HB', s: 8.15, u: true});
+    t('Name of Company :', 518, 1318); hl(686, 961, 1320); if (se) fv(UP(d.org), 686, 961, 1320);
+    t('Office Address :', 518, 1340); hl(686, 961, 1343); hl(517, 963, 1364);
+    hl(513, 804, 1385); t('PIN :', 811, 1383); hl(857, 961, 1385);
+    if (se) { fw(UP(d.offAddr), [[686, 961, 1343], [517, 963, 1364], [513, 804, 1385]]); fv(d.offPin, 857, 961, 1385); }
+    t('Tel. :', 517, 1403); hl(552, 640, 1407); t('Extn. No.:', 648, 1403); hl(725, 806, 1407); t('Fax :', 812, 1403); hl(860, 961, 1407);
+    if (se) { fv(d.offTel, 552, 640, 1407); fv(d.offExt, 725, 806, 1407); fv(d.offFax, 860, 961, 1407); }
+    t('E-mail :', 518, 1425); hl(584, 958, 1429); if (se) fv(d.offEmail, 584, 958, 1429);
+    t('Business Details :', 518, 1446, {f: 'HB'});
+    [['PVT', 'Pvt. Ltd.', 659, 683, 1432, 1450], ['PART', 'Partnership', 818, 840, 1433, 1450], ['PROP', 'Proprietorship', 517, 541, 1454, 1471], ['OTH', 'Others', 659, 682, 1454, 1472]]
+        .forEach(([k, s, x1, x2, y1, y2]) => { cbx(x1, y1, x2, y2, se && d.bizType === k); t(s, x2 + 5, y2 - 3); });
+    hl(744, 958, 1472); if (se && d.bizType === 'OTH') fv(UP(d.bizOther), 744, 958, 1472);
+    t('Established Since :', 518, 1513); hl(671, 961, 1515); if (se) fv(myTxt(d.estSince), 671, 961, 1515);
+    t('Designation :', 518, 1533);
+    [['Executive', 659, 683], ['Managerial', 818, 840]].forEach(([s, x1, x2]) => { cbx(x1, 1519, x2, 1537, se && d.desigLevel === s); t(s, x2 + 2, 1533); });
+    t('Years in Current Business :', 517, 1579);
+    const yb = se ? yearsSince(d.estSince, d.date) : null;
+    const ybk = yb == null ? '' : yb > 5 ? 'A' : yb >= 3 ? 'B' : yb >= 1 ? 'C' : 'D';
+    [['A', '>5', 727, 768], ['B', '3-5', 776, 818], ['C', '1-3', 828, 869], ['D', '<1', 879, 919]].forEach(([k, s, a, b]) => {
+        box(a, 1562, b, 1583, 0.8); t(s, (a + b) / 2, 1578, {align: 'center'});
+        if (ybk === k) ring(a, 1562, b, 1583);
+    });
+    t('(Greater)', 734, 1601); t('(Less)', 881, 1601);
+    t('Gross Monthly Income : Rs.', 518, 1642); hl(734, 961, 1644); if (se) fv(amtTxt(d.gmi), 734, 961, 1644);
+}
+
+/* The declaration, line for line as printed on the form (two spaces after a full stop, as typed there). */
+const DECL = [[
+    'I/We hereby declare that all the particulars and information furnished in the application form are true, correct and complete and up-to-date in all',
+    'respects.  I/We have not withheld any information.  I/We confirm that I/We have had no insolvency proceedings initiated against me/us nor have',
+    'I/We ever been adjudicated insolvent.  I/We also authorize Bank of Baroda or its agent to make references and enquiries relative to information',
+    'in this application which Bank of Baroda considers necessary.  I/We also authorize Bank of Baroda to exchange, share, part with all information',
+    'relating to my/our loan details and repayment history information to other Banks/Financial Institutions/Credit Bureaus/Agencies as may be',
+    'required and shall not hold Bank of Baroda liable for use of this information.  I/We undertake to inform Bank of Baroda regarding any change in',
+    'my/our residence/employment/Occupation/Transfer and to provide any other information that Bank of Baroda may require.  I/We further agree that',
+    'my/our loan shall be governed by the rules of Bank of Baroda which may be in force from time to time.  Bank of Baroda reserves the right to reject',
+    'any application without providing any reason.'
+], [
+    'I/We Undertake to bear processing, service, documentation charges etc. stipulated by the bank from time to time.  I/We agree, note and understand',
+    'that Bank of Baroda shall be entitled at its sole discretion to call back, the entire loan/advance whether due and payable or not at any time without',
+    'assigning any reason and enforce its rights, remedies and securities.'
+]];
+/* Set given lines justified between x and x + w (the last line flush left). */
+function paraLines(pg, lines, x, y, w, s, lead) {
+    lines.forEach((t, i) => {
+        const gaps = (t.match(/ /g) || []).length;
+        const ws = i < lines.length - 1 && gaps ? (w - tWidth(t, 'H', s)) / gaps : 0;
+        pg.text(t, x, y + i * lead, {s, ws});
+    });
+}
+
+function appPage2(pg, d) {
+    const P = painter(pg, AP2, 8.5), {t, hl, vl, box, ring, fv, fw, X, Y, sy} = P;
+    /* proposed loan + income */
+    box(21, 2, 996, 417.5, 1.3); vl(411.5, 2, 417.5);
+    t('Proposed  Loan Details : (To be filled by', 34, 31.5, {f: 'HB', s: 8.3, u: true});
+    t('Branches/Offices)', 34, 54.5, {f: 'HB', s: 8.3, u: true});
+    const pl = d.proposed || {};
+    [['Tenure Months :', 133, 170, 404, 137, pl.tenure], ['Purpose :', 169, 120, 406, 173, UP(pl.purpose)], ['Purchase Price (Rs.) :', 206, 217, 401, 209.5, amtTxt(pl.price)],
+        ['Loan Amount (Rs.) :', 243, 202, 406, 246, amtTxt(pl.loan)], ['Rate of Interest % :', 280, 197, 407, 282.5, pl.roi], ['Margin % :', 317, 129, 401, 320, pl.margin]]
+        .forEach(([s, bl, x1, x2, ly, v]) => { t(s, 34, bl, {s: 8.8}); hl(x1, x2, ly); fv(v, x1, x2, ly); });
+    t('Income Details :', 424, 34.5, {f: 'HB', s: 8.3, u: true});
+    /* number, sub-number, label, label baseline, colon x, line from x1 to x2 at height ly, value */
+    const ln = (num, sub, label, bl, colon, x1, x2, ly, v) => {
+        if (num) t(num, 424, bl);
+        if (sub) t(sub, 482, bl);
+        t(label, sub ? 521 : 482, bl);
+        if (colon) { t(':', colon, bl); hl(x1, x2, ly); fv(v, x1, x2, ly); }
+    };
+    ln('1.', '', 'Gross Monthly Income (Rs.)', 80, 718, 735, 980, 84, amtTxt(d.gmi));
+    ln('2.', '', 'Salaried Person', 124);
+    ln('', '(i)', 'Monthly Basic (Rs.)', 146, 760, 781, 982, 150, amtTxt(d.basic));
+    ln('', '(ii)', '% of PF deduction', 168, 760, 781, 982, 172, d.pf);
+    ln('3.', '', 'Annual Professional Tax', 196, 760, 782, 982, 200, amtTxt(d.profTax));
+    ln('4.', '', 'For Tax Purpose', 223);
+    ln('', '(i)', 'Total Annual Savings Under S/88', 243, 786, 804, 983, 249.5, amtTxt(d.sav88));
+    ln('', '(ii)', '100% Rebate Amount', 266, 786, 782, 982, 271, amtTxt(d.rebate100));
+    ln('', '(iii)', 'Deduction under chapter VI A', 288, 786, 783, 982, 293, amtTxt(d.via));
+    ln('', '(iv)', 'Other Rebate/Deduction claimed', 310, 786, 802, 983, 315.5, amtTxt(d.otherReb));
+    ln('5.', '', 'Total Monthly house hold expenses', 354, 786, 789, 987, 360, amtTxt(d.hhExp));
+    ln('6.', '', 'Monthly other loan amount', 377, 786, 792, 990, 382, amtTxt(d.otherEmi));
+    ln('7.', '', 'Net Income of other Family members', 400, 790, 795, 990, 404.5, amtTxt(d.famInc));
+
+    /* car */
+    box(21, 423, 996, 619, 1.3); vl(497, 423, 619);
+    t('FOR CAR LOANS ONLY (CAR DETAILS) :', 34, 453, {f: 'HB', s: 9, u: true});
+    t('Type of Vehicle :', 34, 487);
+    box(164, 463.5, 474, 513.5, 0.8); vl(268, 463.5, 513.5, 0.8); vl(366, 463.5, 513.5, 0.8);
+    [['Less', 'than 4 Lacs'], ['Between', '4 to 6 Lacs'], ['Greater', 'than 6 Lacs']].forEach(([a, b], i) => {
+        const x1 = [164, 268, 366][i], x2 = [268, 366, 474][i];
+        t(a, (x1 + x2) / 2, 484, {align: 'center', s: 8.2}); t(b, (x1 + x2) / 2, 504, {align: 'center', s: 8.2});
+        if (d.vehBand === String(i + 1)) ring(x1 + 6, 468, x2 - 6, 509);
+    });
+    t('Age of Vehicle :', 33, 566);
+    box(164, 534.5, 475, 584, 0.8); vl(268, 534.5, 584, 0.8); vl(366, 534.5, 584, 0.8);
+    [['Less', 'than 1 Year'], ['Between', '1 to 3 Years'], ['Between', '3 to 5 Years']].forEach(([a, b], i) => {
+        const x1 = [164, 268, 366][i], x2 = [268, 366, 475][i];
+        t(a, (x1 + x2) / 2, 556, {align: 'center', s: 8.2}); t(b, (x1 + x2) / 2, 576, {align: 'center', s: 8.2});
+        if (d.ageBand === String(i + 1)) ring(x1 + 6, 539, x2 - 6, 579);
+    });
+    const c = d.car || {};
+    t('1. Make / Model :', 509, 453, {f: 'HB', s: 9.3}); hl(654, 979, 458.5); fv(UP(c.make), 660, 979, 458.5);
+    t('2. Name of the dealer (For New Car) :', 509, 474.5, {s: 8.7}); hl(815, 985, 477); hl(531, 982, 494.5);
+    fw(UP(c.dealer), [[815, 985, 477], [531, 982, 494.5]]);
+    const w3 = t('3. ', 509, 511);
+    pg.text('For Second Hand Car', X(509) + w3, Y(511), {s: 8.5, u: true});
+    const s9 = {s: 8.9};
+    t('(i)', 527, 531, s9); t('Approx. serviceable age of car :', 563, 531, s9); hl(822, 983, 532); fv(c.servAge, 822, 983, 532);
+    t('(ii)', 527, 549, s9); t('Valuation as per garage certificate :', 563, 549, s9); hl(852, 984, 550); fv(amtTxt(c.valuation), 852, 984, 550);
+    t('(iii)', 527, 567, s9); t('Name and address of Seller (Attach copy of RC)', 563, 567, s9); hl(566, 988, 586.5); fv(UP(c.seller), 566, 988, 586.5);
+    t('(iv)', 527, 604, s9); t('Engine / Chassis No.', 563, 604, s9); t(':', 745, 604, s9); hl(756, 988, 605); fv(UP(c.engine), 756, 988, 605);
+
+    /* existing loans and bank accounts */
+    box(21, 626, 996, 966.5, 1.3);
+    t('Outstanding Loan', 34, 650); t('Details Source/Type', 35, 675);
+    t('Amount of Loan', 410, 652, {align: 'center'}); t('Outstanding', 590, 652, {align: 'center'});
+    t('EMI', 769, 652, {align: 'center'}); t('Default/Overdue', 910, 652, {align: 'center'}); t('Since', 908, 678, {align: 'center'});
+    const cols = [[57, 204], [326, 489], [518, 673], [709, 841], [861, 986]];
+    /* room a value may take: its blank line plus the free space beside it */
+    const vcols = [[57, 316], [314, 505], [507, 690], [694, 855], [858, 990]];
+    (d.loans || [{}, {}, {}]).slice(0, 3).forEach((r, i) => {
+        const [bl, ly] = [[699, 703], [722, 726.5], [746, 750]][i];
+        t(`${i + 1})`, 35, bl);
+        cols.forEach(([a, b]) => hl(a, b, ly));
+        const v = [UP(r.src), amtTxt(r.amt), amtTxt(r.out), amtTxt(r.emi), r.od];
+        vcols.forEach(([a, b], j) => fv(v[j], j ? a : cols[0][0], j ? b : b, ly, {align: j ? 'center' : undefined}));
+    });
+    const w4 = t('About Your Bank Account', 34, 790, {u: true});
+    pg.text(' (including credit facilities if any)', X(34) + w4, Y(790), {s: 8.5});
+    t('Name of the Bank', 150, 816, {align: 'center'}); t('Branch &', 399, 816, {align: 'center'}); t('Telephone No.', 394, 842, {align: 'center'});
+    t('A/c. Type', 587, 816, {align: 'center'}); t('A/c No.', 771, 816, {align: 'center'});
+    t('No. of years account', 917, 816, {align: 'center', s: 8.2}); t('held', 910, 842, {align: 'center'});
+    const bk = d.banks || [{}, {}, {}];
+    const bankRow = (r, ly, x1, x2) => {
+        hl(x1, x2, ly); cols.slice(1).forEach(([a, b]) => hl(a, b, ly));
+        const v = [UP(r.name), UP(r.branch), UP(r.type), r.no, r.yrs];
+        fv(v[0], x1, vcols[0][1], ly);
+        vcols.slice(1).forEach(([a, b], j) => fv(v[j + 1], a, b, ly, {align: 'center'}));
+    };
+    t('Main Bank', 35, 863, {f: 'HB'}); bankRow(bk[0] || {}, 867, 125, 192);
+    t('Others', 34, 887, {f: 'HB'});
+    t('1)', 36, 911); bankRow(bk[1] || {}, 914.5, 57, 204);
+    t('2)', 36, 935); bankRow(bk[2] || {}, 938.5, 57, 204);
+
+    /* spouse and guarantor */
+    box(21, 976.5, 996, 1222, 1.3); vl(507, 976.5, 1222);
+    const person = (title, x, colon, x1, x2, p) => {
+        t(title, x, 1002, {f: 'HB', s: 10, u: true});
+        const rows = [['Name', 1025, 1030, UP(p.name)], ['Address', 1048, 1052.5, ''], ['Occupation', 1094, 1097, UP(p.occ)], ['Phone/Fax', 1117, 1120, p.phone],
+            ['E-mail', 1140, 1142.5, p.email], ['PAN/GIR Number', 1162, 1165, UP(p.pan)]];
+        rows.forEach(([s, bl, ly, v]) => { t(s, x, bl, {s: 8.9}); t(':', colon, bl, {s: 8.9}); hl(x1, x2, ly); if (v) fv(v, x1, x2, ly); });
+        hl(x1, x2, 1075);
+        fw(UP(p.addr), [[x1, x2, 1052.5], [x1, x2, 1075]]);
+        const wl = t('Net Annual Income (Rs.)', x, 1205, {s: 9.2});
+        const cx2 = X(x) + wl + 3;
+        pg.text(':', cx2, Y(1205), {s: 9.2});
+        pg.line(cx2 + 6, Y(1209), X(x2), Y(1209), {w: 0.5});
+        fitIn(pg, amtTxt(p.inc), cx2 + 8, Y(1209) - 1.6, X(x2) - cx2 - 10, {s: 8.5});
+    };
+    person('About your Spouse :', 32, 228, 234, 490, d.spouse || {});
+    person('About Guarantor :', 519, 715, 722, 976, d.gua || {});
+
+    /* declaration */
+    box(21, 1235, 996, 1561.5, 1.3);
+    paraLines(pg, DECL[0], X(31), Y(1254), X(986) - X(31), 7.2, 18.25 * sy);
+    paraLines(pg, DECL[1], X(31), Y(1437), X(986) - X(31), 7.2, 18.5 * sy);
+    t('Yours faithfully,', 749, 1497, {f: 'HB', s: 9});
+    t('Place', 32, 1515, {f: 'HB', s: 9}); t(':', 82, 1515, {f: 'HB', s: 9}); hl(101, 351, 1517); fv(UP(d.place), 101, 351, 1517);
+    t('Date', 32, 1538, {f: 'HB', s: 9}); t(':', 82, 1538, {f: 'HB', s: 9}); hl(101, 351, 1540); fv(dmyTxt(d.date), 101, 351, 1540);
+    t('Signature of the Applicant', 708, 1539, {f: 'HB', s: 8.3});
+
+    /* guarantor's consent */
+    box(21, 1572.5, 996, 1700, 1.3);
+    t('I am willing to stand as guarantor', 508.5, 1603, {f: 'HB', s: 11.4, align: 'center'});
+    t('Place :', 31, 1655); hl(88, 356, 1656.5);
+    t('Date :', 31, 1684); hl(88, 358, 1686);
+    t('Signature of the Guarantor/s', 655, 1684, {s: 9.3});
+}
+
+function buildApplicationPdf(d) {
+    const doc = new PdfDoc('Application Form - Vehicle Loan');
+    appPage1(doc.page(), d);
+    appPage2(doc.page(), d);
+    return doc.bytes();
+}
+
+/* ===================== Form 135 ===================== */
+/* Positions follow the original form (A4 points); `top` is the top of an 11 pt line. */
+const BL = (top, s = 11) => top + 0.788 * s;
+const UW = s => tWidth('_', 'H', s);
+/* Draw a line made of text and underscore blanks; parts are strings or {u: count, v: value}. */
+function seq(pg, x, top, parts, o = {}) {
+    const s = o.s || 11, y = BL(top, s);
+    let cx = x;
+    for (const p of parts) {
+        if (typeof p === 'string') { cx += pg.text(p, cx, y, {f: o.f || 'H', s}); continue; }
+        const w = pg.text('_'.repeat(p.u), cx, y, {s});
+        if (p.v != null && p.v !== '') fitIn(pg, p.v, cx + 2, y - 2.2, (p.w || w) - 4, {s: o.vs || 10, align: p.a});
+        cx += w;
+    }
+    return cx;
+}
+function rule(pg, top, h) { pg.bar(62.3, top, 488.4, h); }
+
+function f135Page1(pg, d) {
+    pg.text('Form -135', 459.9, BL(94.1), {f: 'HB', s: 11});
+    pg.text('(a)', 49.3, BL(119.4), {s: 11});
+    pg.text('PARTICULARS TO BE SUPPLIED BY APPLICANT/ Directors/ partners/ Prop Guarantor FOR', 70.8, BL(119.4), {s: 11});
+    pg.bar(70.8, 129.3, 457.7, 0.75);
+    pg.text('ADVANCES', 70.8, BL(131.9), {s: 11});
+    pg.bar(70.8, 141.8, 60.5, 0.75);
+    seq(pg, 63.8, 157.4, ['I give below the particulars of myself, my family and my Assesses & Liabilities as at ', {u: 9, v: dmyTxt(d.asAt), w: 70}, '.']);
+    seq(pg, 63.8, 182.6, ['1. Name in Full: ', {u: 63, v: d.name}]);
+    seq(pg, 63.8, 207.9, [' 2. Date of Birth:', {u: 27, v: dmyTxt(d.dob)}, '  &  Age : ', {u: 28, v: d.dob ? ageOn(d.dob, d.asAt) + ' years' : ''}]);
+    seq(pg, 63.8, 233.1, ['3. Father’s/ Husband’s Name: ', {u: 53, v: d.father}]);
+    pg.text('4. Residential Address:', 63.8, BL(258.4), {s: 11});
+    pg.text('PERMANENT', 226.0, BL(258.4), {s: 11});
+    pg.text('PRESENT', 423.9, BL(258.4), {s: 11});
+    const addrCol = (x, n, val, pin, pinParts) => {
+        const tops = [271.1, 283.9, 296.4, 309.2];
+        tops.forEach(tp => pg.text('_'.repeat(n), x, BL(tp), {s: 11}));
+        wrapInto(pg, val, tops.map(tp => ({x: x + 2, y: BL(tp) - 2.2, w: n * UW(11) - 4})), {s: 10, min: 6.5});
+        seq(pg, x, 334.4, [{u: pinParts[0]}, 'Pin:', {u: pinParts[1], v: pin}]);
+    };
+    addrCol(207.8, 28, d.permAddr, d.permPin, [11, 13]);
+    addrCol(398.0, 25, d.resAddr, d.resPin, [9, 11]);
+    pg.text('5. Telephone Numbers.', 63.8, BL(372.4), {s: 11});
+    pg.text('Office/Shop', 200.3, BL(372.4), {s: 11});
+    seq(pg, 266.4, 372.4, [': ', {u: 18, v: d.offTel}, ' Residence: ', {u: 15, v: d.tel}]);
+    pg.text('Mobile', 73.0, BL(397.7), {s: 11});
+    seq(pg, 266.4, 397.7, [': ', {u: 39, v: d.mobile}]);
+    pg.text('6. Occupation/ Line of Business', 63.8, BL(422.9), {s: 11});
+    seq(pg, 266.4, 422.9, [': ', {u: 39, v: d.occupation}]);
+    const sal = d.workType === 'SAL' || d.workType === 'PEN', se = d.workType === 'SE';
+    pg.text('A. If in service', 63.8, BL(448.2), {f: 'HB', s: 11}); pg.text(':', 266.4, BL(448.2), {f: 'HB', s: 11});
+    pg.text('Name of employer and Address', 82.2, BL(461.0), {s: 11});
+    seq(pg, 266.4, 461.0, [': ']);
+    const empLines = [461.0, 473.5, 486.2].map(tp => { const x = 266.4 + tWidth(': ', 'H', 11); pg.text('_'.repeat(39), x, BL(tp), {s: 11}); return {x: x + 2, y: BL(tp) - 2.2, w: 39 * UW(11) - 4}; });
+    if (sal && d.workType === 'SAL') wrapInto(pg, [d.org, d.offAddr, d.offPin].filter(Boolean).join(', '), empLines, {s: 10, min: 6.5});
+    pg.text('Designation', 79.1, BL(499.0), {s: 11});
+    seq(pg, 266.4, 499.0, [': ', {u: 39, v: d.workType === 'SAL' ? d.desig : ''}]);
+    pg.text('B. If in Business/Professional', 63.8, BL(524.2), {f: 'HB', s: 11}); pg.text(':', 266.4, BL(524.2), {f: 'HB', s: 11});
+    pg.text('i) Name/s of the firm/company', 79.1, BL(536.7), {s: 11});
+    pg.text('and its Address', 91.3, BL(549.5), {s: 11});
+    seq(pg, 266.4, 536.7, [': ']);
+    const firmLines = [536.7, 549.5, 562.2].map(tp => { const x = 266.4 + tWidth(': ', 'H', 11); pg.text('_'.repeat(39), x, BL(tp), {s: 11}); return {x: x + 2, y: BL(tp) - 2.2, w: 39 * UW(11) - 4}; });
+    if (se) wrapInto(pg, [d.org, d.offAddr, d.offPin].filter(Boolean).join(', '), firmLines, {s: 10, min: 6.5});
+    pg.text('ii) Line/s of activities', 79.1, BL(574.7), {s: 11});
+    seq(pg, 266.4, 574.7, [': ', {u: 39, v: se ? d.activity : ''}]);
+    pg.text('iii) Since when established', 76.0, BL(587.5), {s: 11});
+    seq(pg, 266.4, 587.5, [': ', {u: 39, v: se ? dmyTxt(d.estSince) : ''}]);
+    pg.text('iv) In which capacity he/she is', 76.0, BL(600.0), {s: 11});
+    pg.text('Representing', 91.3, BL(612.7), {s: 11});
+    seq(pg, 266.4, 600.0, [': ', {u: 39, v: se ? d.capacity : ''}]);
+    pg.text('7. Annual Income', 63.8, BL(625.5), {s: 11});
+    seq(pg, 266.4, 625.5, [': ₹', {u: 36, v: amtTxt(d.annualIncome)}]);
+    pg.text('8. PAN (if an Income Tax Assesses)', 63.8, BL(650.8), {s: 11});
+    seq(pg, 266.4, 650.8, [': ', {u: 39, v: UP(d.pan)}]);
+    pg.text('9. Details of Assets', 63.8, BL(663.3), {f: 'HB', s: 11}); pg.text(':', 266.4, BL(663.3), {f: 'HB', s: 11});
+    pg.text('9.1', 99.8, BL(688.8), {s: 11});
+    pg.text('Details of immovable properties (held in own name / joint name):', 118.3, BL(688.8), {f: 'HB', s: 11});
+    pg.text('A. Nature of properties (Please tick which ever applicable):', 99.8, BL(714.0), {f: 'HB', s: 11});
+    const pr = d.prop || {};
+    pg.text('i) Plot of land', 99.8, BL(739.3), {s: 11}); seq(pg, 266.4, 739.3, [': ', {u: 39, v: pr.plot}]);
+    pg.text('ii) Agriculture Land', 99.8, BL(764.5), {s: 11}); seq(pg, 266.4, 764.5, [': ', {u: 39, v: pr.agri}]);
+}
+function f135Page2(pg, d) {
+    const pr = d.prop || {};
+    pg.text('iii) House / Godowns', 99.8, BL(76.8), {s: 11}); seq(pg, 266.4, 76.8, [': ', {u: 39, v: pr.house}]);
+    pg.text('iv) Others', 99.8, BL(102.1), {s: 11}); seq(pg, 266.4, 102.1, [': ', {u: 39, v: pr.others}]);
+    pg.text('B.', 99.8, BL(127.4), {f: 'HB', s: 11});
+    seq(pg, 110.8, 127.4, [' Location: ', {u: 24, v: pr.location}, ' Survey / House No: ', {u: 20, v: pr.survey}]);
+    seq(pg, 99.8, 152.6, ['Area / Locality: ', {u: 58, v: pr.area}]);
+    seq(pg, 99.8, 177.9, ['Village / Town: ', {u: 25, v: pr.village}, ' District : ', {u: 26, v: pr.district}]);
+    pg.text('C. Property in whose name?', 99.8, BL(203.4), {s: 11}); seq(pg, 266.4, 203.4, [': ', {u: 39, v: pr.owner}]);
+    seq(pg, 99.8, 228.6, ['D. Cost (at the time of purchase)  : ₹ ', {u: 36, v: amtTxt(pr.cost)}]);
+    seq(pg, 99.8, 253.9, ['E. Present estimated market value of the property/ies : ₹', {u: 24, v: amtTxt(pr.value)}]);
+    pg.text('F. Whether encumbered/un-encumbered/partially', 99.8, BL(279.1), {s: 11});
+    seq(pg, 351.9, 279.1, ['  : ', {u: 28, v: pr.enc}]);
+    pg.text('Encumbered /un-encumbered/partially', 115.1, BL(291.9), {s: 11}); pg.text(':', 393.9, BL(291.9), {s: 11});
+    pg.text('With whom, Consideration and major terms and', 112.0, BL(304.4), {s: 11});
+    seq(pg, 99.8, 317.2, ['conditions.', {u: 28, v: pr.encTerms, w: 440 - 99.8 - tWidth('conditions.', 'H', 11)}]);
+    pg.text('9.2', 99.8, BL(342.4), {s: 11});
+    pg.text('Details of movable properties in my name:', 118.3, BL(342.4), {f: 'HB', s: 11});
+
+    const S9 = 9, h = (s, x, top, o = {}) => pg.text(s, x, BL(top, S9), Object.assign({s: S9}, o));
+    const fillRow = (vals, colsX, yBottom) => vals.forEach((v, i) => fitIn(pg, v, colsX[i][0] + 1, yBottom - 2.6, colsX[i][1] - colsX[i][0] - 3, {s: 8.5}));
+    /* A. LIC policies (column headings where the form prints them; the second-line words sit under their own columns) */
+    h('A. LIC policies', 81.8, 367.5, {f: 'HB'}); pg.bar(63.8, 375.6, 80.0, 1.0);
+    [['Policy No.', 86.3], ['Date of issuance', 153.8], ['Sum assured', 243.3], ['Branch Name', 338.4], ['Annual Premium', 419.4], ['Premium', 508.4]].forEach(([s, x]) => h(s, x, 377.8));
+    h('Paid', 511.5, 388.0);
+    [['of Policy', 338.4], ['(Rs.)', 419.4], ['date', 514.0]].forEach(([s, x]) => h(s, x, 398.5));
+    h('(1)', 86.3, 408.8);
+    [[2, 187.3], [3, 293.4], [4, 369.4], [5, 450.5], [6, 547.5]].forEach(([n, x]) => h(`(${n})`, x, 408.8, {align: 'right'}));
+    rule(pg, 417.9, 0.5); rule(pg, 430.6, 0.75); rule(pg, 442.6, 0.75); rule(pg, 455.9, 0.75); rule(pg, 466.9, 1.5);
+    const licC = [[63, 150], [150, 242], [242, 335], [335, 416], [416, 508], [508, 551]];
+    (d.lic || []).slice(0, 3).forEach((r, i) => fillRow([r.no, dmyTxt(r.date) || r.date, amtTxt(r.sum), r.branch, amtTxt(r.prem), dmyTxt(r.paid) || r.paid], licC, [430.6, 442.6, 455.9][i]));
+    /* B. Shares */
+    h('B. Shares/ Debentures etc.', 86.3, 470.8, {f: 'HB'});
+    rule(pg, 480.9, 1.5);
+    [['Name of', 63.8], ['Total No. of', 110.3], ['Certificate No', 210.3], ['Total Amount', 272.3], ['Whether fully', 343.4], ['Cur. Market', 404.0]].forEach(([s, x]) => h(s, x, 483.8));
+    [['Company', 63.8], ['Shares held', 112.3], ['A/C No.', 210.3], ['₹ (Face Value)', 272.3], ['Paid (yes/No)', 343.4], ['Value ₹', 404.0]].forEach(([s, x]) => h(s, x, 494.0));
+    rule(pg, 503.9, 1.5); rule(pg, 516.9, 0.75); rule(pg, 529.9, 0.75);
+    (d.shares || []).slice(0, 2).forEach((r, i) => {
+        /* the number of shares sits right-aligned under its heading, leaving the company name the room to its left */
+        const qty = sval(r.qty), qw = qty ? Math.min(tWidth(qty, 'H', 8.5), 44) : 0;
+        const shC = [[63, 160 - qw - 4], [160 - qw - 2, 162], [208, 270], [270, 341], [341, 402], [402, 551]];
+        fillRow([r.co, qty, r.cert, amtTxt(r.amt), r.paid, amtTxt(r.mkt)], shC, [516.9, 529.9][i]);
+    });
+    /* C. Term deposits */
+    h('C. Term Deposits', 86.3, 542.5, {f: 'HB'});
+    [['FDR/RD/YSJY', 63.8], ['Date', 171.8], ['Fvg.', 234.8], ['Amount', 288.9], ['Name of Bank', 360.9], ['Due Date', 464.4], ['Maturity', 507.0]].forEach(([s, x]) => h(s, x, 552.8));
+    [['A/c No.', 63.8], ['₹', 288.9], ['Branch', 360.9], ['Value ₹', 507.0]].forEach(([s, x]) => h(s, x, 563.1));
+    rule(pg, 573.2, 1.5); rule(pg, 585.9, 0.75); rule(pg, 599.2, 0.75); rule(pg, 610.2, 1.5);
+    const tdC = [[63, 170], [170, 233], [233, 287], [287, 359], [359, 462], [462, 505], [505, 551]];
+    (d.tds || []).slice(0, 2).forEach((r, i) => fillRow([r.acc, dmyTxt(r.date) || r.date, r.fvg, amtTxt(r.amt), r.bank, dmyTxt(r.due) || r.due, amtTxt(r.mat)], tdC, [585.9, 599.2][i]));
+    /* D. Govt securities */
+    h('D. Investment in Govt. Securities like Bonds/NSC etc.', 86.3, 614.1, {f: 'HB'});
+    rule(pg, 623.9, 1.5);
+    [['Bond/', 63.8], ['Date of', 153.8], ['Issuing Office/Post', 234.8], ['Amount', 326.5], ['Due', 362.0], ['Maturity Value', 464.4]].forEach(([s, x]) => h(s, x, 626.8));
+    [['Certificate No.', 63.8], ['Purchase', 153.8], ['Office Add.(including', 234.8], ['₹', 326.5], ['Date', 362.0], ['₹', 464.4]].forEach(([s, x]) => h(s, x, 637.3));
+    h('Mutual Funds)', 234.8, 647.6);
+    rule(pg, 657.7, 0.75); rule(pg, 670.7, 0.75); rule(pg, 682.7, 1.5);
+    const gsC = [[63, 151], [151, 232], [232, 324], [324, 361], [361, 462], [462, 551]];
+    (d.secs || []).slice(0, 2).forEach((r, i) => fillRow([r.cert, dmyTxt(r.date) || r.date, r.office, amtTxt(r.amt), dmyTxt(r.due) || r.due, amtTxt(r.mat)], gsC, [670.7, 682.7][i]));
+
+    pg.text('9.3 Details like Reg. No. type and value of vehicle/s', 86.3, BL(696.3), {s: 11});
+    pg.text('Owned by me', 107.7, BL(709.0), {s: 11});
+    const vx = 360.9 + tWidth(': ', 'H', 11);
+    seq(pg, 360.9, 696.3, [': ', {u: 28}]);
+    pg.text('_'.repeat(26), 360.9 + tWidth('  ', 'H', 11), BL(721.8), {s: 11});
+    wrapInto(pg, d.vehicles, [{x: vx + 2, y: BL(696.3) - 2.2, w: 28 * UW(11) - 4}, {x: 360.9 + tWidth('  ', 'H', 11) + 2, y: BL(721.8) - 2.2, w: 26 * UW(11) - 4}], {s: 10, min: 6.5});
+    pg.text('9.4 Capital investment in business. Name of Firm/', 86.3, BL(747.0), {s: 11});
+    pg.text('Company (As on latest sheet date)', 107.7, BL(759.5), {s: 11});
+    seq(pg, 360.9, 747.0, [': ', {u: 27, v: d.capital}]);
+}
+function f135Page3(pg, d) {
+    const ox = 86.3 + tWidth('9.5 Full details of other investments if any: ', 'H', 11);
+    seq(pg, 86.3, 64.1, ['9.5 Full details of other investments if any: ', {u: 26}]);
+    pg.text('(I.e. Jewellery, Investment in other firm etc.)', 104.6, BL(76.8), {s: 11});
+    pg.text('_'.repeat(23), 360.9 + tWidth(' ', 'H', 11), BL(89.3), {s: 11});
+    wrapInto(pg, d.otherInv, [{x: ox + 2, y: BL(64.1) - 2.2, w: 26 * UW(11) - 4}, {x: 360.9 + tWidth(' ', 'H', 11) + 2, y: BL(89.3) - 2.2, w: 23 * UW(11) - 4}], {s: 10, min: 6.5});
+    pg.text('9.6 Total of all assets (9.1 to 9.5)', 86.3, BL(114.6), {s: 11});
+    seq(pg, 360.9, 114.6, [': ₹', {u: 24, v: amtTxt(d.totalAssets)}]);
+    pg.text('10.', 63.8, BL(152.6), {s: 11});
+    const w10 = pg.text('Details of Loans in individual name/firms Name /Company’s Name', 82.3, BL(152.6), {f: 'HB', s: 11});
+    pg.text(':', 82.3 + w10, BL(152.6), {s: 11});
+    const ln = d.loan135 || {};
+    const wide = 550 - 360.9 - tWidth(': ', 'H', 11);
+    pg.text('A. Name/s of the Bank /other Institution and its branch', 86.3, BL(177.9), {s: 11}); seq(pg, 360.9, 177.9, [': ', {u: 12, v: ln.bank, w: wide}]);
+    pg.text('B. Purpose and amount of Loan availed', 86.3, BL(203.4), {s: 11}); seq(pg, 360.9, 203.4, [': ', {u: 12, v: ln.purpose, w: wide}]);
+    pg.text('C. Security & repayment schedule/rate of interest', 86.3, BL(228.6), {s: 11}); seq(pg, 360.9, 228.6, [': ', {u: 28, v: ln.security}]);
+    pg.text('D. Present balance outstanding', 86.3, BL(253.9), {s: 11}); seq(pg, 464.4, 253.9, [': ', {u: 12, v: amtTxt(ln.balance)}]);
+    pg.text('E. Liabilities other than to bank and Financial Institution', 86.3, BL(279.1), {s: 11}); seq(pg, 360.9, 279.1, [': ', {u: 12, v: ln.other, w: wide}]);
+    pg.text('11. Other Details', 63.8, BL(304.4), {f: 'HB', s: 11});
+    pg.text('Details of personal guarantee given for any person/firm', 86.3, BL(317.2), {s: 11});
+    seq(pg, 360.9, 317.2, [': ', {u: 12, v: d.guaranteeGiven ? 'Yes' : (d.guaranteeGiven === false ? 'No' : '')}]);
+    pg.text('If so furnish details (i.e. Name of Bank /Institution, on', 86.3, BL(329.9), {s: 11});
+    pg.text('Whose behalf amount of guarantee present status of a/c etc.)', 86.3, BL(342.4), {s: 11});
+    if (d.guaranteeGiven) wrapInto(pg, d.guaranteeDetails, [{x: 392, y: BL(329.9), w: 158}, {x: 392, y: BL(342.4), w: 158}], {s: 9, min: 6});
+    pg.text('12. (A) Particulars of Legal Heirs', 63.8, BL(367.9), {f: 'HB', s: 11}); pg.text(':', 360.9, BL(367.9), {f: 'HB', s: 11});
+    rule(pg, 379.6, 1.5);
+    [['Sr. No', 86.3], ['Name', 153.8], ['Relationship', 234.8], ['Age', 374.4], ['Present Address', 464.4]].forEach(([s, x]) => pg.text(s, x, BL(382.9), {s: 11}));
+    [['(1)', 104.3], ['(2)', 167.3], ['(3)', 257.4], ['(4)', 374.4], ['(5)', 500.5]].forEach(([s, x]) => pg.text(s, x, BL(395.7), {s: 11}));
+    rule(pg, 407.4, 1.5); rule(pg, 422.6, 0.75); rule(pg, 438.1, 0.75); rule(pg, 451.4, 1.5);
+    (d.heirs || []).slice(0, 3).forEach((r, i) => {
+        const yb = [422.6, 438.1, 451.4][i] - 3;
+        if (!(r.name || r.rel || r.age || r.addr)) return;
+        pg.text(String(i + 1), 106, yb, {s: 9, c: BLUE});
+        fitIn(pg, r.name, 145, yb, 87, {s: 9}); fitIn(pg, r.rel, 233, yb, 135, {s: 9});
+        fitIn(pg, r.age, 372, yb, 40, {s: 9}); fitIn(pg, r.addr, 418, yb, 132, {s: 9});
+    });
+    pg.text('(B) Nomination particulars', 86.3, BL(455.7), {f: 'HB', s: 11});
+    rule(pg, 467.6, 1.52);
+    [['Sr. No.', 86.3, 470.7], ['Description of Asset', 153.8, 470.7], ['(Bank Dep., Co. Dep.,', 153.8, 496.2], ['Terminal Benefits etc.)', 153.8, 521.5],
+        ['Bank/Organisation', 288.9, 470.7], ['Account/Certi-', 410.4, 470.7], ['ficate No.', 410.4, 496.2],
+        ['Amount (at', 485.0, 470.7], ['present /at', 485.0, 496.2], ['Maturity)', 485.0, 521.5]].forEach(([s, x, tp]) => pg.text(s, x, BL(tp), {s: 11}));
+    [['(1)', 104.3], ['(2)', 203.0], ['(3)', 327.0], ['(4)', 431.0], ['(5)', 509.0]].forEach(([s, x]) => pg.text(s, x, BL(546.7), {s: 11}));
+    rule(pg, 558.7, 1.5); rule(pg, 573.9, 0.75); rule(pg, 589.2, 0.75); rule(pg, 603.7, 1.5);
+    (d.noms || []).slice(0, 3).forEach((r, i) => {
+        const yb = [573.9, 589.2, 603.7][i] - 3;
+        if (!(r.desc || r.org || r.acc || r.amt)) return;
+        pg.text(String(i + 1), 106, yb, {s: 9, c: BLUE});
+        fitIn(pg, r.desc, 153, yb, 132, {s: 9}); fitIn(pg, r.org, 288, yb, 119, {s: 9});
+        fitIn(pg, r.acc, 409.5, yb, 72, {s: 9}); fitIn(pg, amtTxt(r.amt), 484, yb, 66, {s: 9});
+    });
+    pg.text('In support of my above declaration, I enclose', 63.8, BL(619.5), {s: 11});
+    ['1. Balance sheet, Profit and Loss Accounts, Trading Account, Capital Account (audited/unaudited).',
+        '2. Copy of employment certificated with details of salary drawn.',
+        '3. Copies of agreement/revenue records/society certificates in respect of land/ building/flat owned by',
+        'me.',
+        '4. Copies of Income Tax/Wealth tax returns/ Assessment Order.'].forEach((s, i) => pg.text(s, 63.8, BL([644.8, 657.5, 670.0, 682.8, 695.5][i]), {s: 11}));
+    pg.text('13.  I declare that.', 63.8, BL(720.8), {s: 11});
+    pg.text('•', 45.8, BL(746.9), {s: 11});
+    const y13 = BL(746.9);
+    const wAm = tWidth('I am', 'H', 11), wSl = tWidth('/', 'H', 11), wNot = tWidth('I am not', 'H', 11);
+    const rest = pg.text('I am/I am not (tick as applicable) a Director in  ', 63.8, y13, {s: 11});
+    const bx = 63.8 + rest;
+    const wu = pg.text('____', bx, y13, {s: 11});
+    pg.text('/any Bank . There is no litigation against me or', bx + wu, y13, {s: 11});
+    if (d.director === 'NOT') pg.tick(63.8 + wAm + wSl + wNot / 2 - 4, y13 - 18, 9, 8);
+    /* the bank's name is written just above the short blank, where there is room for it */
+    if (d.director === 'AM') { pg.tick(63.8 + wAm / 2 - 4, y13 - 18, 9, 8); fitIn(pg, d.directorBank, bx + wu / 2 - 80, y13 - 11, 160, {s: 8.5, align: 'center'}); }
+    pg.text('the firm/ Co. in which I am the proprietor/ a partner/ a Director.', 63.8, BL(759.5), {s: 11});
+}
+function f135Page4(pg, d) {
+    pg.text('•', 45.8, BL(64.9), {s: 11});
+    pg.text('The name of the firm /Co. or the name of the partners/Proprietor/Director of the firm/ Co. is not the', 63.8, BL(64.9), {s: 11});
+    pg.text('caution list of RBI/ECGC.', 63.8, BL(77.6), {s: 11});
+    pg.text('•', 45.8, BL(90.9), {s: 11});
+    pg.text('The proprietor/partners/directors of the firm/Co. is/are not the Directors in any Co-operative Bank.', 63.8, BL(90.9), {s: 11});
+    pg.text('•', 45.8, BL(116.9), {s: 11});
+    pg.text('I also declare that the above information is complete, true and correct.', 63.8, BL(116.9), {s: 11});
+    seq(pg, 217.7, 167.6, ['Signature of the Applicant /Guarantor: ', {u: 21}]);
+    pg.text('Encls:', 63.8, BL(180.1), {s: 11});
+    wrapInto(pg, d.encls, [{x: 100, y: BL(180.1), w: 450}, {x: 63.8, y: BL(192.9), w: 486}, {x: 63.8, y: BL(205.4), w: 486}], {s: 10, min: 6.5});
+    seq(pg, 63.8, 230.9, ['Place: ', {u: 21, v: d.place}]);
+    seq(pg, 63.8, 256.1, ['Date: ', {u: 22, v: dmyTxt(d.date)}]);
+}
+function buildForm135Pdf(d) {
+    const doc = new PdfDoc('Form 135 - Particulars of Assets and Liabilities');
+    f135Page1(doc.page(), d); f135Page2(doc.page(), d); f135Page3(doc.page(), d); f135Page4(doc.page(), d);
+    return doc.bytes();
+}
+
+/* =====================================================================
+   Forms tab – collects the details and downloads the two PDFs
+   ===================================================================== */
+const FLABEL = {};
+const fid = id => 'f_' + id;
+function fT(id, label, o = {}) {
+    FLABEL[id] = o.lab || label;
+    const attrs = `id="${fid(id)}" autocomplete="off"${o.ph ? ` placeholder="${esc(o.ph)}"` : ''}${o.num ? ' inputmode="decimal"' : ''}${o.max ? ` maxlength="${o.max}"` : ''}`;
+    const ctl = o.area ? `<textarea ${attrs} rows="${o.rows || 2}"></textarea>` : `<input type="${o.type || 'text'}" ${attrs}>`;
+    return `<div class="ff${o.full ? ' full' : ''}"${o.wrap ? ` id="w_${id}"` : ''}><label for="${fid(id)}">${label}</label>${ctl}${o.hint ? `<div class="hint">${o.hint}</div>` : ''}</div>`;
+}
+const fN = (id, label, o = {}) => fT(id, label, Object.assign({num: true}, o));
+const fD = (id, label, o = {}) => fT(id, label, Object.assign({type: 'date'}, o));
+const fA = (id, label, o = {}) => fT(id, label, Object.assign({area: true, full: true}, o));
+function fS(id, label, opts, o = {}) {
+    FLABEL[id] = o.lab || label;
+    return `<div class="ff${o.full ? ' full' : ''}"><label for="${fid(id)}">${label}</label><select id="${fid(id)}">${opts.map(([v, l]) => `<option value="${esc(v)}">${esc(l)}</option>`).join('')}</select>${o.hint ? `<div class="hint">${o.hint}</div>` : ''}</div>`;
+}
+const fC = (id, label, on) => `<label class="cb-item"><input type="checkbox" id="${fid(id)}"${on ? ' checked' : ''}><span>${label}</span></label>`;
+const grid = (...a) => `<div class="fgrid">${a.join('')}</div>`;
+const sub = t => `<div class="fsub">${t}</div>`;
+const fsec = (k, title, body, hint) => `<details class="set-sec fsec" data-k="${k}"><summary>${title}${hint ? `<span class="sum-sub">${hint}</span>` : ''}</summary><div class="set-body">${body}</div></details>`;
+const blankOpt = [['', '—']];
+
+const OA = [['tv', 'Colour TV'], ['fridge', 'Refrigerator'], ['car', 'Car'], ['two', 'Two-wheeler'], ['phone', 'Telephone'], ['cell', 'Mobile phone'], ['pc', 'PC'], ['wash', 'Washing machine']];
+
+function formsHtml() {
+    const s1 = grid(
+        fT('facility', 'Loan facility for', {full: true, ph: 'e.g. Purchase of new car'}),
+        fT('name', 'Full name', {full: true}),
+        fT('father', "Father's / husband's name", {full: true}),
+        fD('dob', 'Date of birth'),
+        fT('pan', 'PAN', {max: 10}),
+        fS('sex', 'Sex', blankOpt.concat([['Male', 'Male'], ['Female', 'Female']])),
+        fS('marital', 'Marital status', blankOpt.concat(['Single', 'Married', 'Divorced', 'Widowed'].map(x => [x, x]))),
+        fS('category', 'Category', blankOpt.concat([['SC', 'SC'], ['ST', 'ST'], ['OBC', 'OBC'], ['OTHERS', 'Others'], ['MINORITY COMMUNITY', 'Minority community']])),
+        fS('education', 'Education', blankOpt.concat(['Matric', 'Under Graduate', 'Graduate', 'Post-Graduate', 'Doctorate'].map(x => [x, x]))),
+        fN('dependents', 'Dependants (excl. spouse)'),
+        fN('children', 'Children'),
+        fS('profession', 'If professional', blankOpt.concat(['Doctor', 'Architect', 'CA', 'MBA', 'Engineer', 'Lawyer'].map(x => [x, x])).concat([['Other', 'Other']])),
+        fT('profOther', 'Other profession', {wrap: true})
+    );
+    const s2 = sub('Present (residence) address') + grid(
+        fA('resAddr', 'Address', {lab: 'Residence address'}),
+        fT('resPin', 'PIN', {num: true, max: 6, lab: 'Residence PIN'}),
+        fN('yrsRes', 'Years at this address'),
+        fS('resChange', 'Moved house in the last 3 years?', blankOpt.concat([['NC', 'Not changed'], ['ONCE', 'Once'], ['MORE', 'More than once']]), {full: true}),
+        fT('tel', 'Telephone (residence)'), fT('fax', 'Fax'),
+        fT('mobile', 'Mobile'), fT('email', 'E-mail')
+    ) + sub('Permanent address') + `<div class="fchk">${fC('permSame', 'Same as present address', true)}</div>` + `<div id="w_perm">` + grid(
+        fA('permAddr', 'Address', {lab: 'Permanent address'}),
+        fT('permPin', 'PIN', {num: true, max: 6, lab: 'Permanent address PIN'}),
+        fT('permTel', 'Telephone'), fT('permFax', 'Fax')
+    ) + `</div>`;
+    const s3 = grid(
+        fS('workType', 'Work', [['SAL', 'Salaried'], ['SE', 'Self-employed / professional / business'], ['PEN', 'Pensioner / not working']], {full: true}),
+        fT('occupation', 'Occupation / line of business', {full: true}),
+        fT('org', 'Employer / firm / company name', {full: true, lab: 'Employer / firm name'}),
+        fA('offAddr', 'Office address'),
+        fT('offPin', 'Office PIN', {num: true, max: 6}),
+        fT('offTel', 'Office telephone'), fT('offExt', 'Extension'), fT('offFax', 'Office fax'),
+        fT('offEmail', 'Office e-mail', {full: true})
+    ) + `<div id="w_sal">` + sub('Salaried') + grid(
+        fS('desigLevelS', 'Designation level', blankOpt.concat([['Executive', 'Executive'], ['Managerial', 'Managerial'], ['Clerk', 'Clerk']])),
+        fT('desig', 'Designation'),
+        fT('dept', 'Department'),
+        fS('workWith', 'Working with', blankOpt.concat([['GOVT', 'Govt. / public sector'], ['PUBLTD', 'Public Ltd.'], ['PVT', 'Pvt. Ltd.'], ['PART', 'Partnership'], ['PROP', 'Proprietorship'], ['MNC', 'MNC']])),
+        fD('workSince', 'Working since'),
+        fN('retireAge', 'Retirement age')
+    ) + `</div><div id="w_se">` + sub('Self-employed / business') + grid(
+        fS('bizType', 'Business type', blankOpt.concat([['PVT', 'Pvt. Ltd.'], ['PART', 'Partnership'], ['PROP', 'Proprietorship'], ['OTH', 'Others']])),
+        fT('bizOther', 'If others, specify'),
+        fS('desigLevelB', 'Designation', blankOpt.concat([['Executive', 'Executive'], ['Managerial', 'Managerial']])),
+        fD('estSince', 'Established since'),
+        fT('activity', 'Line of activity'),
+        fT('capacity', 'Your capacity', {ph: 'e.g. Proprietor, Partner'})
+    ) + `</div>` + sub('Income') + grid(
+        fN('gmi', 'Gross monthly income (₹)'),
+        fN('annualIncome', 'Annual income (₹)'),
+        fN('basic', 'Monthly basic pay (₹)'),
+        fN('pf', 'PF deduction (%)'),
+        fN('profTax', 'Annual professional tax (₹)'),
+        fN('sav88', 'Annual tax-saving investments (₹)'),
+        fN('rebate100', '100% rebate amount (₹)'),
+        fN('via', 'Chapter VI-A deductions (₹)'),
+        fN('otherReb', 'Other rebate / deduction (₹)'),
+        fN('hhExp', 'Monthly household expenses (₹)'),
+        fN('otherEmi', 'Monthly EMIs on other loans (₹)'),
+        fN('famInc', 'Net income of other family members (₹)')
+    );
+    const s4 = grid(
+        fT('make', 'Make / model', {full: true}),
+        fA('dealer', 'Dealer name & address (new car)'),
+        fS('vehBand', 'Price of the car', blankOpt.concat([['1', 'Less than ₹4 lakh'], ['2', '₹4 to 6 lakh'], ['3', 'More than ₹6 lakh']])),
+        fS('ageBand', 'Age of the car', blankOpt.concat([['1', 'Less than 1 year'], ['2', '1 to 3 years'], ['3', '3 to 5 years']]))
+    ) + sub('Pre-owned car') + grid(
+        fT('servAge', 'Approx. serviceable age'),
+        fN('valuation', 'Valuation (₹)'),
+        fT('seller', 'Seller name & address', {full: true}),
+        fT('engine', 'Engine / chassis no.', {full: true})
+    ) + sub('Proposed loan') + `<div class="fchk">${fC('fillProposed', "Fill the bank's “Proposed Loan Details” box with these figures", true)}</div>` + `<div id="w_prop">` + grid(
+        fN('pTenure', 'Tenure (months)'),
+        fT('pPurpose', 'Purpose'),
+        fN('pPrice', 'Purchase price (₹)'),
+        fN('pLoan', 'Loan amount (₹)'),
+        fN('pRoi', 'Rate of interest (%)'),
+        fN('pMargin', 'Margin (%)')
+    ) + `</div>`;
+    let s5 = '';
+    for (let i = 1; i <= 3; i++) s5 += sub(`Existing loan ${i}`) + grid(fT(`ln${i}_src`, 'Lender / type of loan', {full: true, lab: `Existing loan ${i}: lender`}), fN(`ln${i}_amt`, 'Loan amount (₹)'), fN(`ln${i}_out`, 'Outstanding (₹)'), fN(`ln${i}_emi`, 'EMI (₹)'), fT(`ln${i}_od`, 'Overdue since', {lab: `Existing loan ${i}: overdue since`}));
+    ['Main bank', 'Other bank 1', 'Other bank 2'].forEach((t, i) => {
+        s5 += sub(t) + grid(fT(`bk${i}_name`, 'Bank', {lab: `${t}: bank`}), fT(`bk${i}_branch`, 'Branch & telephone', {lab: `${t}: branch`}), fT(`bk${i}_type`, 'Account type', {ph: 'e.g. Savings', lab: `${t}: account type`}), fT(`bk${i}_no`, 'Account no.', {lab: `${t}: account no.`}), fN(`bk${i}_yrs`, 'Years held'));
+    });
+    s5 += sub('Bank of Baroda account & credit cards') + grid(
+        fT('bobAcc', 'Bank of Baroda account no.'),
+        fS('bobAccType', 'Account type', blankOpt.concat([['SB', 'Savings (SB)'], ['CA', 'Current (CA)']])),
+        fT('bobBranch', 'Branch name', {full: true, lab: 'Bank of Baroda branch'}),
+        fN('cardCount', 'Credit cards owned'),
+        fT('cardIssuer', 'Card issuer'),
+        fT('cardNo', 'Card no.', {full: true, hint: 'Optional. You can also write it by hand on the printed form.'})
+    ) + sub('Other assets you own') + `<div class="fchk two">${OA.map(([k, l]) => fC('oa_' + k, l)).join('')}</div>`;
+    const person = (p, t) => sub(t) + grid(
+        fT(p + 'Name', 'Name', {full: true, lab: `${t}: name`}),
+        fA(p + 'Addr', 'Address', {lab: `${t}: address`}),
+        fT(p + 'Occ', 'Occupation', {lab: `${t}: occupation`}),
+        fT(p + 'Phone', 'Phone / fax', {lab: `${t}: phone`}),
+        fT(p + 'Email', 'E-mail', {lab: `${t}: e-mail`}),
+        fT(p + 'Pan', 'PAN', {max: 10, lab: `${t}: PAN`}),
+        fN(p + 'Inc', 'Net annual income (₹)', {full: true, lab: `${t}: income`})
+    );
+    const s6 = person('sp', 'Spouse') + person('gu', 'Guarantor');
+    const s7 = sub('Applicant (₹)') + grid(fN('nwAppMov', 'Total movable assets'), fN('nwAppImm', 'Total immovable assets'), fN('nwAppLiab', 'Total liabilities'), fN('nwColl', 'Collateral offered')) +
+        sub('Guarantor (₹)') + grid(fN('nwGuaMov', 'Total movable assets'), fN('nwGuaImm', 'Total immovable assets'), fN('nwGuaLiab', 'Total liabilities')) +
+        '<div class="hint">Total assets and net assets are worked out on the form.</div>';
+    let s8 = grid(fD('asAt', 'Particulars as at')) + sub('Immovable property') + grid(
+        fT('prPlot', 'Plot of land'), fT('prAgri', 'Agricultural land'), fT('prHouse', 'House / godown'), fT('prOthers', 'Others'),
+        fT('prLocation', 'Location'), fT('prSurvey', 'Survey / house no.'), fT('prArea', 'Area / locality'), fT('prVillage', 'Village / town'),
+        fT('prDistrict', 'District'), fT('prOwner', 'In whose name'), fN('prCost', 'Cost when bought (₹)'), fN('prValue', 'Present market value (₹)'),
+        fS('prEnc', 'Encumbrance', blankOpt.concat([['Un-encumbered', 'Un-encumbered'], ['Encumbered', 'Encumbered'], ['Partially encumbered', 'Partially encumbered']])),
+        fT('prEncTerms', 'With whom, terms')
+    );
+    for (let i = 1; i <= 3; i++) s8 += sub(`LIC policy ${i}`) + grid(fT(`lic${i}_no`, 'Policy no.', {lab: `LIC policy ${i}: number`}), fD(`lic${i}_date`, 'Date of issue'), fN(`lic${i}_sum`, 'Sum assured (₹)'), fT(`lic${i}_branch`, 'Branch'), fN(`lic${i}_prem`, 'Annual premium (₹)'), fD(`lic${i}_paid`, 'Premium paid on'));
+    for (let i = 1; i <= 2; i++) s8 += sub(`Shares / debentures ${i}`) + grid(fT(`sh${i}_co`, 'Company', {lab: `Shares ${i}: company`}), fN(`sh${i}_qty`, 'No. of shares'), fT(`sh${i}_cert`, 'Certificate / account no.'), fN(`sh${i}_amt`, 'Face value total (₹)'), fS(`sh${i}_paid`, 'Fully paid', blankOpt.concat([['Yes', 'Yes'], ['No', 'No']])), fN(`sh${i}_mkt`, 'Market value (₹)'));
+    for (let i = 1; i <= 2; i++) s8 += sub(`Term deposit ${i}`) + grid(fT(`td${i}_acc`, 'FD / RD account no.', {lab: `Term deposit ${i}: account`}), fD(`td${i}_date`, 'Date'), fT(`td${i}_fvg`, 'In favour of'), fN(`td${i}_amt`, 'Amount (₹)'), fT(`td${i}_bank`, 'Bank & branch'), fD(`td${i}_due`, 'Due date'), fN(`td${i}_mat`, 'Maturity value (₹)'));
+    for (let i = 1; i <= 2; i++) s8 += sub(`Bonds / NSC / mutual funds ${i}`) + grid(fT(`gs${i}_cert`, 'Certificate no.', {lab: `Bonds ${i}: certificate`}), fD(`gs${i}_date`, 'Date of purchase'), fT(`gs${i}_office`, 'Issuing office'), fN(`gs${i}_amt`, 'Amount (₹)'), fD(`gs${i}_due`, 'Due date'), fN(`gs${i}_mat`, 'Maturity value (₹)'));
+    s8 += sub('Other assets') + grid(
+        fA('vehicles', 'Vehicles owned (reg. no., type, value)'),
+        fT('capital', 'Capital in business (firm, amount)', {full: true}),
+        fA('otherInv', 'Other investments (jewellery etc.)'),
+        fN('totalAssets', 'Total of all assets (₹)')
+    ) + sub('Loans & liabilities') + grid(
+        fT('lBank', 'Lender & branch', {full: true, lab: 'Loans: lender'}),
+        fT('lPurpose', 'Purpose & amount', {full: true, lab: 'Loans: purpose'}),
+        fT('lSecurity', 'Security, repayment & interest rate', {full: true}),
+        fN('lBalance', 'Present balance outstanding (₹)'),
+        fT('lOther', 'Other liabilities')
+    ) + sub('Guarantees given') + grid(
+        fS('guGiven', 'Guarantor for anyone?', blankOpt.concat([['No', 'No'], ['Yes', 'Yes']])),
+        fT('guDetails', 'If yes: bank, for whom, amount')
+    );
+    for (let i = 1; i <= 3; i++) s8 += sub(`Legal heir ${i}`) + grid(fT(`h${i}_name`, 'Name', {lab: `Legal heir ${i}: name`}), fT(`h${i}_rel`, 'Relationship'), fN(`h${i}_age`, 'Age'), fT(`h${i}_addr`, 'Present address'));
+    for (let i = 1; i <= 3; i++) s8 += sub(`Nomination ${i}`) + grid(fT(`n${i}_desc`, 'Asset (bank deposit, etc.)', {lab: `Nomination ${i}: asset`}), fT(`n${i}_org`, 'Bank / organisation'), fT(`n${i}_acc`, 'Account / certificate no.'), fN(`n${i}_amt`, 'Amount (₹)'));
+    s8 += sub('Declaration') + grid(
+        fS('director', 'Director of a bank?', blankOpt.concat([['NOT', 'I am not a director of any bank'], ['AM', 'I am a director of a bank']]), {full: true}),
+        fT('directorBank', 'If yes, which bank', {full: true}),
+        fT('encls', 'Enclosures', {full: true, ph: 'e.g. ITR, salary certificate'})
+    );
+    const s9 = grid(fT('place', 'Place'), fD('date', 'Date'));
+    return fsec('f1', 'Applicant', s1) + fsec('f2', 'Address & contact', s2) + fsec('f3', 'Work & income', s3) + fsec('f4', 'Car & proposed loan', s4) +
+        fsec('f5', 'Existing loans & bank accounts', s5) + fsec('f6', 'Spouse & guarantor', s6) + fsec('f7', 'Net worth', s7, 'Application Form') +
+        fsec('f8', 'Assets & liabilities', s8, 'Form 135') + fsec('f9', 'Place & date', s9);
+}
+
+/* ---------- reading the form ---------- */
+const gv = id => { const el = $(fid(id)); if (!el) return ''; return el.type === 'checkbox' ? el.checked : String(el.value).trim(); };
+const gn = id => { const v = String(gv(id)).replace(/,/g, ''); return v === '' ? '' : (isFinite(+v) ? +v : v); };
+function formData() {
+    const permSame = gv('permSame');
+    const workType = gv('workType');
+    const d = {
+        facility: gv('facility'), name: gv('name'), father: gv('father'), dob: gv('dob'), pan: gv('pan'), sex: gv('sex'), marital: gv('marital'),
+        category: gv('category'), education: gv('education'), dependents: gv('dependents'), children: gv('children'), profession: gv('profession'), profOther: gv('profOther'),
+        resAddr: gv('resAddr'), resPin: gv('resPin'), yrsRes: gv('yrsRes'), resChange: gv('resChange'), tel: gv('tel'), fax: gv('fax'), mobile: gv('mobile'), email: gv('email'),
+        permAddr: permSame ? gv('resAddr') : gv('permAddr'), permPin: permSame ? gv('resPin') : gv('permPin'),
+        permTel: permSame ? gv('tel') : gv('permTel'), permFax: permSame ? gv('fax') : gv('permFax'),
+        workType, occupation: gv('occupation'), org: gv('org'), offAddr: gv('offAddr'), offPin: gv('offPin'), offTel: gv('offTel'), offExt: gv('offExt'),
+        offFax: gv('offFax'), offEmail: gv('offEmail'),
+        desigLevel: workType === 'SAL' ? gv('desigLevelS') : workType === 'SE' ? gv('desigLevelB') : '', desig: gv('desig'), dept: gv('dept'),
+        workWith: gv('workWith'), workSince: gv('workSince'), retireAge: gv('retireAge'),
+        bizType: gv('bizType'), bizOther: gv('bizOther'), estSince: gv('estSince'), activity: gv('activity'), capacity: gv('capacity'),
+        gmi: gn('gmi'), annualIncome: gn('annualIncome'), basic: gn('basic'), pf: gv('pf'), profTax: gn('profTax'), sav88: gn('sav88'), rebate100: gn('rebate100'),
+        via: gn('via'), otherReb: gn('otherReb'), hhExp: gn('hhExp'), otherEmi: gn('otherEmi'), famInc: gn('famInc'),
+        vehBand: gv('vehBand'), ageBand: gv('ageBand'),
+        car: {make: gv('make'), dealer: gv('dealer'), servAge: gv('servAge'), valuation: gn('valuation'), seller: gv('seller'), engine: gv('engine')},
+        proposed: gv('fillProposed') ? {tenure: gv('pTenure'), purpose: gv('pPurpose'), price: gn('pPrice'), loan: gn('pLoan'), roi: gv('pRoi'), margin: gv('pMargin')} : {},
+        loans: [1, 2, 3].map(i => ({src: gv(`ln${i}_src`), amt: gn(`ln${i}_amt`), out: gn(`ln${i}_out`), emi: gn(`ln${i}_emi`), od: gv(`ln${i}_od`)})),
+        banks: [0, 1, 2].map(i => ({name: gv(`bk${i}_name`), branch: gv(`bk${i}_branch`), type: gv(`bk${i}_type`), no: gv(`bk${i}_no`), yrs: gv(`bk${i}_yrs`)})),
+        bobAcc: gv('bobAcc'), bobAccType: gv('bobAccType'), bobBranch: gv('bobBranch'), cardCount: gv('cardCount'), cardIssuer: gv('cardIssuer'), cardNo: gv('cardNo'),
+        oa: OA.map(([k]) => k).filter(k => gv('oa_' + k)),
+        spouse: {name: gv('spName'), addr: gv('spAddr'), occ: gv('spOcc'), phone: gv('spPhone'), email: gv('spEmail'), pan: gv('spPan'), inc: gn('spInc')},
+        gua: {name: gv('guName'), addr: gv('guAddr'), occ: gv('guOcc'), phone: gv('guPhone'), email: gv('guEmail'), pan: gv('guPan'), inc: gn('guInc')},
+        nw: {appMov: gn('nwAppMov'), appImm: gn('nwAppImm'), appLiab: gn('nwAppLiab'), coll: gn('nwColl'), guaMov: gn('nwGuaMov'), guaImm: gn('nwGuaImm'), guaLiab: gn('nwGuaLiab')},
+        asAt: gv('asAt'),
+        prop: {plot: gv('prPlot'), agri: gv('prAgri'), house: gv('prHouse'), others: gv('prOthers'), location: gv('prLocation'), survey: gv('prSurvey'), area: gv('prArea'),
+            village: gv('prVillage'), district: gv('prDistrict'), owner: gv('prOwner'), cost: gn('prCost'), value: gn('prValue'), enc: gv('prEnc'), encTerms: gv('prEncTerms')},
+        lic: [1, 2, 3].map(i => ({no: gv(`lic${i}_no`), date: gv(`lic${i}_date`), sum: gn(`lic${i}_sum`), branch: gv(`lic${i}_branch`), prem: gn(`lic${i}_prem`), paid: gv(`lic${i}_paid`)})),
+        shares: [1, 2].map(i => ({co: gv(`sh${i}_co`), qty: gv(`sh${i}_qty`), cert: gv(`sh${i}_cert`), amt: gn(`sh${i}_amt`), paid: gv(`sh${i}_paid`), mkt: gn(`sh${i}_mkt`)})),
+        tds: [1, 2].map(i => ({acc: gv(`td${i}_acc`), date: gv(`td${i}_date`), fvg: gv(`td${i}_fvg`), amt: gn(`td${i}_amt`), bank: gv(`td${i}_bank`), due: gv(`td${i}_due`), mat: gn(`td${i}_mat`)})),
+        secs: [1, 2].map(i => ({cert: gv(`gs${i}_cert`), date: gv(`gs${i}_date`), office: gv(`gs${i}_office`), amt: gn(`gs${i}_amt`), due: gv(`gs${i}_due`), mat: gn(`gs${i}_mat`)})),
+        vehicles: gv('vehicles'), capital: gv('capital'), otherInv: gv('otherInv'), totalAssets: gn('totalAssets'),
+        loan135: {bank: gv('lBank'), purpose: gv('lPurpose'), security: gv('lSecurity'), balance: gn('lBalance'), other: gv('lOther')},
+        guaranteeGiven: gv('guGiven') === 'Yes' ? true : gv('guGiven') === 'No' ? false : null, guaranteeDetails: gv('guDetails'),
+        heirs: [1, 2, 3].map(i => ({name: gv(`h${i}_name`), rel: gv(`h${i}_rel`), age: gv(`h${i}_age`), addr: gv(`h${i}_addr`)})),
+        noms: [1, 2, 3].map(i => ({desc: gv(`n${i}_desc`), org: gv(`n${i}_org`), acc: gv(`n${i}_acc`), amt: gn(`n${i}_amt`)})),
+        director: gv('director'), directorBank: gv('directorBank'), encls: gv('encls'),
+        place: gv('place'), date: gv('date')
+    };
+    d.guaPresent = d.gua.name ? 'Y' : (d.name ? 'N' : '');
+    return d;
+}
+/* Fields holding characters the PDF base fonts cannot print (for example Hindi or Kannada script, emoji). */
+function badFields() {
+    const bad = [];
+    document.querySelectorAll('#formWrap input, #formWrap textarea').forEach(el => {
+        if (el.type === 'checkbox' || el.type === 'date') return;
+        const v = el.value || '';
+        if ([...v].some(ch => ch !== '\n' && ch !== '\r' && ch !== '\t' && !printable(ch))) bad.push(FLABEL[el.id.slice(2)] || el.id.slice(2));
+    });
+    return bad;
+}
+
+/* ---------- prefill from the calculator ---------- */
+const ymdOf = d => d ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` : '';
+function calcPrefill() {
+    const {inp} = collectInputs();
+    const R = gRes, out = {};
+    const used = SCHEMES[inp.scheme] && SCHEMES[inp.scheme].product === 'USED';
+    out.facility = used ? 'Purchase of pre-owned car' : inp.scheme === 'GREEN' ? 'Purchase of new electric car' : 'Purchase of new car';
+    if ($('dob').value && BORR[inp.borr] && BORR[inp.borr].ind) out.dob = $('dob').value;
+    out.workType = inp.borr === 'SAL' ? 'SAL' : inp.borr === 'PEN' ? 'PEN' : 'SE';
+    if (inp.borr === 'SAL' && inp.retire) out.retireAge = String(inp.retire);
+    let gmi = null, gai = null, ded = null;
+    if (R && R.inc) { gmi = R.inc.gmiA; gai = R.inc.gaiA; ded = R.inc.dedMA; }
+    else if (BORR[inp.borr] && BORR[inp.borr].sal) { if (inp.s.every(v => v != null)) { gmi = avg(inp.s); gai = gmi * 12; } ded = inp.dedM; }
+    else { if (inp.y.every(v => v != null)) { gai = avg(inp.y); gmi = gai / 12; } ded = inp.dedA != null ? inp.dedA / 12 : null; }
+    if (gmi != null) out.gmi = String(Math.round(gmi));
+    if (gai != null) out.annualIncome = String(Math.round(gai));
+    if (ded != null && ded > 0) out.otherEmi = String(Math.round(ded));
+    let price = null;
+    if (R && R.veh) price = used ? R.veh.price : R.veh.onRoad;
+    else if (!used && inp.ex) price = (inp.ex || 0) + (inp.gst || 0) + (inp.rto || 0) + (inp.ins || 0) - (inp.dealerDisc || 0);
+    else if (used && inp.usedPrice) price = inp.usedPrice;
+    if (price) out.vehBand = price < 400000 ? '1' : price <= 600000 ? '2' : '3';
+    if (used && inp.usedInv) { const m = monthsFit(inp.usedInv, today()); out.ageBand = m < 12 ? '1' : m < 36 ? '2' : '3'; }
+    if (used && inp.usedVal) out.valuation = String(inp.usedVal);
+    out.pPurpose = out.facility;
+    if (price) out.pPrice = String(Math.round(price));
+    if (R && R.lim && R.lim.fin > 0) {
+        out.pTenure = String(R.ten.ten);
+        out.pLoan = String(R.lim.fin);
+        out.pRoi = R.rate.finalRoi.toFixed(2);
+        if (price) out.pMargin = (Math.max(0, price - R.lim.fin) / price * 100).toFixed(2);
+    }
+    return out;
+}
+function formsPrefill(force) {
+    const vals = calcPrefill();
+    for (const [k, v] of Object.entries(vals)) {
+        const el = $(fid(k));
+        if (!el || v == null || v === '') continue;
+        if (force || (!el.dataset.touched && (el.tagName === 'SELECT' || !el.value || el.dataset.auto === '1'))) { el.value = v; el.dataset.auto = '1'; if (force) delete el.dataset.touched; }
+    }
+    if (!gv('date')) $(fid('date')).value = ymdOf(today());
+    if (!gv('asAt')) $(fid('asAt')).value = ymdOf(today());
+    formsUpdate();
+}
+let formsReady = false;
+function formsOnOpen() { if (!formsReady) return; formsPrefill(false); }
+function formsAfterCalc() { if (formsReady) formsPrefill(false); }
+
+function formsUpdate() {
+    const wt = gv('workType');
+    show('w_sal', wt === 'SAL'); show('w_se', wt === 'SE');
+    show('w_perm', !gv('permSame'));
+    show('w_profOther', gv('profession') === 'Other');
+    show('w_prop', !!gv('fillProposed'));
+    $(fid('directorBank')).disabled = gv('director') !== 'AM';
+    $(fid('guDetails')).disabled = gv('guGiven') !== 'Yes';
+}
+
+/* ---------- download ---------- */
+function saveBytes(bytes, name) {
+    const blob = new Blob([bytes], {type: 'application/pdf'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = name; a.rel = 'noopener';
+    document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 10000);
+}
+const slug = s => sval(s).replace(/[^A-Za-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 40);
+function makePdf(which) {
+    const blank = gv('fBlank');
+    const box = $('fErr');
+    if (!blank) {
+        const bad = badFields();
+        if (bad.length) {
+            box.innerHTML = `<b>Please type these in English letters and numbers</b> (the PDF can't print other scripts or emoji):<ul>${bad.map(b => `<li>${esc(b)}</li>`).join('')}</ul>`;
+            show('fErr', true); box.scrollIntoView({behavior: 'smooth', block: 'center'});
+            return;
+        }
+    }
+    show('fErr', false);
+    const d = blank ? {workType: '', director: ''} : formData();
+    try {
+        const bytes = which === 'app' ? buildApplicationPdf(d) : buildForm135Pdf(d);
+        const nm = blank ? '' : slug(d.name);
+        saveBytes(bytes, `${which === 'app' ? 'Application_Form' : 'Form_135'}${nm ? '_' + nm : ''}.pdf`);
+        toast('PDF downloaded');
+    } catch (e) {
+        box.innerHTML = `<b>Could not create the PDF.</b> ${esc(e.message || e)}`;
+        show('fErr', true);
+    }
+}
+function formsClear() {
+    if (!confirm('Clear everything typed in the Forms tab?')) return;
+    document.querySelectorAll('#formWrap input, #formWrap textarea, #formWrap select').forEach(el => {
+        if (el.type === 'checkbox') el.checked = el.id === fid('permSame') || el.id === fid('fillProposed');
+        else if (el.tagName === 'SELECT') el.selectedIndex = 0;
+        else el.value = '';
+        delete el.dataset.touched; delete el.dataset.auto;
+    });
+    formsPrefill(true);
+    toast('Cleared');
+}
+function initForms() {
+    $('formWrap').innerHTML = formsHtml();
+    const first = $('formWrap').querySelector('details');
+    if (first) first.open = true;
+    const wrap = $('formWrap');
+    wrap.addEventListener('input', e => { if (e.target.id && e.target.id.startsWith('f_')) { e.target.dataset.touched = '1'; delete e.target.dataset.auto; } });
+    wrap.addEventListener('change', e => { if (e.target.id && e.target.id.startsWith('f_')) { if (e.target.tagName === 'SELECT') { e.target.dataset.touched = '1'; delete e.target.dataset.auto; } formsUpdate(); } });
+    $('dlApp').addEventListener('click', () => makePdf('app'));
+    $('dl135').addEventListener('click', () => makePdf('135'));
+    $('fRefresh').addEventListener('click', () => { formsPrefill(true); toast('Filled from the calculator'); });
+    $('fClear').addEventListener('click', formsClear);
+    formsReady = true;
+    formsPrefill(false);
+}
+
 initCalc();
 initSettings();
+initForms();
 
 </script>
 </body>
