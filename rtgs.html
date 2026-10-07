@@ -50,9 +50,9 @@
             -webkit-print-color-adjust: exact;
         }
 
-        /* Landscape A4 for printing. Chrome, Edge, Firefox and Samsung Internet follow this: the print window opens in landscape
-           and its portrait/landscape choice is hidden. (Also given outside the print block below, for browsers that only read it here.)
-           Safari, and every browser on iPhone/iPad, ignore it, so those users are shown a note to pick Landscape themselves. */
+        /* Landscape A4 for printing. Chrome, Edge, Firefox, Samsung Internet and Safari 18.2+ on a Mac follow this: the print window
+           opens in landscape. (Also given outside the print block below, for browsers that only read it here.)
+           Older Safari ignores it, and on iPhone/iPad it isn't reliable, so those users are shown a note to pick Landscape themselves. */
         @page { size: A4 landscape; margin: 2mm; }
 
         /* STRONGER PRINT CONSTRAINTS */
@@ -61,21 +61,33 @@
                 size: A4 landscape; /* Forces landscape mode in the print dialog */
                 margin: 2mm !important; /* Minimal margin to prevent browser overflow triggers */
             }
+            /* html and body take the height of the sheet's printable area, so the slip can be sized to it */
+            html, body { height: 100% !important; }
             body { 
-                background-color: white; 
+                background-color: white !important; 
                 padding: 0; 
                 margin: 0; 
                 width: 100%;
+                display: block !important;   /* not the screen's full-height column */
+                min-height: 0 !important;
                 overflow: hidden !important; /* Silver bullet to kill empty 2nd pages */
             }
             .no-print { display: none !important; }
+            /* the page's wrapper adds no space around the slip on paper */
+            .animate-fade-in { height: 100% !important; padding: 0 !important; animation: none !important; }
             
+            /* On A4 with the 2mm page margin above, the slip is 283mm x 196mm, 7mm from every edge of the paper.
+               Its width is fixed, so it prints exactly as the preview shows it; where the paper gives less room
+               (other paper sizes, wider printer margins) the browser scales the whole slip down to fit.
+               Its height follows the printable area, so the slip never spills onto a 2nd page.
+               (The screen rules further down would otherwise override these, hence !important.) */
             .print-container {
-                width: 100%;
-                max-width: 297mm;
-                height: 180mm;
-                padding: 2mm 5mm; /* Reduced print padding */
-                margin: 0;
+                width: 293mm !important;        /* the printable width of A4 landscape */
+                max-width: none !important;
+                height: 100% !important;
+                max-height: 206mm !important;   /* on taller paper, no taller than on A4 */
+                padding: 5mm !important;
+                margin: 0 !important;
                 box-shadow: none;
                 box-sizing: border-box;
                 overflow: hidden;
@@ -83,14 +95,14 @@
             
             .slip-outer {
                 border: 1px solid #000 !important;
-                height: 175mm; /* Further reduced from 185mm to 175mm to absolutely prevent spill */
+                height: 100% !important;
                 page-break-inside: avoid;
             }
         }
 
 
         .print-container {
-            width: 290mm;
+            width: 283mm; /* the same size as on paper, so the preview shows exactly what prints */
             margin: 20px auto;
         }
 
@@ -98,7 +110,7 @@
             background: white;
             display: flex;
             width: 100%;
-            height: 175mm; /* Condensing the on-screen height to match print */
+            height: 196mm; /* the same height as on paper */
             border: 1px solid #999;
             color: black;
             overflow: hidden;
@@ -331,8 +343,8 @@
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
                 Print Form
             </button>
-            <!-- Shown only where the browser can't set landscape by itself (Safari, iPhone, iPad) -->
-            <p id="landscapeHint" class="hidden mt-2 max-w-md text-center text-sm font-semibold text-amber-700">This browser can't turn the page to landscape by itself. In the print window, choose <b>Landscape</b>.</p>
+            <!-- Shown only where the browser may not set landscape by itself (iPhone, iPad, Safari before 18.2) -->
+            <p id="landscapeHint" class="hidden mt-2 max-w-md text-center text-sm font-semibold text-amber-700">This browser may not turn the page to landscape by itself. In the print window, make sure <b>Landscape</b> is chosen.</p>
         </div>
 
         <!-- THE PRINTABLE SLIP -->
@@ -967,7 +979,7 @@
         // Put a value on the slip. Its letters shrink to fit the box (see .fit in the styles), on screen and in print.
         // A long value may also wrap onto up to maxLines lines, when one line would make the letters smaller than prefPx;
         // maxBlockPx, if given, keeps the wrapped lines within that height (so the row does not grow).
-        // The size is kept as a share of the box width, so the narrower printed slip keeps exactly the same line breaks.
+        // The size is kept as a share of the box width, so the printed slip keeps exactly the same line breaks.
         const MIN_PRINT_PX = 6.5;
         function boxWidth(el) {
             const cs = getComputedStyle(el);
@@ -1014,7 +1026,7 @@
                     lines++;
                     size = Math.min(wrapSize(el, text, width, lines, base), maxBlockPx / (lines * 1.15));
                 }
-                el.dataset.tooLong = size * 0.94 < MIN_PRINT_PX ? '1' : '';   // printing is a little narrower than the screen
+                el.dataset.tooLong = size < MIN_PRINT_PX ? '1' : '';   // the preview is the size of the printed slip, so this is the printed size too
                 t.style.setProperty('--fs', base + 'px');
                 t.style.setProperty('--k', (size * 100 / width).toFixed(4));
             }
@@ -1244,11 +1256,14 @@
             // Fetch the random advertisement (printing waits for it)
             adReady = fetchAdvertisement();
 
-            // Safari, and all browsers on iPhone/iPad, ignore the landscape page setting: tell the user to pick Landscape when printing
+            // Safari before 18.2 ignores the landscape page setting, and on iPhone/iPad (every browser there) it isn't reliable:
+            // remind those users to pick Landscape when printing
             const ua = navigator.userAgent;
             const appleTouch = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
             const safari = /Safari/.test(ua) && !/Chrome|Chromium|CriOS|FxiOS|EdgiOS|Edg\/|OPR|Firefox|SamsungBrowser/.test(ua);
-            if (appleTouch || safari) document.getElementById('landscapeHint').classList.remove('hidden');
+            const sv = (ua.match(/Version\/(\d+)(?:\.(\d+))?/) || []).slice(1).map(n => parseInt(n || '0', 10));
+            const oldSafari = safari && !(sv[0] > 18 || (sv[0] === 18 && sv[1] >= 2));
+            if (appleTouch || oldSafari) document.getElementById('landscapeHint').classList.remove('hidden');
         };
     </script>
 
