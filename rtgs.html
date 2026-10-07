@@ -50,6 +50,11 @@
             -webkit-print-color-adjust: exact;
         }
 
+        /* Landscape A4 for printing. Chrome, Edge, Firefox and Samsung Internet follow this: the print window opens in landscape
+           and its portrait/landscape choice is hidden. (Also given outside the print block below, for browsers that only read it here.)
+           Safari, and every browser on iPhone/iPad, ignore it, so those users are shown a note to pick Landscape themselves. */
+        @page { size: A4 landscape; margin: 2mm; }
+
         /* STRONGER PRINT CONSTRAINTS */
         @media print {
             @page {
@@ -82,6 +87,7 @@
                 page-break-inside: avoid;
             }
         }
+
 
         .print-container {
             width: 290mm;
@@ -320,11 +326,13 @@
         </div>
 
         <!-- MIDDLE PRINT BUTTON -->
-        <div class="max-w-6xl mx-auto flex justify-center mb-8 no-print">
+        <div class="max-w-6xl mx-auto flex flex-col items-center mb-8 no-print">
             <button onclick="validateAndPrint()" class="bg-bob-vermillion hover:bg-bob-dark text-white px-8 py-3 rounded-lg font-bold shadow-md transition-all flex items-center gap-2 text-lg">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
                 Print Form
             </button>
+            <!-- Shown only where the browser can't set landscape by itself (Safari, iPhone, iPad) -->
+            <p id="landscapeHint" class="hidden mt-2 max-w-md text-center text-sm font-semibold text-amber-700">This browser can't turn the page to landscape by itself. In the print window, choose <b>Landscape</b>.</p>
         </div>
 
         <!-- THE PRINTABLE SLIP -->
@@ -1235,6 +1243,12 @@
             
             // Fetch the random advertisement (printing waits for it)
             adReady = fetchAdvertisement();
+
+            // Safari, and all browsers on iPhone/iPad, ignore the landscape page setting: tell the user to pick Landscape when printing
+            const ua = navigator.userAgent;
+            const appleTouch = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+            const safari = /Safari/.test(ua) && !/Chrome|Chromium|CriOS|FxiOS|EdgiOS|Edg\/|OPR|Firefox|SamsungBrowser/.test(ua);
+            if (appleTouch || safari) document.getElementById('landscapeHint').classList.remove('hidden');
         };
     </script>
 
