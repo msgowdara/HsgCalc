@@ -22,6 +22,11 @@
         .header { padding: 20px 20px 14px; text-align: center; }
         .header h2 { margin: 0; color: var(--primary); font-size: 18px; text-transform: uppercase; }
         .header span { font-size: 11px; color: #888; }
+        .visits { display: flex; align-items: center; gap: 5px; width: max-content; margin: 8px auto 0; padding: 3px 11px; border-radius: 999px; background: #fff3ec; border: 1px solid #ffe0cc; color: var(--primary); font-size: 11px; line-height: 16px; }
+        .visits[hidden] { display: none; }
+        .visits svg { width: 14px; height: 14px; flex: none; }
+        .visits b { font-weight: 800; }
+        .header .visits span { font-size: inherit; color: inherit; font-weight: 600; }
         .tabs { display: flex; border-top: 1px solid #eee; border-bottom: 1px solid #eee; }
         .tab-btn { flex: 1; padding: 12px 8px; background: #fff; border: none; border-bottom: 3px solid transparent; font-weight: 700; font-size: 13px; color: #888; cursor: pointer; text-transform: uppercase; letter-spacing: .5px; font-family: inherit; }
         .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
@@ -255,6 +260,10 @@
     <div class="header">
         <h2>Baroda Auto Loan</h2>
         <span id="hdrSub"></span>
+        <div class="visits" id="visits" hidden title="People who have opened this page, counted anonymously">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+            <b id="visitsNum"></b> <span id="visitsLbl">visitors</span>
+        </div>
     </div>
     <div class="tabs" role="tablist">
         <button type="button" class="tab-btn active" id="tabCalc" role="tab">Calculator</button>
@@ -477,7 +486,7 @@
             <span class="set-status" id="setStatus"></span>
         </div>
     </div>
-    <div class="disclaimer">Indicative estimate only, not a loan offer. The final loan amount, interest rate and charges depend on the bank's assessment and its rates on the day. Please confirm current rates and terms with Bank of Baroda before you apply. This is an independent calculator, not an official Bank of Baroda tool.</div>
+    <div class="disclaimer">Indicative estimate only, not a loan offer. The final loan amount, interest rate and charges depend on the bank's assessment and its rates on the day. Please confirm current rates and terms with Bank of Baroda before you apply. This is an independent calculator, not an official Bank of Baroda tool. Visits to this page are counted anonymously, without cookies; nothing you type is sent anywhere.</div>
 </div>
 <div class="toast" id="toast"></div>
 
@@ -3020,9 +3029,60 @@ function initForms() {
     formsPrefill(false);
 }
 
+/* =====================================================================
+   Visitor counter, shown under the page title.
+   Counting and the dashboard are done by GoatCounter (free, no cookies,
+   no personal data): https://VISITS.code.goatcounter.com
+   Until that GoatCounter site exists, the counter simply stays hidden.
+   ===================================================================== */
+const VISITS = {
+    code: 'msgowdara',              // GoatCounter site code (the part before .goatcounter.com)
+    path: '/baroda-auto-loan',      // the name this page is counted under
+    cacheKey: 'bobAutoLoan.visits'  // last count seen in this browser, shown at once on the next visit
+};
+function initVisits() {
+    const base = `https://${VISITS.code}.goatcounter.com`;
+    const box = $('visits'), num = $('visitsNum'), lbl = $('visitsLbl');
+    const show = n => {
+        num.textContent = n.toLocaleString('en-IN');
+        lbl.textContent = n === 1 ? 'visitor' : 'visitors';
+        box.hidden = false;
+    };
+    let cached = NaN;
+    try { cached = parseInt(localStorage.getItem(VISITS.cacheKey), 10); } catch (e) { /* storage blocked */ }
+    if (cached > 0) show(cached);
+
+    /* count this visit: only on the published site, not a copy opened from disk or a local test server, and not automated browsers */
+    const live = /^https?:$/.test(location.protocol) && !/^(localhost|127\.|0\.0\.0\.0|\[::1\])/.test(location.hostname);
+    if (live && !navigator.webdriver) {
+        const q = new URLSearchParams({
+            p: VISITS.path, t: document.title, r: document.referrer,
+            s: [screen.width, screen.height, window.devicePixelRatio || 1].join(','),
+            rnd: Math.random().toString(36).slice(2)
+        });
+        new Image().src = `${base}/count?${q}`;
+    }
+
+    /* show the total (GoatCounter refreshes this figure every few hours) */
+    if (typeof fetch !== 'function') return;
+    const ctl = typeof AbortController === 'function' ? new AbortController() : null;
+    const timer = ctl && setTimeout(() => ctl.abort(), 8000);
+    fetch(`${base}/counter/${encodeURIComponent(VISITS.path)}.json`, {cache: 'no-store', signal: ctl ? ctl.signal : undefined})
+        .then(r => (r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status))))
+        .then(j => {
+            const n = parseInt(String(j && j.count).replace(/[^\d]/g, ''), 10);
+            if (!(n >= 0)) throw new Error('no count');
+            show(n);
+            try { localStorage.setItem(VISITS.cacheKey, String(n)); } catch (e) { /* storage blocked */ }
+        })
+        .catch(() => { /* not set up yet, offline or blocked: keep the last figure if there is one, else stay hidden */ })
+        .finally(() => { if (timer) clearTimeout(timer); });
+}
+
 initCalc();
 initSettings();
 initForms();
+initVisits();
 
 </script>
 </body>
