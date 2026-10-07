@@ -211,7 +211,14 @@
         <!-- INPUT PANEL (HIDDEN ON PRINT) -->
         <div class="max-w-6xl mx-auto no-print bg-white p-6 rounded-xl shadow-lg border-t-4 border-bob-vermillion mb-8">
             <div class="flex justify-between items-center mb-6">
-                <h1 class="text-2xl font-bold text-gray-800">Bank of Baroda NEFT/RTGS Form</h1>
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-800">Bank of Baroda NEFT/RTGS Form</h1>
+                    <!-- Visitor counter (filled in by the script at the end of the page) -->
+                    <div id="visits" class="items-center gap-1.5 mt-1.5 px-3 py-0.5 rounded-full bg-bob-light text-bob-vermillion border border-orange-200 text-xs font-semibold" style="display: none; width: max-content;" title="People who have opened this page, counted anonymously">
+                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <b id="visitsNum" class="font-extrabold"></b> <span id="visitsLbl">visitors</span>
+                    </div>
+                </div>
                 <div class="flex gap-2">
                     <button onclick="validateAndPrint()" class="bg-bob-vermillion hover:bg-bob-dark text-white px-6 py-2 rounded font-bold shadow transition-all">Print Form</button>
                     <button onclick="location.reload()" class="bg-gray-200 hover:bg-gray-300 text-slate-800 px-4 py-2 rounded font-bold transition-colors">Reset</button>
@@ -590,6 +597,7 @@
     <footer class="bg-white border-t border-slate-200 mt-auto no-print">
         <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-sm text-slate-500">
             <p>&copy; <span id="year"></span> msgowdara.github.io/HsgCalc. All rights reserved.</p>
+            <p class="mt-1 text-xs">Visits to this page are counted anonymously.</p>
         </div>
     </footer>
 
@@ -970,6 +978,42 @@
             // Fetch the random advertisement
             fetchAdvertisement();
         };
+    </script>
+
+    <script>
+        /* Visitor counter: each browser is counted once. The count is kept by Abacus (https://abacus.jsn.cam),
+           a free counting service that needs no account; if it can't be reached, the counter stays hidden. */
+        (function () {
+            const API = 'https://abacus.jsn.cam', NS = 'msgowdara.github.io', KEY = 'hsgcalc-rtgs-visitors';
+            const SEEN = 'hsgcalc.rtgs.visitCounted', CACHE = 'hsgcalc.rtgs.visits';
+            const box = document.getElementById('visits'), num = document.getElementById('visitsNum'), lbl = document.getElementById('visitsLbl');
+            if (!box || typeof fetch !== 'function') return;
+            const get = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+            const set = (k, v) => { try { localStorage.setItem(k, v); } catch (e) { /* storage blocked */ } };
+            const show = n => {
+                num.textContent = n.toLocaleString('en-IN');
+                lbl.textContent = n === 1 ? 'visitor' : 'visitors';
+                box.style.display = 'flex';
+            };
+            const cached = parseInt(get(CACHE), 10);
+            if (cached > 0) show(cached);
+
+            // a new visitor is counted only on the published site: not a copy opened from disk or a local test server, and not automated browsers
+            const live = /^https?:$/.test(location.protocol) && !/^(localhost|127\.|0\.0\.0\.0|\[::1\])/.test(location.hostname);
+            const isNew = live && !navigator.webdriver && get(SEEN) !== '1';
+            const ctl = typeof AbortController === 'function' ? new AbortController() : null;
+            const timer = ctl && setTimeout(() => ctl.abort(), 8000);
+            fetch(`${API}/${isNew ? 'hit' : 'get'}/${NS}/${KEY}`, {cache: 'no-store', signal: ctl ? ctl.signal : undefined})
+                .then(r => (r.status === 404 ? {value: 0} : r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status))))
+                .then(j => {
+                    const n = Math.floor(Number(j && j.value));
+                    if (!Number.isFinite(n) || n < 0) throw new Error('no count');
+                    if (isNew) set(SEEN, '1');
+                    if (n > 0) { show(n); set(CACHE, String(n)); }
+                })
+                .catch(() => { /* offline, blocked or busy: keep the last figure if there is one, else stay hidden */ })
+                .finally(() => { if (timer) clearTimeout(timer); });
+        })();
     </script>
 </body>
 </html>
