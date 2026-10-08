@@ -148,7 +148,15 @@ const fmtDate = iso => { const p = String(iso || '').split('-'); return p.length
 const num = v => { const n = parseFloat(v); return Number.isFinite(n) ? n : 0; };
 const money = v => '₹\u00a0' + num(v).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });   // the symbol never wraps away from the amount
 const marginAmount = (value, pct) => (num(value) * num(pct) / 100).toFixed(2);
-const calcDP = r => Math.max(0, (num(r.stockValue) - num(r.stockMargin)) + (num(r.bookDebts) - num(r.bookDebtsMargin)) - num(r.creditors));
+// Drawing power. Current rule ('paid-stock'): the stock margin is taken on paid stock, i.e. stock less creditors:
+//     DP = (stock - creditors) - margin on it  +  book debts - margin on them
+// Reports saved before this rule ('gross') keep the calculation they were printed with:
+//     DP = (stock - margin on stock)  +  (book debts - margin on them)  -  creditors
+const paidStock = r => Math.max(0, num(r.stockValue) - num(r.creditors));
+const stockMarginAmount = r => (r.dpRule === 'gross' ? marginAmount(r.stockValue, r.stockMarginPercent) : marginAmount(paidStock(r), r.stockMarginPercent));
+const calcDP = r => (r.dpRule === 'gross'
+    ? Math.max(0, (num(r.stockValue) - num(r.stockMargin)) + (num(r.bookDebts) - num(r.bookDebtsMargin)) - num(r.creditors))
+    : Math.max(0, (paidStock(r) - num(r.stockMargin)) + (num(r.bookDebts) - num(r.bookDebtsMargin))));
 const oldStockPct = r => num(r.stockValue) ? (num(r.amountOfOldStockRupees) / num(r.stockValue) * 100).toFixed(2) + ' %' : '0.00 %';
 const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
 
@@ -159,7 +167,7 @@ const blankReport = () => ({
     dateOfReporting: todayLocal(), dateOfVerification: todayLocal(), inspectingOfficer: '',
 
     conditionOfGodown: 'Satisfactory', godownRemark: '',
-    stockValue: '', stockMarginPercent: '25', stockMargin: '0.00',
+    dpRule: 'paid-stock', stockValue: '', stockMarginPercent: '25', stockMargin: '0.00',
     bookDebts: '', bdMarginPercent: '25', bookDebtsMargin: '0.00',
     creditors: '', outstandingBalance: '',
     conditionOfStocks: 'Satisfactory', conditionOfStocksRemark: '', modeOfStorage: 'Proper', modeOfStorageRemark: '',
@@ -222,8 +230,11 @@ function normalizeRecord(raw) {
     if (km) r.distance = km[1];
     r.accountNo = r.accountNo.trim();
     r.branchAlpha = r.branchAlpha.replace(/[^a-z]/gi, '').toUpperCase().slice(0, 6);
+    // A report saved before the drawing-power rule was recorded used the earlier calculation, and keeps it;
+    // a report that has never been saved uses the current rule
+    r.dpRule = raw.dpRule === 'paid-stock' || raw.dpRule === 'gross' ? raw.dpRule : (raw.lastUpdated ? 'gross' : 'paid-stock');
     // Margins and the old-stock share always follow the figures
-    r.stockMargin = marginAmount(r.stockValue, r.stockMarginPercent);
+    r.stockMargin = stockMarginAmount(r);
     r.bookDebtsMargin = marginAmount(r.bookDebts, r.bdMarginPercent);
     r.percentOldStock = oldStockPct(r);
     return r;
@@ -253,7 +264,7 @@ function applyChange(prev, name, value) {
     const next = { ...prev, [name]: value };
     if (name === 'accountNo') next.accountNo = value.replace(/\D/g, '').slice(0, 14);
     if (name === 'branchAlpha') next.branchAlpha = value.replace(/[^a-z]/gi, '').toUpperCase().slice(0, 6);
-    if (name === 'stockValue' || name === 'stockMarginPercent') next.stockMargin = marginAmount(next.stockValue, next.stockMarginPercent);
+    if (['stockValue', 'stockMarginPercent', 'creditors', 'dpRule'].includes(name)) next.stockMargin = stockMarginAmount(next);
     if (name === 'bookDebts' || name === 'bdMarginPercent') next.bookDebtsMargin = marginAmount(next.bookDebts, next.bdMarginPercent);
     if (name === 'stockValue' || name === 'amountOfOldStockRupees') next.percentOldStock = oldStockPct(next);
     if (name === 'stockValue' || name === 'insuranceAmount') insuranceCheck(next);
@@ -304,7 +315,7 @@ function fillAccountDetails(cur, last, defaults, filledBefore) {
         if (next[key] !== f.trigger) next[f.field] = '';
         else if (!next[f.field]) next[f.field] = f.remark;
     }
-    next.stockMargin = marginAmount(next.stockValue, next.stockMarginPercent);
+    next.stockMargin = stockMarginAmount(next);
     next.bookDebtsMargin = marginAmount(next.bookDebts, next.bdMarginPercent);
     insuranceCheck(next);
     return { next, filled, cleared };
@@ -615,6 +626,7 @@ function setDateChecks(f) {
 function InspectionForm({ form, set, officers, onAccountBlur, onPreview, onSave, saving }) {
     useEffect(() => { setDateChecks(document.getElementById('inspectionForm')); }, [form.dateOfReporting, form.dateOfVerification]);
     const dp = calcDP(form), os = num(form.outstandingBalance);
+    const paid = form.dpRule !== 'gross';
     const ins = insuranceStatus(form);
     const today = todayLocal();
     const p = { form, set };
@@ -653,8 +665,16 @@ function InspectionForm({ form, set, officers, onAccountBlur, onPreview, onSave,
                         <div className="grid grid-cols-3 gap-3 mb-3">
                             <Amount label="Stock Value (₹)" name="stockValue" {...p} className="col-span-2" inputClass="font-mono text-right" />
                             <Select label="Margin %" name="stockMarginPercent" {...p} options={DROPDOWNS.margins} selectClass="font-mono" />
+                            <Amount label="Creditors (₹)" name="creditors" {...p} className="col-span-2" inputClass="font-mono text-right text-red-600" />
                         </div>
-                        <div className="flex justify-between items-center bg-white p-2 rounded border border-red-100"><span className="text-sm font-semibold text-slate-600">Less margin (stock):</span><span className="font-mono font-bold text-red-600">{money(form.stockMargin)}</span></div>
+                        {paid ? (
+                            <div className="bg-white p-2 rounded border border-red-100 text-sm space-y-1">
+                                <div className="flex justify-between gap-2"><span className="font-semibold text-slate-600">Paid stock (stock less creditors):</span><span className="font-mono font-bold">{money(paidStock(form))}</span></div>
+                                <div className="flex justify-between gap-2"><span className="font-semibold text-slate-600">Less margin on paid stock:</span><span className="font-mono font-bold text-red-600">{money(form.stockMargin)}</span></div>
+                            </div>
+                        ) : (
+                            <div className="flex justify-between items-center bg-white p-2 rounded border border-red-100"><span className="text-sm font-semibold text-slate-600">Less margin (stock):</span><span className="font-mono font-bold text-red-600">{money(form.stockMargin)}</span></div>
+                        )}
                     </div>
                     <div className="bg-slate-50 p-4 rounded border border-slate-200">
                         <div className="grid grid-cols-3 gap-3 mb-3">
@@ -664,7 +684,6 @@ function InspectionForm({ form, set, officers, onAccountBlur, onPreview, onSave,
                         <div className="flex justify-between items-center bg-white p-2 rounded border border-red-100"><span className="text-sm font-semibold text-slate-600">Less margin (book debts):</span><span className="font-mono font-bold text-red-600">{money(form.bookDebtsMargin)}</span></div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
-                        <Amount label="Creditors (₹)" name="creditors" {...p} inputClass="font-mono text-right text-red-600" />
                         <Amount label="O/S Balance (₹)" name="outstandingBalance" {...p} inputClass="font-mono font-bold text-right bg-blue-50 border-blue-400" />
                     </div>
                     <div className="flex items-end">
@@ -672,6 +691,12 @@ function InspectionForm({ form, set, officers, onAccountBlur, onPreview, onSave,
                             <Alert kind="error">Drawing power ({money(dp)}) is below the outstanding balance ({money(os)}) by <b>{money(os - dp)}</b>. This goes into the memo as a critical finding.</Alert>
                         )}
                     </div>
+                    {!paid && (
+                        <div className="md:col-span-2">
+                            <Alert>This report was saved with the earlier drawing-power calculation (margin on the full stock value, creditors deducted after the margin), so its figures stay as they were printed.{' '}
+                                <button type="button" onClick={() => set('dpRule', 'paid-stock')} className="underline font-bold">Use margin on paid stock instead</button></Alert>
+                        </div>
+                    )}
                 </div>
             </Card>
 
@@ -812,6 +837,7 @@ function Documents({ r, findings, printTarget }) {
     const { critical, other, borrower, dp } = findings;
     const show = doc => (printTarget === 'all' || printTarget === doc ? '' : ' print-skip');
     const expired = insuranceStatus(r) === 'expired';
+    const L = r.dpRule === 'gross' ? ['f', 'g', 'h', 'i', 'j'] : ['e', 'f', 'g', 'h', 'i'];   // letters after the stock figures
     return (
         <>
             {/* GODOWN INSPECTION REPORT */}
@@ -836,21 +862,36 @@ function Documents({ r, findings, printTarget }) {
                 <Row label="c) Condition of Godown">{yesNo(r.conditionOfGodown, r.godownRemark)}</Row>
 
                 <h2>3. STOCKS</h2>
-                <Row label="a) Value of stock pledged/hypothecated">{money(r.stockValue)}</Row>
-                <Row label={`Less: margin on stock @ ${r.stockMarginPercent}%`} sub>{money(r.stockMargin)}</Row>
-                <Row label="b) Book debts">{money(r.bookDebts)}</Row>
-                <Row label={`Less: margin on book debts @ ${r.bdMarginPercent}%`} sub>{money(r.bookDebtsMargin)}</Row>
-                <Row label="c) Less: creditors">{money(r.creditors)}</Row>
-                <Row label="d) Drawing power"><b>{money(dp)}</b></Row>
-                <Row label="e) Outstanding balance">{money(r.outstandingBalance)}</Row>
+                {r.dpRule === 'gross' ? (
+                    <>
+                        <Row label="a) Value of stock pledged/hypothecated">{money(r.stockValue)}</Row>
+                        <Row label={`Less: margin on stock @ ${r.stockMarginPercent}%`} sub>{money(r.stockMargin)}</Row>
+                        <Row label="b) Book debts">{money(r.bookDebts)}</Row>
+                        <Row label={`Less: margin on book debts @ ${r.bdMarginPercent}%`} sub>{money(r.bookDebtsMargin)}</Row>
+                        <Row label="c) Less: creditors">{money(r.creditors)}</Row>
+                        <Row label="d) Drawing power"><b>{money(dp)}</b></Row>
+                        <Row label="e) Outstanding balance">{money(r.outstandingBalance)}</Row>
+                    </>
+                ) : (
+                    <>
+                        <Row label="a) Value of stock pledged/hypothecated">{money(r.stockValue)}</Row>
+                        <Row label="Less: creditors" sub>{money(r.creditors)}</Row>
+                        <Row label="Paid stock" sub>{money(paidStock(r))}</Row>
+                        <Row label={`Less: margin on paid stock @ ${r.stockMarginPercent}%`} sub>{money(r.stockMargin)}</Row>
+                        <Row label="b) Book debts">{money(r.bookDebts)}</Row>
+                        <Row label={`Less: margin on book debts @ ${r.bdMarginPercent}%`} sub>{money(r.bookDebtsMargin)}</Row>
+                        <Row label="c) Drawing power"><b>{money(dp)}</b></Row>
+                        <Row label="d) Outstanding balance">{money(r.outstandingBalance)}</Row>
+                    </>
+                )}
                 <div className="gap" />
-                <Row label="f) Condition of stocks">{yesNo(r.conditionOfStocks, r.conditionOfStocksRemark)}</Row>
-                <Row label="g) Mode of storage (Proper/Haphazard)">{yesNo(r.modeOfStorage, r.modeOfStorageRemark)}</Row>
+                <Row label={`${L[0]}) Condition of stocks`}>{yesNo(r.conditionOfStocks, r.conditionOfStocksRemark)}</Row>
+                <Row label={`${L[1]}) Mode of storage (Proper/Haphazard)`}>{yesNo(r.modeOfStorage, r.modeOfStorageRemark)}</Row>
                 {r.conditionOfStocks === 'Not Satisfactory' && (
                     <>
-                        <Row label="h) Season/Year of purchase of manufactured goods">{r.seasonYear || '-'}</Row>
-                        <Row label="i) Age & amount of old stock">{r.ageOfOldStockDays || '0'} days & {money(r.amountOfOldStockRupees)}</Row>
-                        <Row label="j) Percentage of old stocks to total stocks">{oldStockPct(r)}</Row>
+                        <Row label={`${L[2]}) Season/Year of purchase of manufactured goods`}>{r.seasonYear || '-'}</Row>
+                        <Row label={`${L[3]}) Age & amount of old stock`}>{r.ageOfOldStockDays || '0'} days & {money(r.amountOfOldStockRupees)}</Row>
+                        <Row label={`${L[4]}) Percentage of old stocks to total stocks`}>{oldStockPct(r)}</Row>
                     </>
                 )}
 
@@ -1194,7 +1235,7 @@ function App() {
     const actions = {
         onEdit: r => openReport(r),
         onCopy: r => {
-            if (openReport({ ...r, id: '', lastUpdated: '', dateOfReporting: todayLocal(), dateOfVerification: todayLocal() }, 'form', { autoFillFor: r.accountNo })) {
+            if (openReport({ ...r, id: '', lastUpdated: '', dpRule: 'paid-stock', dateOfReporting: todayLocal(), dateOfVerification: todayLocal() }, 'form', { autoFillFor: r.accountNo })) {
                 showToast('Copied for a new inspection with today’s date. Check every answer before saving.');
             }
         },

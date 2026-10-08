@@ -4,15 +4,20 @@
     npm install        (once, in this folder; needs Node.js)
     python3 build.py   (writes ../../GodownInspection.html)
 
+If GodownInspection.html was edited directly since the last build, the build stops instead of
+overwriting those edits: copy them into the files here first, or run "python3 build.py --force".
+
 The page is made from app.jsx (the app), style.css (the A4 documents and printing),
 page.html (the outer page), Tailwind CSS generated from the classes in app.jsx,
 React from node_modules, and logo.png.
 """
 import base64
+import hashlib
 import json
 import pathlib
 import re
 import subprocess
+import sys
 
 HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parent.parent
@@ -44,5 +49,12 @@ parts = {
 }
 page = re.sub(r'\{\{(\w+)\}\}', lambda m: parts[m.group(1)], (HERE / 'page.html').read_text())
 out = ROOT / 'GodownInspection.html'
+stamp = HERE / '.last-build'   # fingerprint of the page this script last wrote
+digest = lambda data: hashlib.sha256(data).hexdigest()
+if out.exists() and stamp.exists() and digest(out.read_bytes()) != stamp.read_text().strip() and '--force' not in sys.argv:
+    sys.exit(f'{out.name} has been changed directly since it was last built, and building would overwrite those changes.\n'
+             'Make the same changes in src/godown (app.jsx, style.css or page.html) and build again,\n'
+             'or run "python3 build.py --force" to overwrite them.')
 out.write_text(page)
+stamp.write_text(digest(out.read_bytes()) + '\n')
 print(f'wrote {out.relative_to(ROOT)} ({len(page.encode()) // 1024} KB)')

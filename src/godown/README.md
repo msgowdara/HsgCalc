@@ -16,6 +16,9 @@ npm install        # once; needs Node.js
 python3 build.py   # writes ../../GodownInspection.html
 ```
 
+Don't edit `GodownInspection.html` itself: the next build would replace it. The build checks for this and stops
+(with a message) if the page was changed directly since it was last built.
+
 The built page contains everything it needs (React, styles, logo), so it makes no requests to the internet.
 `godown-sw.js` (at the top of the site) keeps a copy of the page on the device so it opens without internet.
 Reports are stored only in the browser on the device; the page's Back up / Load backup buttons move them as a file.
