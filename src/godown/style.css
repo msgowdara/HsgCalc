@@ -1,0 +1,55 @@
+/* The A4 documents and printing. Everything else on the page uses Tailwind classes (see app.jsx). */
+body { background-color: #f8fafc; }
+
+.a4-page {
+    width: 210mm; min-height: 297mm; background: white; margin: 0 auto 24px;
+    box-sizing: border-box; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); padding: 12mm 15mm;
+}
+
+/* Word-document look */
+.word-doc { font-family: "Times New Roman", Times, serif; font-size: 11pt; line-height: 1.25; color: black; }
+.word-doc .doc-grid { display: grid; grid-template-columns: 4.4in 1fr; column-gap: 12pt; margin-bottom: 2pt; break-inside: avoid; page-break-inside: avoid; }
+.word-doc .doc-grid .sub { padding-left: 1.2rem; }
+.word-doc h2 { font-size: 11pt; font-weight: bold; margin-top: 14pt; margin-bottom: 4pt; text-transform: uppercase; break-after: avoid; page-break-after: avoid; }
+.word-doc .gap { height: 8pt; }
+.word-doc .para { margin-bottom: 10pt; }
+.word-doc .doc-title { text-align: center; font-weight: bold; font-size: 13pt; text-decoration: underline; margin: 4pt 0 10pt; }
+
+.letterhead { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; border-bottom: 2px solid black; padding-bottom: 4px; margin-bottom: 8px; }
+.letterhead img { display: block; height: 100px; width: auto; max-width: 100%; object-fit: contain; object-position: left center; }   /* never stretched */
+.lh-bank { font-size: 20pt; font-weight: bold; text-transform: uppercase; }
+.lh-branch { font-size: 13pt; font-weight: bold; text-transform: uppercase; margin-top: 4pt; }
+.refline { display: flex; justify-content: space-between; gap: 12pt; font-weight: bold; font-size: 11pt; margin-bottom: 8px; }
+
+.signatures { display: flex; justify-content: space-between; padding: 0 40pt; margin-top: 60pt; font-weight: bold; text-align: center; break-inside: avoid; page-break-inside: avoid; }
+.sig-name { min-height: 1.5em; margin-bottom: 4pt; }
+.sig-end { display: flex; flex-direction: column; justify-content: flex-end; }
+.signoff { margin-top: 24pt; }
+.closing { break-inside: avoid; page-break-inside: avoid; }   /* the last paragraph stays with the signature */
+
+.critical-title { color: #b91c1c; margin: 16pt 0 6pt; font-size: 11pt; font-weight: bold; }
+.other-title { margin: 14pt 0 6pt; font-size: 11pt; font-weight: bold; }
+table.findings { width: 100%; border-collapse: collapse; margin: 6pt 0 14pt; font-size: 9.5pt; line-height: 1.2; }
+table.findings th, table.findings td { padding: 4px 6px; border: 1px solid black; vertical-align: top; text-align: left; }
+table.findings th { background: #f0f0f0; }
+table.findings tr.critical th { background: #fee2e2; color: #7f1d1d; }
+table.findings td.sl { text-align: center; width: 2.4em; }
+table.findings td.param { font-weight: bold; width: 20%; }
+table.findings tr { break-inside: avoid; page-break-inside: avoid; }
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: #f1f1f1; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+@page { margin: 10mm; }
+@media print {
+    html, body { background: white !important; margin: 0; padding: 0; height: auto !important; overflow: visible !important; }
+    .no-print { display: none !important; }
+    #report-container { zoom: 1 !important; margin: 0 !important; padding: 0 !important; }
+    .a4-page { width: auto !important; min-height: 0 !important; margin: 0 !important; padding: 8mm 10mm !important; box-shadow: none !important; }
+    .letterhead img { height: 84px !important; }
+    .page-break-before { break-before: page; page-break-before: always; }
+    .print-skip { display: none !important; }   /* documents left out when printing one at a time */
+    ::-webkit-scrollbar { display: none; }
+}
