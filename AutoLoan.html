@@ -285,6 +285,15 @@
         .nw-tbl th:first-child, .nw-tbl td:first-child { text-align: left; color: #555; width: 44%; }
         .nw-tbl tr.tot td { font-weight: 800; color: var(--dark); }
         .nw-tbl td[colspan] { text-align: left; font-weight: 700; color: var(--dark); }
+        .lnk { border: none; background: none; padding: 0; color: var(--primary); font: inherit; font-weight: 700; text-decoration: underline; cursor: pointer; }
+        .ent.linked { background: #f8fafc; border: 1px dashed #d5dde7; }
+        .ent.linked .ent-h b { color: #555; }
+        .lnk-d { font-size: 12px; color: #555; line-height: 1.45; margin: -2px 0 8px; }
+        .auto-row { font-size: 12px; color: #333; padding: 7px 10px; border: 1px dashed #d5dde7; border-radius: 6px; background: #f8fafc; margin-bottom: 6px; overflow-wrap: anywhere; }
+        .quick { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+        .quick .hint { flex-basis: 100%; margin: 0; }
+        .btn-sm.wide { width: 100%; margin-bottom: 10px; }
+        .linked-note { margin: 2px 0 6px; font-size: 11.5px; color: #555; }
         .dl-135 { display: grid; grid-template-columns: 1fr auto; gap: 6px; }
         .dl-135 select { width: 104px; font-size: 12.5px; padding: 8px 22px 8px 8px; border-radius: 8px; background-position: right 7px center; }
         .dl-135 .btn-dl { padding: 13px 8px; }
@@ -2524,7 +2533,7 @@ const VEH_CLS = {car: 'Car / jeep', two: 'Two-wheeler', oth: 'Other vehicle'};
 const ENTRY_NAME = {plot: 'Plot of land', agri: 'Agricultural land', house: 'House / godown', oprop: 'Other property', lic: 'LIC policy', shares: 'Shares',
     tds: 'Term deposit', secs: 'Bond / NSC / MF', veh: 'Vehicle', cap: 'Capital in business', inv: 'Other investment', loans: 'Loan', oliab: 'Other liability', guar: 'Guarantee'};
 /* choices that always hold a value, by list; an entry with nothing but these filled in is treated as empty */
-const CHOICE_KEYS = {plot: ['acq', 'enc'], agri: ['acq', 'enc'], house: ['acq', 'enc'], oprop: ['acq', 'enc'], shares: ['paid'], veh: ['cls']};
+const CHOICE_KEYS = {plot: ['acq', 'enc', 'with'], agri: ['acq', 'enc', 'with'], house: ['acq', 'enc', 'with'], oprop: ['acq', 'enc', 'with'], shares: ['paid'], veh: ['cls'], loans: ['with']};
 const tx = v => String(v == null ? '' : v).trim();
 /* an amount typed as 1800000, 18,00,000, ₹ 18,00,000/-, Rs. 18,00,000 only, 18 lakh or 1.8 crore; null when there is none or it is not a number */
 const AMT_UNIT = {k: 1e3, l: 1e5, lac: 1e5, lacs: 1e5, lakh: 1e5, lakhs: 1e5, cr: 1e7, crore: 1e7, crores: 1e7};
@@ -2548,7 +2557,8 @@ function sharePct(v) {
 const amtS = v => { const a = amtOf(v); return a == null ? tx(v) : amtTxt(a); };
 const rs = v => '₹ ' + amtTxt(v);
 const uniq = a => [...new Set(a.map(tx).filter(Boolean))];
-const filledEntry = (r, k) => !!r && Object.keys(r).some(f => f[0] !== '_' && !(CHOICE_KEYS[k] || []).includes(f) && tx(r[f]) !== '');
+/* an entry holds something when a field other than its choices and tick boxes is filled in */
+const filledEntry = (r, k) => !!r && Object.keys(r).some(f => f[0] !== '_' && !(CHOICE_KEYS[k] || []).includes(f) && typeof r[f] !== 'boolean' && tx(r[f]) !== '');
 /* the entries of one list that hold something; _n is the entry's number as shown on screen.
    Guarantees count only while the answer to "given a guarantee?" is not No. */
 const entries = (s, k) => k === 'guar' && (s || {}).guarGiven === 'No' ? []
@@ -2558,7 +2568,7 @@ const sumOf = (E, f) => E.reduce((a, r) => a + (f(r) || 0), 0);
 const totOf = (E, key) => E.some(r => amtOf(r[key]) != null) ? amtTxt(sumOf(E, r => amtOf(r[key]))) : '';
 
 const freeAcq = r => r.acq === 'I' || r.acq === 'G';
-const shareOf = r => { const p = sharePct(r.share); return p == null || !(p > 0 && p <= 100) ? 100 : p; };
+const shareOf = r => { const p = sharePct(r.share); return p == null || isNaN(p) || p < 0 || p > 100 ? 100 : p; };
 const shareTxt = r => String(Math.round(shareOf(r) * 100) / 100) + '%';
 const propCost = r => freeAcq(r) ? 0 : (amtOf(r.cost) || 0) * shareOf(r) / 100;
 const propVal = r => (amtOf(r.value) || 0) * shareOf(r) / 100;
@@ -2618,6 +2628,7 @@ function stmtTotals(s) {
         C[k] = E.length;
         P[k] = sumOf(E, r => entryValue(k, r, asAt).v);
         E.forEach(r => {
+            if (r._from) return;   /* entered in someone else's statement: noted there */
             const nm = `${ENTRY_NAME[k]} ${r._n}`, e = entryValue(k, r, asAt);
             const bad = (NUM_KEYS[k] || []).filter(f => tx(r[f]) !== '' && !(f === 'cost' && freeAcq(r)) && (f === 'grams' ? gramsOf(r[f]) : amtOf(r[f])) == null);
             bad.forEach(f => notes.push(`${nm}: “${tx(r[f])}” in ${NUM_NAME[f]} is not an amount; type it in figures (for example 1,50,000 or 1.5 lakh).`));
@@ -2625,7 +2636,7 @@ function stmtTotals(s) {
             if (PROP_KINDS.some(p => p[0] === k)) {
                 if (e.how === 'none') notes.push(`${nm}: enter its present market value; until then it is not counted.`);
                 const sh = sharePct(r.share);
-                if (sh != null && !(sh > 0 && sh <= 100)) notes.push(`${nm}: the share “${tx(r.share)}” should be a percentage from 1 to 100; 100% is used.`);
+                if (sh != null && (isNaN(sh) || sh < 0 || sh > 100)) notes.push(`${nm}: the share “${tx(r.share)}” should be a percentage up to 100; 100% is used.`);
             } else if (k === 'lic' && e.how === 'none') notes.push(`${nm}: enter its surrender value; the sum assured is not counted as an asset.`);
             else if (k === 'shares' && e.how === 'face') notes.push(`${nm}: market value not entered, so the face value is counted.`);
             else if (k === 'veh' && e.how === 'old') notes.push(`${nm}: more than 5 years old; enter its present value.`);
@@ -3190,7 +3201,8 @@ function f135Annexure(doc, s, v, blank) {
     axTable(F, 'Summary', [['', 78, 'l'], ['₹', 22, 'r']], sum1);
     const pg = () => F.pg;
     const basis = 'Basis of values: immovable property at its present market value (own share where held jointly); LIC policies at surrender value; shares at market value; ' +
-        'deposits, bonds and NSC at the amount plus interest earned to date; vehicles at present value. Guarantees given are shown but not deducted.';
+        'deposits, bonds and NSC at the amount plus interest earned to date; vehicles at present value. Guarantees given are shown but not deducted.' +
+        (LN.some(r => r._joint) ? ' A loan taken jointly is shown in full, as each borrower is liable for all of it.' : '');
     cellWrap(basis, AXR - AXL, 'HI', 7.4).forEach(ln => { pg().text(ln, AXL, F.y + 7, {s: 7.4, f: 'HI'}); F.y += 9.2; });
     F.y += 8;
     pg().text('I declare that the particulars above are true and correct, and form part of my statement in Form 135.', AXL, F.y + 8, {s: 8.5});
@@ -3221,7 +3233,10 @@ function buildForm135Pdf(input, opt = {}) {
 }
 
 /* =====================================================================
-   Forms tab – collects the details and downloads the two PDFs
+   Forms tab – collects the details and downloads the two PDFs.
+   Each detail is typed once: the applicant's in the first sections, each co-applicant's and
+   guarantor's under "Co-applicants & guarantors", and each person's assets and loans under
+   "Assets & liabilities". The Application Form and every Form 135 take what they need from there.
    ===================================================================== */
 const FLABEL = {};
 const fid = id => 'f_' + id;
@@ -3241,7 +3256,7 @@ function fS(id, label, opts, o = {}) {
 const fC = (id, label, on) => `<label class="cb-item"><input type="checkbox" id="${fid(id)}"${on ? ' checked' : ''}><span>${label}</span></label>`;
 const grid = (...a) => `<div class="fgrid">${a.join('')}</div>`;
 const sub = t => `<div class="fsub">${t}</div>`;
-const fsec = (k, title, body, hint) => `<details class="set-sec fsec" data-k="${k}"><summary>${title}${hint ? `<span class="sum-sub">${hint}</span>` : ''}</summary><div class="set-body">${body}</div></details>`;
+const fsec = (k, title, body, hint) => `<details class="set-sec fsec" data-k="${k}"><summary>${title}${hint ? `<span class="sum-sub" id="sum_${k}">${hint}</span>` : ''}</summary><div class="set-body">${body}</div></details>`;
 const blankOpt = [['', '—']];
 
 const OA = [['tv', 'Colour TV'], ['fridge', 'Refrigerator'], ['car', 'Car'], ['two', 'Two-wheeler'], ['phone', 'Telephone'], ['cell', 'Mobile phone'], ['pc', 'PC'], ['wash', 'Washing machine']];
@@ -3341,38 +3356,49 @@ function formsHtml() {
         fT('cardNo', 'Card no.', {full: true, hint: 'Optional. You can also write it by hand on the printed form.'})
     ) + sub('Other assets you own') + `<div class="fchk two">${OA.map(([k, l]) => fC('oa_' + k, l)).join('')}</div>` +
         '<div class="hint">A car or two-wheeler entered under the applicant’s vehicles is ticked here on the form as well.</div>';
-    const person = (p, t) => sub(t) + grid(
-        fT(p + 'Name', 'Name', {full: true, lab: `${t}: name`}),
-        fA(p + 'Addr', 'Address', {lab: `${t}: address`}),
-        fT(p + 'Occ', 'Occupation', {lab: `${t}: occupation`}),
-        fT(p + 'Phone', 'Phone / fax', {lab: `${t}: phone`}),
-        fT(p + 'Email', 'E-mail', {lab: `${t}: e-mail`}),
-        fT(p + 'Pan', 'PAN', {max: 10, lab: `${t}: PAN`}),
-        fN(p + 'Inc', 'Net annual income (₹)', {full: true, lab: `${t}: income`})
-    );
-    const s6 = person('sp', 'Spouse') + '<div class="hint">Co-applicants and guarantors are added under <b>Assets &amp; liabilities</b>; the first guarantor’s details go in the Application Form’s guarantor box.</div>';
-    const s7 = '<div class="hint top">Fill in a statement (Form 135) for the applicant and for each co-applicant and guarantor. Add as many entries as needed under each heading; the form shows the totals, and every entry is listed in an annexure printed with it.</div>' +
-        grid(fD('asAt', 'Particulars as at')) + '<div id="stmWrap"></div>';
-    const s8 = '<div id="nwView"></div><div class="fchk" id="w_incCo">' + fC('nwIncCo', 'Add the co-applicants’ figures to the Applicant column', true) + '</div>' +
-        grid(fN('nwColl', 'Collateral offered (₹)')) + '<div class="hint">Worked out from the statements under Assets &amp; liabilities. The Guarantor column adds up all the guarantors.</div>';
+    /* the spouse: typed here, or the same person as a co-applicant or guarantor */
+    const sSpouse = '<div class="fgrid"><div class="ff full"><label for="f_spFrom">Spouse’s details</label><select id="f_spFrom"><option value="">Type them in below</option></select></div></div>' +
+        '<div id="spLinked" class="hint linked-note" style="display:none"></div><div id="w_spTyped">' + grid(
+            fT('spName', 'Name', {full: true, lab: 'Spouse: name'}),
+            fA('spAddr', 'Address', {lab: 'Spouse: address'}),
+            fT('spOcc', 'Occupation', {lab: 'Spouse: occupation'}),
+            fT('spPhone', 'Phone / fax', {lab: 'Spouse: phone'}),
+            fT('spEmail', 'E-mail', {lab: 'Spouse: e-mail'}),
+            fT('spPan', 'PAN', {max: 10, lab: 'Spouse: PAN'}),
+            fN('spInc', 'Net annual income (₹)', {full: true, lab: 'Spouse: income'})
+        ) + '<div class="hint">If the spouse is also a co-applicant, choose them above instead: their details are then used here and are not typed twice.</div></div>';
+    const sPeople = '<div class="hint top">Add each co-applicant (for example the spouse) and guarantor here and fill in their details once. ' +
+        'They are used for that person’s Form 135, for the guarantor box on the Application Form, and in the net worth box.</div><div id="pplWrap"></div>';
+    const sStm = '<div class="hint top">Fill in a statement (Form 135) for the applicant and for each co-applicant and guarantor. Add as many entries as needed under each heading; ' +
+        'the form shows the totals, and every entry is listed in an annexure printed with it. Property or a loan held jointly with someone else in this application is entered once, ' +
+        'by choosing the joint owner; it then appears in their statement too.</div>' + grid(fD('asAt', 'Particulars as at')) + '<div id="stmWrap"></div>';
+    const sNw = '<div id="nwView"></div><div class="fchk" id="w_incCo">' + fC('nwIncCo', 'Add the co-applicants’ figures to the Applicant column', true) + '</div>' +
+        grid(fN('nwColl', 'Collateral offered (₹)')) + '<div class="hint">Worked out from the statements under Assets &amp; liabilities. The Guarantor column adds up all the guarantors; a loan taken jointly by the applicant and a co-applicant is counted once.</div>';
     const s9 = grid(fT('place', 'Place'), fD('date', 'Date'));
-    return fsec('f1', 'Applicant', s1) + fsec('f2', 'Address & contact', s2) + fsec('f3', 'Work & income', s3) + fsec('f4', 'Car & proposed loan', s4) +
-        fsec('f5', 'Bank accounts & cards', s5) + fsec('f6', 'Spouse', s6) + fsec('f7', 'Assets & liabilities', s7, 'Form 135, for each person') +
-        fsec('f8', 'Net worth', s8, 'Application Form') + fsec('f9', 'Place & date', s9);
+    return fsec('f1', 'Applicant', s1) + fsec('f2', 'Address & contact', s2) + fsec('f3', 'Work & income', s3) +
+        fsec('f4', 'Co-applicants & guarantors', sPeople, 'none yet') + fsec('f5', 'Spouse', sSpouse) + fsec('f6', 'Car & proposed loan', s4) +
+        fsec('f7', 'Bank accounts & cards', s5) + fsec('f8', 'Assets & liabilities', sStm, 'Form 135, for each person') +
+        fsec('f9', 'Net worth', sNw, 'Application Form') + fsec('f10', 'Place & date', s9);
 }
 
-/* ---------- Form 135 statements: the applicant, co-applicants and guarantors ---------- */
+/* ---------- the people in the application, and a Form 135 statement for each ---------- */
 const ACQ_OPTS = [['P', 'Purchased'], ['I', 'Inherited'], ['G', 'Gift'], ['O', 'Other (allotted, built)']];
 const ENC_OPTS = blankOpt.concat([['Un-encumbered', 'Un-encumbered'], ['Encumbered', 'Encumbered'], ['Partially encumbered', 'Partly encumbered']]);
+/* the choice of a joint owner (or joint borrower) among the other people in this application */
+const withOpts = () => [['', 'No one (or someone not in this application)']].concat(
+    STM.map((s, j) => [s, j]).filter(([, j]) => j !== stmCur).map(([s, j]) => [s.id, roleTitle(j) + (stmName(j) ? ': ' + stmName(j) : '')]));
 /* a field: [key, label, type, options]; type t text, n number, d date, a address, s choice, c tick box */
 const propFields = (no, desc) => [desc ? ['desc', desc, 't', {full: true}] : null,
     ['survey', no, 't'], ['extent', 'Extent (area)', 't', {ph: 'e.g. 2 acres 10 guntas'}],
     ['village', 'Village / town', 't'], ['district', 'District', 't'],
     ['location', 'Location', 't', {ph: 'e.g. Main road'}], ['locality', 'Area / locality', 't'],
-    ['owner', 'In whose name', 't', {ph: 'e.g. Self, or Self & wife'}], ['share', 'Own share (%)', 'n', {ph: '100'}],
+    ['owner', 'In whose name', 't', {full: true, ph: 'e.g. Self, or Self & wife'}],
+    ['with', 'Joint owner in this application', 's', {opts: withOpts, full: true, when: 'others'}],
+    ['share', 'Own share (%)', 'n', {ph: '100'}], ['withShare', 'Their share (%)', 'n'],
     ['acq', 'How acquired', 's', {opts: ACQ_OPTS}], ['year', 'Year acquired', 'n', {max: 4}],
     ['cost', 'Purchase cost (₹)', 'n'], ['value', 'Market value (₹)', 'n'],
     ['enc', 'Encumbrance', 's', {opts: ENC_OPTS}], ['encTerms', 'Encumbered with', 't', {ph: 'bank, terms'}]].filter(Boolean);
+const NOM_FIELD = ['nom', 'Has a nominee (listed under 12 B by itself)', 'c'];
 const LISTS = {
     plot: {item: 'Plot of land', fields: propFields('Survey / site no.')},
     agri: {item: 'Agricultural land', fields: propFields('Survey no.')},
@@ -3380,23 +3406,25 @@ const LISTS = {
     oprop: {item: 'Other property', fields: propFields('Survey / property no.', 'What it is')},
     lic: {item: 'LIC / insurance policy', fields: [['no', 'Policy no.', 't'], ['date', 'Date of issue', 'd'], ['sum', 'Sum assured (₹)', 'n'], ['branch', 'Branch', 't'],
         ['prem', 'Annual premium (₹)', 'n'], ['paid', 'Premium paid up to', 'd'],
-        ['surr', 'Surrender value today (₹)', 'n', {full: true, hint: 'This is what the policy counts for in the net worth (not the sum assured). The insurer can tell you the figure.'}]]},
-    shares: {item: 'Shares / debentures', fields: [['co', 'Company', 't', {full: true}], ['qty', 'No. of shares', 'n'], ['paid', 'Fully paid', 's', {opts: [['Yes', 'Yes'], ['No', 'No']]}], ['cert', 'Certificate / demat a/c no.', 't', {full: true}],
-        ['amt', 'Face value, total (₹)', 'n'], ['mkt', 'Market value (₹)', 'n']]},
+        ['surr', 'Surrender value today (₹)', 'n', {full: true, hint: 'This is what the policy counts for in the net worth (not the sum assured). The insurer can tell you the figure.'}], NOM_FIELD]},
+    shares: {item: 'Shares / debentures', fields: [['co', 'Company', 't', {full: true}], ['qty', 'No. of shares', 'n'], ['paid', 'Fully paid', 's', {opts: [['Yes', 'Yes'], ['No', 'No']]}],
+        ['cert', 'Certificate / demat a/c no.', 't', {full: true}], ['amt', 'Face value, total (₹)', 'n'], ['mkt', 'Market value (₹)', 'n']]},
     tds: {item: 'Term deposit', fields: [['acc', 'FD / RD account no.', 't'], ['date', 'Date of deposit', 'd'], ['fvg', 'In favour of', 't'], ['amt', 'Amount (₹)', 'n'],
         ['bank', 'Bank & branch', 't', {full: true}], ['due', 'Due date', 'd'], ['mat', 'Maturity value (₹)', 'n'],
-        ['now', 'Value today (₹)', 'n', {full: true, hint: 'Leave blank to count the amount plus the interest earned so far.'}]]},
+        ['now', 'Value today (₹)', 'n', {full: true, hint: 'Leave blank to count the amount plus the interest earned so far.'}], NOM_FIELD]},
     secs: {item: 'Bond / NSC / mutual fund', fields: [['cert', 'Certificate / folio', 't'], ['date', 'Date of purchase', 'd'], ['office', 'Issuing office / fund', 't', {full: true}],
         ['amt', 'Amount invested (₹)', 'n'], ['due', 'Due date', 'd'], ['mat', 'Maturity value (₹)', 'n'],
-        ['now', 'Value today (₹)', 'n', {hint: 'For a mutual fund, its current value. For bonds and NSC, leave blank to count the amount plus interest so far.'}]]},
+        ['now', 'Value today (₹)', 'n', {hint: 'For a mutual fund, its current value. For bonds and NSC, leave blank to count the amount plus interest so far.'}], NOM_FIELD]},
     veh: {item: 'Vehicle', fields: [['reg', 'Registration no.', 't'], ['cls', 'Kind', 's', {opts: [['car', 'Car / jeep'], ['two', 'Two-wheeler'], ['oth', 'Other']]}],
         ['type', 'Make & model', 't', {full: true}], ['date', 'Purchased on', 'd'], ['cost', 'Cost (₹)', 'n'],
         ['now', 'Present value (₹)', 'n', {full: true, hint: 'The IDV on its insurance policy is a good figure. Leave blank to estimate it from the cost and age.'}]]},
     cap: {item: 'Capital in business', fields: [['firm', 'Firm / company (and your role)', 't', {full: true}], ['asOn', 'Balance sheet date', 'd'], ['amt', 'Capital (₹)', 'n']]},
     inv: {item: 'Other investment', fields: [['desc', 'Description', 't', {full: true, ph: 'e.g. Gold jewellery, investment in a firm'}], ['grams', 'Weight (grams)', 'n'],
         ['rate', 'Rate per gram (₹)', 'n'], ['value', 'Value (₹)', 'n', {full: true, hint: 'For gold or silver, leave blank to work out weight × rate.'}]]},
-    loans: {item: 'Loan', fields: [['lender', 'Bank / institution & branch', 't', {full: true}], ['borrower', 'In whose name', 't', {ph: 'Self, or the firm'}],
-        ['purpose', 'Purpose', 't', {ph: 'e.g. Home loan'}], ['amt', 'Loan amount (₹)', 'n'], ['out', 'Outstanding (₹)', 'n'], ['emi', 'EMI (₹)', 'n'], ['roi', 'Interest rate (%)', 'n'],
+    loans: {item: 'Loan', fields: [['lender', 'Bank / institution & branch', 't', {full: true}],
+        ['with', 'Joint borrower in this application', 's', {opts: withOpts, full: true, when: 'others'}],
+        ['borrower', 'In whose name', 't', {ph: 'Self, or the firm'}], ['purpose', 'Purpose', 't', {ph: 'e.g. Home loan'}],
+        ['amt', 'Loan amount (₹)', 'n'], ['out', 'Outstanding (₹)', 'n'], ['emi', 'EMI (₹)', 'n'], ['roi', 'Interest rate (%)', 'n'],
         ['security', 'Security', 't'], ['repay', 'Repayment terms', 't', {ph: 'e.g. 240 EMIs from 01-2017'}], ['od', 'Overdue since', 't', {full: true, ph: 'Leave blank if regular'}]]},
     oliab: {item: 'Other liability', fields: [['to', 'To whom', 't'], ['nature', 'Nature', 't'], ['amt', 'Amount (₹)', 'n']]},
     guar: {item: 'Guarantee', fields: [['bank', 'Bank / institution', 't'], ['behalf', 'On behalf of', 't'], ['amt', 'Amount (₹)', 'n'], ['status', 'Status of the account', 't']]},
@@ -3404,102 +3432,291 @@ const LISTS = {
     noms: {item: 'Nomination', fields: [['desc', 'Asset (bank deposit, etc.)', 't', {full: true}], ['org', 'Bank / organisation', 't'], ['acc', 'Account / cert. no.', 't'], ['amt', 'Amount (₹)', 'n']]}
 };
 const ENTRY_DEFAULTS = {plot: {acq: 'P'}, agri: {acq: 'P'}, house: {acq: 'P'}, oprop: {acq: 'P'}, shares: {paid: 'Yes'}, veh: {cls: 'car'}};
+const JOINT_KEYS = ['plot', 'agri', 'house', 'oprop', 'loans'];
 const WORK_OPTS = blankOpt.concat([['SAL', 'Salaried'], ['SE', 'Self-employed / business'], ['PEN', 'Pensioner / not working']]);
+const ADDR_KEYS = ['permAddr', 'permPin', 'resAddr', 'resPin', 'tel'];
 const INFO_FIELDS = [['rel', 'Relationship with the applicant', 't', {full: true, ph: 'e.g. Wife, Father, Friend'}],
     ['name', 'Full name', 't', {full: true}], ['father', "Father's / husband's name", 't', {full: true}], ['dob', 'Date of birth', 'd'], ['pan', 'PAN', 't', {max: 10}],
-    ['permAddr', 'Permanent address', 'a'], ['permPin', 'PIN', 't', {max: 6}], ['presSame', 'Present address is the same', 'c'],
+    ['sameAddr', 'Same address and residence phone as the applicant', 'c'],
+    ['permAddr', 'Permanent address', 'a', {when: 'own'}], ['permPin', 'PIN', 't', {max: 6, when: 'own'}], ['presSame', 'Present address is the same', 'c', {when: 'own'}],
     ['resAddr', 'Present address', 'a', {when: 'pres'}], ['resPin', 'Present address PIN', 't', {max: 6, when: 'pres'}],
-    ['mobile', 'Mobile', 't'], ['email', 'E-mail', 't'], ['tel', 'Phone (residence)', 't'], ['offTel', 'Phone (office / shop)', 't'],
+    ['mobile', 'Mobile', 't'], ['email', 'E-mail', 't'], ['tel', 'Phone (residence)', 't', {when: 'own'}], ['offTel', 'Phone (office / shop)', 't'],
     ['occupation', 'Occupation / line of business', 't', {full: true}], ['workType', 'Work', 's', {opts: WORK_OPTS, full: true}],
     ['org', 'Employer / firm name', 't', {full: true, when: 'work'}], ['offAddr', 'Office address', 'a', {when: 'work'}], ['offPin', 'Office PIN', 't', {max: 6, when: 'work'}],
     ['desig', 'Designation', 't', {when: 'sal'}], ['activity', 'Line of activity', 't', {when: 'se'}], ['estSince', 'Established since', 'd', {when: 'se'}],
     ['capacity', 'Capacity (proprietor, partner…)', 't', {when: 'se'}], ['annualIncome', 'Annual income (₹)', 'n', {full: true}]];
 const WHEN = {
-    pres: st => st.info.presSame === false,
+    own: st => !st.info.sameAddr,
+    pres: st => !st.info.sameAddr && st.info.presSame === false,
     work: st => st.info.workType === 'SAL' || st.info.workType === 'SE',
     sal: st => st.info.workType === 'SAL',
     se: st => st.info.workType === 'SE',
     guar: st => st.guarGiven !== 'No',
-    dir: st => st.director === 'AM'
+    dir: st => st.director === 'AM',
+    others: () => STM.length > 1
 };
 /* the headings within a statement: key, title, the lists under it */
-const GROUPS = [['info', 'Personal details', []], ['imm', 'Immovable property (9.1)', ['plot', 'agri', 'house', 'oprop']],
+const GROUPS = [['imm', 'Immovable property (9.1)', ['plot', 'agri', 'house', 'oprop']],
     ['ins', 'Insurance, shares & deposits (9.2)', ['lic', 'shares', 'tds', 'secs']], ['oth', 'Vehicles, business, jewellery (9.3–9.5)', ['veh', 'cap', 'inv']],
     ['debt', 'Loans & other liabilities (10)', ['loans', 'oliab']], ['guar', 'Guarantees given (11)', ['guar']],
     ['heirs', 'Legal heirs & nominations (12)', ['heirs', 'noms']], ['decl', 'Declaration & enclosures', []]];
+const LIST_TITLES = {plot: 'Plots of land', agri: 'Agricultural land', house: 'Houses / godowns', oprop: 'Other property', lic: 'A. LIC / insurance policies',
+    shares: 'B. Shares / debentures', tds: 'C. Term deposits', secs: 'D. Bonds, NSC, mutual funds', veh: '9.3 Vehicles', cap: '9.4 Capital in business',
+    inv: '9.5 Jewellery & other investments', loans: 'Loans', oliab: 'E. Liabilities other than to banks', heirs: '(A) Legal heirs', noms: '(B) Nominations'};
 const DIRECTOR_OPTS = blankOpt.concat([['NOT', 'I am not a director of any bank'], ['AM', 'I am a director of a bank']]);
+const SPOUSE_RE = /^(spouse|wife|husband)$/i;
 
-let STM = [], stmCur = 0;
+/* STM: the statements, the applicant's first, then co-applicants, then guarantors.
+   stmCur: whose statement is open under Assets & liabilities; pplCur: whose details are open under Co-applicants & guarantors. */
+let STM = [], stmCur = 0, pplCur = -1, pidSeq = 0;
 const openGrp = new Set(['imm']);
-const newStmt = role => ({role, info: role === 'APP' ? {} : {presSame: true}, lists: {}, guarGiven: '', director: '', directorBank: '', encls: ''});
+const newStmt = role => ({id: role === 'APP' ? 'app' : 'p' + (++pidSeq), role, info: role === 'APP' ? {} : {presSame: true, sameAddr: role === 'CO'},
+    lists: {}, guarGiven: '', director: '', directorBank: '', encls: ''});
 const curStm = () => STM[stmCur];
+const stmIdx = id => STM.findIndex(s => s.id === id);
 const roleTitle = i => STM[i].role === 'APP' ? 'Applicant' : `${ROLE_NAME[STM[i].role]} ${STM.slice(0, i + 1).filter(s => s.role === STM[i].role).length}`;
 const stmName = i => i === 0 ? gv('name') : tx(STM[i].info.name);
+const personLabel = i => stmName(i) || roleTitle(i);
+const pct = x => String(Math.round(x * 100) / 100);
+const lowerFirst = s => s.charAt(0).toLowerCase() + s.slice(1);
 
-/* An input tied to the statement. attrs say where its value goes: data-l/data-i (an entry), data-info (personal details) or data-st (the statement). */
+/* An input tied to the statements. attrs say where its value goes: data-l/data-i (an entry), data-info (personal details) or data-st (the statement). */
 function sField(f, val, attrs, id) {
     const [k, label, type, o = {}] = f;
     const a = `id="${id}" ${attrs} data-k="${k}" autocomplete="off"`, v = val == null ? '' : val, when = o.when ? ` data-when="${o.when}"` : '';
     if (type === 'c') return `<label class="cb-item full"${when}><input type="checkbox" ${a}${v ? ' checked' : ''}><span>${label}</span></label>`;
     let ctl;
-    if (type === 's') ctl = `<select ${a}>${o.opts.map(([x, l]) => `<option value="${esc(x)}"${String(v) === x ? ' selected' : ''}>${esc(l)}</option>`).join('')}</select>`;
+    if (type === 's') ctl = `<select ${a}>${(typeof o.opts === 'function' ? o.opts() : o.opts).map(([x, l]) => `<option value="${esc(x)}"${String(v) === x ? ' selected' : ''}>${esc(l)}</option>`).join('')}</select>`;
     else if (type === 'a') ctl = `<textarea ${a} rows="2">${esc(v)}</textarea>`;
     else ctl = `<input type="${type === 'd' ? 'date' : 'text'}" ${a} value="${esc(v)}"${type === 'n' ? ' inputmode="decimal"' : ''}${o.ph ? ` placeholder="${esc(o.ph)}"` : ''}${o.max ? ` maxlength="${o.max}"` : ''}>`;
     return `<div class="ff${o.full || type === 'a' ? ' full' : ''}"${when}><label for="${id}">${label}</label>${ctl}${o.hint ? `<div class="hint">${o.hint}</div>` : ''}</div>`;
 }
+const chipHtml = (j, on) => `<button type="button" class="pchip${on ? ' on' : ''}" data-p="${j}" aria-pressed="${on}"><span>${esc(roleTitle(j))}</span>` +
+    `<small data-nm="${j}">${esc(stmName(j) || 'name not entered')}</small></button>`;
+function applyWhenIn(sel, st) {
+    document.querySelectorAll(sel + ' [data-when]').forEach(el => { el.style.display = st && WHEN[el.dataset.when](st) ? '' : 'none'; });
+}
+const applyWhen = () => applyWhenIn('#stmWrap', curStm());
+
+/* ---------- joint entries: typed once, counted for each owner at their share ---------- */
+/* the shares of an entry held with someone else in this application: [own, theirs], 50 : 50 unless given */
+function jointShares(r) {
+    const ok = x => x != null && !isNaN(x) && x >= 0 && x <= 100;
+    let a = sharePct(r.share), b = sharePct(r.withShare);
+    a = ok(a) ? a : null; b = ok(b) ? b : null;
+    if (a == null && b == null) return [50, 50];
+    return [a == null ? Math.max(0, 100 - b) : a, b == null ? Math.max(0, 100 - a) : b];
+}
+/* the other person in this application an entry is held with, or -1 */
+const jointWith = (k, r, i) => { const j = JOINT_KEYS.includes(k) && r && r.with ? stmIdx(r.with) : -1; return j >= 0 && j !== i ? j : -1; };
+/* an entry as it counts for the person who entered it */
+function resolveOwn(k, r, i) {
+    const j = jointWith(k, r, i);
+    if (j < 0) return r;
+    const nm = personLabel(j);
+    if (k === 'loans') return Object.assign({}, r, {borrower: tx(r.borrower) || `Jointly with ${nm}`, _joint: nm});
+    return Object.assign({}, r, {share: pct(jointShares(r)[0]), owner: tx(r.owner) || `Jointly with ${nm}`, _joint: nm});
+}
+/* the entries other people entered as held jointly with person i, as they count for person i */
+function linkedFor(k, i) {
+    const out = [], id = STM[i].id;
+    if (!JOINT_KEYS.includes(k)) return out;
+    STM.forEach((o, j) => {
+        if (j === i) return;
+        (o.lists[k] || []).forEach((r, n) => {
+            if (r.with !== id || !filledEntry(r, k)) return;
+            const nm = personLabel(j), base = {_from: o.id, _fromN: n + 1, _joint: nm, with: '', withShare: ''};
+            if (k === 'loans') out.push(Object.assign({}, r, base, {borrower: `Jointly with ${nm}`}));
+            else { const b = jointShares(r)[1]; if (b > 0) out.push(Object.assign({}, r, base, {share: pct(b), owner: `Jointly with ${nm}`})); }
+        });
+    });
+    return out;
+}
+/* nominations: the deposits, policies and bonds ticked as having a nominee */
+function autoNoms(st) {
+    const rows = [], each = (k, make) => (st.lists[k] || []).forEach((r, n) => { if (r.nom && filledEntry(r, k)) rows.push(Object.assign(make(r), {_auto: `${LISTS[k].item} ${n + 1}`})); });
+    each('tds', r => ({desc: 'Bank deposit', org: tx(r.bank), acc: tx(r.acc), amt: tx(r.mat) || tx(r.amt)}));
+    each('lic', r => ({desc: 'LIC policy', org: ['LIC', tx(r.branch)].filter(Boolean).join(', '), acc: tx(r.no), amt: tx(r.sum)}));
+    each('secs', r => ({desc: 'Bonds / NSC / mutual fund', org: tx(r.office), acc: tx(r.cert), amt: tx(r.mat) || tx(r.now) || tx(r.amt)}));
+    return rows;
+}
+
+/* ---------- Co-applicants & guarantors: their personal details ---------- */
+function renderPeople() {
+    const box = $('pplWrap');
+    if (!box) return;
+    if (!(pplCur > 0 && STM[pplCur])) pplCur = STM.length > 1 ? 1 : -1;
+    const st = STM[pplCur];
+    const chips = STM.length > 1 ? `<div class="pbar" role="group" aria-label="Co-applicants and guarantors">${STM.map((s, j) => j ? chipHtml(j, j === pplCur) : '').join('')}</div>` : '';
+    const btns = `<div class="btn-row"><button type="button" class="btn-sm" data-addp="CO">+ Co-applicant</button><button type="button" class="btn-sm" data-addp="GUA">+ Guarantor</button>` +
+        (st ? `<button type="button" class="btn-sm danger" data-delp="${pplCur}">Remove ${esc(roleTitle(pplCur).toLowerCase())}</button>` : '') + '</div>';
+    const form = st ? `<div class="fsub">Details of ${esc(lowerFirst(roleTitle(pplCur)))}</div><div id="fromSpBox"></div><div class="fgrid">${INFO_FIELDS.map(f => sField(f, st.info[f[0]], 'data-info="1"', 'si_' + f[0])).join('')}</div>` +
+        `<div class="hint">Their assets and loans are entered under Assets &amp; liabilities, on their own tab.</div>` : '';
+    box.innerHTML = chips + btns + form;
+    applyWhenIn('#pplWrap', st);
+    refreshPeopleRefs();
+}
+function selectPerson(j) {
+    if (!STM[j]) return;
+    stmCur = j;
+    if (j > 0) pplCur = j;
+    renderPeople();
+    renderStm();
+}
+/* a new person, kept in the order applicant, co-applicants, guarantors; returns their place */
+function insertStmt(role) {
+    const g = STM.findIndex(s => s.role === 'GUA'), at = role === 'CO' && g >= 0 ? g : STM.length;
+    STM.splice(at, 0, newStmt(role));
+    return at;
+}
+function addPerson(role) {
+    stmCur = pplCur = insertStmt(role);
+    renderPeople();
+    renderStm();
+    const f = $('si_name');
+    if (f) f.focus();
+}
+function removePerson(i) {
+    if (!(i > 0) || !STM[i]) return;
+    if (stmTyped(STM[i]) && !confirm(`Remove ${roleTitle(i).toLowerCase()}${stmName(i) ? ' (' + stmName(i) + ')' : ''} and everything entered for them?`)) return;
+    const id = STM[i].id;
+    STM.splice(i, 1);
+    /* entries held jointly with them become entries of their owner alone */
+    STM.forEach(s => Object.values(s.lists).forEach(l => l.forEach(r => { if (r.with === id) { r.with = ''; r.withShare = ''; } })));
+    const sp = $(fid('spFrom'));
+    if (sp && sp.value === id) sp.value = '';
+    stmCur = 0; pplCur = -1;
+    renderPeople();
+    renderStm();
+}
+function openPeople(j) {
+    if (j > 0) pplCur = j;
+    renderPeople();
+    const sec = document.querySelector('#formWrap details[data-k="f4"]');
+    if (sec) { sec.open = true; sec.scrollIntoView({behavior: 'smooth', block: 'start'}); }
+}
+/* the spouse's details typed in the Spouse section, moved into a co-applicant who is the spouse */
+function copySpouse() {
+    const st = STM[pplCur];
+    if (!st) return;
+    const f = st.info, put = (k, v) => { if (tx(v)) f[k] = tx(v); };
+    put('name', gv('spName')); put('occupation', gv('spOcc')); put('mobile', gv('spPhone')); put('email', gv('spEmail')); put('pan', gv('spPan'));
+    if (gn('spInc') !== '') f.annualIncome = String(gn('spInc'));
+    if (!tx(f.rel)) f.rel = gv('sex') === 'Male' ? 'Wife' : gv('sex') === 'Female' ? 'Husband' : 'Spouse';
+    const addr = gv('spAddr');
+    if (addr && !/^same\b/i.test(addr)) { f.sameAddr = false; f.permAddr = addr; f.presSame = true; }
+    syncSpouse();
+    const sel = $(fid('spFrom'));
+    if (sel) { sel.value = st.id; sel.dataset.touched = '1'; }
+    renderPeople();
+    refreshTotals();
+    toast('Filled in from the spouse’s details');
+}
+function pplInput(e) {
+    const el = e.target, k = el.dataset.k, st = STM[pplCur];
+    if (!k || !st || !el.dataset.info) return;
+    st.info[k] = el.type === 'checkbox' ? el.checked : el.value;
+    if (k === 'sameAddr' || k === 'presSame' || k === 'workType') applyWhenIn('#pplWrap', st);
+    refreshTotals();
+}
+function pplClick(e) {
+    const b = e.target.closest('button');
+    if (!b) return;
+    if (b.dataset.p != null) selectPerson(+b.dataset.p);
+    else if (b.dataset.addp) addPerson(b.dataset.addp);
+    else if (b.dataset.delp) removePerson(+b.dataset.delp);
+    else if (b.dataset.fromsp) copySpouse();
+}
+
+/* ---------- the spouse: typed in, or the same person as a co-applicant ---------- */
+function spouseIdx() { const id = gv('spFrom'), j = id ? stmIdx(id) : -1; return j > 0 ? j : -1; }
+function syncSpouse() {
+    const sel = $(fid('spFrom'));
+    if (!sel) return;
+    const cur = sel.value;
+    const opts = [['', 'Type them in below']].concat(STM.map((s, j) => [s, j]).filter(([, j]) => j > 0).map(([s, j]) => [s.id, `Same as ${roleTitle(j)}${stmName(j) ? ': ' + stmName(j) : ''}`]));
+    sel.innerHTML = opts.map(([v, l]) => `<option value="${esc(v)}">${esc(l)}</option>`).join('');
+    let v = opts.some(o => o[0] === cur) ? cur : '';
+    /* a co-applicant whose relationship is wife, husband or spouse is taken as the spouse, unless the choice was made by hand or the spouse is typed in */
+    if (!v && !sel.dataset.touched && !gv('spName')) { const j = STM.findIndex((s, n) => n > 0 && SPOUSE_RE.test(tx(s.info.rel))); if (j > 0) v = STM[j].id; }
+    sel.value = v;
+    const j = spouseIdx(), lk = $('spLinked');
+    show('w_spTyped', j < 0);
+    if (lk) {
+        lk.style.display = j < 0 ? 'none' : '';
+        lk.innerHTML = j < 0 ? '' : `The spouse’s name, address, occupation, phone, PAN and income on the Application Form are taken from <b>${esc(roleTitle(j))}</b>` +
+            `${stmName(j) ? ' (' + esc(stmName(j)) + ')' : ''}. <button type="button" class="lnk" data-goppl="${j}">Edit them there</button>`;
+    }
+}
+/* what the Application Form's spouse and guarantor boxes need about a person */
+function personBox(j) {
+    const p = personInfo(j), inc = amtOf(p.annualIncome);
+    return {name: tx(p.name), addr: tx(p.resAddr || p.permAddr), occ: tx(p.occupation), phone: uniq([p.mobile, p.tel]).join(', '), email: tx(p.email), pan: tx(p.pan), inc: inc == null ? '' : inc};
+}
+
+/* ---------- Assets & liabilities: one statement at a time ---------- */
 function entryHtml(k, r, i) {
     const L = LISTS[k];
     return `<div class="ent" data-l="${k}" data-i="${i}"><div class="ent-h"><b>${esc(L.item)} ${i + 1}</b><span class="ent-v"></span>` +
         `<button type="button" class="x" data-del="${k}" data-i="${i}" title="Remove" aria-label="Remove ${esc(L.item)} ${i + 1}">✕</button></div>` +
         `<div class="fgrid">${L.fields.map(f => sField(f, r[f[0]], `data-l="${k}" data-i="${i}"`, `s_${k}_${i}_${f[0]}`)).join('')}</div></div>`;
 }
+/* an entry someone else made as held jointly with this person: shown, edited where it was entered */
+function linkedHtml(k) {
+    return linkedFor(k, stmCur).map(r => {
+        const j = stmIdx(r._from);
+        let val;
+        if (k === 'loans') { const out = amtOf(r.out); val = out == null ? 'joint' : `owes ${fmt(out)}, joint`; }
+        else { const mv = amtOf(r.value); val = (mv == null ? '' : fmt(mv * shareOf(r) / 100) + ' ') + `(${pct(shareOf(r))}% share)`; }
+        const no = (PROP_KINDS.find(p => p[0] === k) || [])[2];
+        const desc = k === 'loans' ? [tx(r.lender), tx(r.purpose)].filter(Boolean).join(' – ') : propDesc(r, k, no);
+        return `<div class="ent linked"><div class="ent-h"><b>${esc(LISTS[k].item)}, held jointly</b><span class="ent-v">${esc(val)}</span></div>` +
+            `<div class="lnk-d">${esc(desc || 'Details not entered yet')}. Entered by ${esc(roleTitle(j).toLowerCase())} ${esc(stmName(j) ? '(' + stmName(j) + ')' : '')} as ${esc(lowerFirst(LISTS[k].item))} ${r._fromN}.</div>` +
+            `<button type="button" class="btn-sm" data-p="${j}">Open their statement to change it</button></div>`;
+    }).join('');
+}
 function listHtml(k) {
     const rows = curStm().lists[k] || [], L = LISTS[k];
-    return `<div class="lst" id="lst_${k}">${rows.map((r, i) => entryHtml(k, r, i)).join('')}` +
-        `<button type="button" class="btn-sm add" data-add="${k}">+ Add ${esc(L.item.charAt(0).toLowerCase() + L.item.slice(1))}</button></div>`;
+    return `<div class="lst" id="lst_${k}">${rows.map((r, i) => entryHtml(k, r, i)).join('')}${linkedHtml(k)}` +
+        `<button type="button" class="btn-sm add" data-add="${k}">+ Add ${esc(lowerFirst(L.item))}</button></div>`;
 }
 function groupBody(key, lists) {
-    const st = curStm(), sf = (f, src) => sField(f, src[f[0]], f.st ? 'data-st="1"' : 'data-info="1"', (f.st ? 'ss_' : 'si_') + f[0]);
-    if (key === 'info') return `<div class="fgrid">${INFO_FIELDS.map(f => sf(f, st.info)).join('')}</div>`;
-    const stF = f => Object.assign(f.slice(), {st: true});
-    if (key === 'decl') return `<div class="fgrid">${[stF(['director', 'Director of a bank?', 's', {opts: DIRECTOR_OPTS, full: true}]),
-        stF(['directorBank', 'If yes, which bank', 't', {full: true, when: 'dir'}]), stF(['encls', 'Enclosures', 't', {full: true, ph: 'e.g. ITR, salary certificate'}])].map(f => sf(f, st)).join('')}</div>` +
+    const st = curStm(), stF = f => sField(f, st[f[0]], 'data-st="1"', 'ss_' + f[0]);
+    if (key === 'decl') return `<div class="fgrid">${[['director', 'Director of a bank?', 's', {opts: DIRECTOR_OPTS, full: true}],
+        ['directorBank', 'If yes, which bank', 't', {full: true, when: 'dir'}], ['encls', 'Enclosures', 't', {full: true, ph: 'e.g. ITR, salary certificate'}]].map(stF).join('')}</div>` +
         '<div class="hint">The annexure with all the entries is added to the enclosures by itself.</div>';
-    let h = '';
-    if (key === 'guar') h += `<div class="fgrid">${sf(stF(['guarGiven', 'Given a personal guarantee for anyone?', 's', {opts: blankOpt.concat([['No', 'No'], ['Yes', 'Yes']]), full: true}]), st)}</div>`;
-    return h + lists.map(k => `<div${key === 'guar' ? ' data-when="guar"' : ''}>${lists.length > 1 ? `<div class="lst-t">${esc(LIST_TITLES[k] || LISTS[k].item)}</div>` : ''}${listHtml(k)}</div>`).join('');
+    if (key === 'heirs') return `<div><div class="lst-t">(A) Legal heirs</div><div class="quick" id="heirQuick"></div>${listHtml('heirs')}</div>` +
+        `<div><div class="lst-t">(B) Nominations</div><div id="nomAuto"></div>${listHtml('noms')}</div>`;
+    const h = key === 'guar' ? `<div class="fgrid">${stF(['guarGiven', 'Given a personal guarantee for anyone?', 's', {opts: blankOpt.concat([['No', 'No'], ['Yes', 'Yes']]), full: true}])}</div>` : '';
+    return h + lists.map(k => `<div${key === 'guar' ? ' data-when="guar"' : ''}>${lists.length > 1 ? `<div class="lst-t">${esc(LIST_TITLES[k])}</div>` : ''}${listHtml(k)}</div>`).join('');
 }
-const LIST_TITLES = {plot: 'Plots of land', agri: 'Agricultural land', house: 'Houses / godowns', oprop: 'Other property', lic: 'A. LIC / insurance policies',
-    shares: 'B. Shares / debentures', tds: 'C. Term deposits', secs: 'D. Bonds, NSC, mutual funds', veh: '9.3 Vehicles', cap: '9.4 Capital in business',
-    inv: '9.5 Jewellery & other investments', loans: 'Loans', oliab: 'E. Liabilities other than to banks', heirs: '(A) Legal heirs', noms: '(B) Nominations'};
 function renderStm() {
     const st = curStm(), i = stmCur;
-    const chips = STM.map((s, j) => `<button type="button" class="pchip${j === i ? ' on' : ''}" data-p="${j}" aria-pressed="${j === i}"><span>${esc(roleTitle(j))}</span><small data-nm="${j}">${esc(stmName(j) || 'name not entered')}</small></button>`).join('');
-    const btns = `<div class="btn-row"><button type="button" class="btn-sm" data-addp="CO">+ Co-applicant</button><button type="button" class="btn-sm" data-addp="GUA">+ Guarantor</button>` +
-        (i ? `<button type="button" class="btn-sm danger" data-delp="${i}">Remove ${esc(roleTitle(i).toLowerCase())}</button>` : '') + '</div>';
-    const groups = GROUPS.filter(g => g[0] !== 'info' || st.role !== 'APP').map(([key, title, lists]) =>
-        `<details class="grp" data-g="${key}"${openGrp.has(key) || (key === 'info' && !tx(st.info.name)) ? ' open' : ''}><summary><span>${esc(title)}</span><span class="grp-s" id="gs_${key}"></span></summary>` +
+    const chips = `<div class="pbar" role="group" aria-label="Whose statement">${STM.map((s, j) => chipHtml(j, j === i)).join('')}</div>`;
+    const who = st.role === 'APP'
+        ? '<div class="hint">The applicant’s own details (name, address, work, PAN) are taken from the sections above.' +
+            (STM.length > 1 ? '' : ' To fill in Form 135 for a co-applicant or guarantor, first add them under Co-applicants &amp; guarantors.') + '</div>'
+        : `<div class="hint">${esc(personLabel(i))}’s personal details are under Co-applicants &amp; guarantors. <button type="button" class="lnk" data-goppl="${i}">Edit them</button></div>`;
+    const add = STM.length > 1 ? '' : '<div class="btn-row"><button type="button" class="btn-sm" data-goppl="0">Add a co-applicant or guarantor</button></div>';
+    const groups = GROUPS.map(([key, title, lists]) =>
+        `<details class="grp" data-g="${key}"${openGrp.has(key) ? ' open' : ''}><summary><span>${esc(title)}</span><span class="grp-s" id="gs_${key}"></span></summary>` +
         `<div class="grp-b">${groupBody(key, lists)}</div></details>`).join('');
-    $('stmWrap').innerHTML = `<div class="pbar" role="group" aria-label="Whose statement">${chips}</div>${btns}<div class="stm-sum" id="stmSum" aria-live="polite"></div>` +
-        (st.role === 'APP' ? '<div class="hint">The applicant’s own details (name, address, work, PAN) are taken from the sections above.</div>' : '') + groups;
+    $('stmWrap').innerHTML = chips + add + '<div class="stm-sum" id="stmSum" aria-live="polite"></div>' + who + groups;
     applyWhen();
-    document.querySelectorAll('#stmWrap .ent').forEach(syncCard);
+    document.querySelectorAll('#stmWrap .ent:not(.linked)').forEach(syncCard);
     refreshTotals();
 }
-function applyWhen() {
-    const st = curStm();
-    document.querySelectorAll('#stmWrap [data-when]').forEach(el => { el.style.display = WHEN[el.dataset.when](st) ? '' : 'none'; });
-}
 const ESTS = {tds: 'now', secs: 'now', veh: 'now', inv: 'value'};
-/* the figure an entry counts for (in its heading), the worked-out estimate (as a hint in its blank), and the cost blank for inherited property */
+/* the figure an entry counts for (in its heading), the worked-out estimate (as a hint in its blank), the cost blank for inherited property
+   and the shares of property held jointly */
 function syncCard(card) {
-    const k = card.dataset.l, i = +card.dataset.i, r = (curStm().lists[k] || [])[i] || {}, asAt = gv('asAt');
+    const k = card.dataset.l, i = +card.dataset.i, raw = (curStm().lists[k] || [])[i] || {}, r = resolveOwn(k, raw, stmCur), asAt = gv('asAt');
     const vEl = card.querySelector('.ent-v');
     if (vEl) {
         let t = '', warn = false;
-        if (filledEntry(r, k) && k !== 'heirs' && k !== 'noms') {
+        if (filledEntry(raw, k) && k !== 'heirs' && k !== 'noms') {
             const e = entryValue(k, r, asAt);
-            if (k === 'loans') { t = e.how === 'none' ? 'enter outstanding' : `owes ${fmt(e.v)}`; warn = e.how === 'none'; }
+            if (k === 'loans') { t = e.how === 'none' ? 'enter outstanding' : `owes ${fmt(e.v)}${r._joint ? ', joint' : ''}`; warn = e.how === 'none'; }
             else if (k === 'oliab') t = e.how === 'none' ? '' : `owes ${fmt(e.v)}`;
             else if (k === 'guar') t = e.how === 'none' ? '' : `${fmt(e.v)}, not deducted`;
             else if (e.how === 'none' || e.how === 'old') { t = 'not valued yet'; warn = true; }
@@ -3509,7 +3726,7 @@ function syncCard(card) {
         vEl.textContent = t; vEl.classList.toggle('warn', warn);
     }
     if (ESTS[k]) {
-        const el = card.querySelector(`[data-k="${ESTS[k]}"]`), probe = Object.assign({}, r, {[ESTS[k]]: ''});
+        const el = card.querySelector(`[data-k="${ESTS[k]}"]`), probe = Object.assign({}, raw, {[ESTS[k]]: ''});
         const e = k === 'veh' ? vehValue(probe, asAt) : k === 'inv' ? invValue(probe) : grownValue(probe, asAt);
         let ph = '';
         if (e.how === 'accrued') ph = `about ${amtTxt(e.v)}, worked out`;
@@ -3521,19 +3738,26 @@ function syncCard(card) {
     }
     const cost = card.querySelector('[data-k="cost"]');
     if (cost && LISTS[k].fields.some(f => f[0] === 'acq')) {
-        const free = freeAcq(r);
+        const free = freeAcq(raw);
         cost.disabled = free; cost.placeholder = free ? 'Nil' : '';
-        const want = free ? '' : tx(r.cost) ? r.cost : cost.value;
+        const want = free ? '' : tx(raw.cost) ? raw.cost : cost.value;
         if (cost.value !== want) cost.value = want;
+    }
+    const ws = card.querySelector('[data-k="withShare"]');
+    if (ws) {
+        const j = jointWith(k, raw, stmCur), box = ws.closest('.ff'), [a, b] = jointShares(raw), sh = card.querySelector('[data-k="share"]');
+        box.style.display = j >= 0 ? '' : 'none';
+        if (sh) sh.placeholder = j >= 0 ? pct(a) : '100';
+        ws.placeholder = pct(b);
+        if (j >= 0) box.querySelector('label').textContent = `${stmName(j) ? stmName(j).split(/\s+/)[0] + '’s' : 'Their'} share (%)`;
     }
 }
 const fmtCount = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
 function refreshTotals() {
-    if (!$('stmWrap') || !STM.length) return;
+    if (!$('stmWrap') || !STM.length || !curStm()) return;
     const st = stmFor(stmCur), T = stmtTotals(st), C = T.C, P = T.P;
     const gs = (key, txt) => { const e = $('gs_' + key); if (e) e.textContent = txt; };
     const nIns = C.lic + C.shares + C.tds + C.secs, nOth = C.veh + C.cap + C.inv, vIns = P.lic + P.shares + P.tds + P.secs, vOth = P.veh + P.cap + P.inv;
-    gs('info', tx(curStm().info.name) ? '' : 'fill in');
     gs('imm', T.nImm ? `${T.nImm} · ${fmt(T.imm)}` : '');
     gs('ins', nIns ? `${nIns} · ${fmt(vIns)}` : '');
     gs('oth', nOth ? `${nOth} · ${fmt(vOth)}` : '');
@@ -3548,15 +3772,83 @@ function refreshTotals() {
         row('Net worth', fmt(T.net), 'net') + (C.guar ? row('Guarantees given (not deducted)', fmt(T.cont), 'note') : '') + '</div>' +
         (T.notes.length ? `<ul class="stm-notes">${T.notes.map(n => `<li>${esc(n)}</li>`).join('')}</ul>` : '')
         : '<div class="hint">Nothing entered yet. Open a heading below and add the entries; the totals and the net worth are worked out here.</div>');
-    document.querySelectorAll('#stmWrap small[data-nm]').forEach(e => { e.textContent = stmName(+e.dataset.nm) || 'name not entered'; });
     renderNw();
+    refreshPeopleRefs();
+}
+/* names and choices that mention the people, kept up to date as details are typed */
+function refreshPeopleRefs() {
+    document.querySelectorAll('#formWrap small[data-nm]').forEach(e => { const j = +e.dataset.nm; if (STM[j]) e.textContent = stmName(j) || 'name not entered'; });
+    document.querySelectorAll('#stmWrap select[data-k="with"]').forEach(sel => {
+        const v = sel.value;
+        sel.innerHTML = withOpts().map(([x, l]) => `<option value="${esc(x)}">${esc(l)}</option>`).join('');
+        sel.value = [...sel.options].some(o => o.value === v) ? v : '';
+    });
+    const n = STM.length - 1, s4 = $('sum_f4');
+    if (s4) s4.textContent = n ? `${n} added` : 'none yet';
+    const fb = $('fromSpBox'), st = STM[pplCur];
+    if (fb) {
+        const on = st && st.role === 'CO' && !tx(st.info.name) && gv('spName') && spouseIdx() < 0;
+        fb.innerHTML = on ? `<button type="button" class="btn-sm wide" data-fromsp="1">Fill in from the spouse’s details (${esc(gv('spName'))})</button>` : '';
+    }
+    syncSpouse();
+    renderHeirQuick();
+    renderNomAuto();
     syncWho();
+}
+/* legal heirs: people already entered, to add with one tap (name, relationship, age and address) */
+function inverseRel(rel, sex) {
+    const r = tx(rel).toLowerCase(), pick = (m, f, x = '') => sex === 'Male' ? m : sex === 'Female' ? f : x;
+    if (SPOUSE_RE.test(r)) return pick('Husband', 'Wife', 'Spouse');
+    if (r === 'father' || r === 'mother') return pick('Son', 'Daughter');
+    if (r === 'son' || r === 'daughter') return pick('Father', 'Mother');
+    if (r === 'brother' || r === 'sister') return pick('Brother', 'Sister');
+    return '';
+}
+function heirCandidates(i) {
+    const st = STM[i], out = [], sex = gv('sex'), asAt = gv('asAt');
+    if (!st) return out;
+    const add = (name, rel, dob, addr) => { if (tx(name)) out.push({name: tx(name), rel: tx(rel), age: dob ? ageOn(dob, asAt) : '', addr: tx(addr)}); };
+    const cap = s => tx(s).charAt(0).toUpperCase() + tx(s).slice(1);
+    if (st.role === 'APP') {
+        const sj = spouseIdx(), spouseWord = sex === 'Male' ? 'Wife' : sex === 'Female' ? 'Husband' : 'Spouse';
+        if (sj < 0 && gv('spName')) add(gv('spName'), spouseWord, '', /^same\b/i.test(gv('spAddr')) || !gv('spAddr') ? applicantInfo().resAddr : gv('spAddr'));
+        STM.forEach((o, j) => {
+            if (o.role !== 'CO') return;
+            const p = personInfo(j), rel = SPOUSE_RE.test(tx(o.info.rel)) || (j === sj && !tx(o.info.rel)) ? spouseWord : cap(o.info.rel);
+            add(p.name, rel, p.dob, p.resAddr || p.permAddr);
+        });
+    } else if (st.role === 'CO') {
+        const app = applicantInfo();
+        add(app.name, inverseRel(st.info.rel, sex), app.dob, app.resAddr || app.permAddr);
+    }
+    const have = new Set((st.lists.heirs || []).map(r => tx(r.name).toLowerCase()));
+    return out.filter(c => !have.has(c.name.toLowerCase()));
+}
+function renderHeirQuick() {
+    const box = $('heirQuick');
+    if (!box) return;
+    const C = heirCandidates(stmCur);
+    box.innerHTML = C.length ? '<div class="hint">Add from the people already entered:</div>' + C.map((c, n) => `<button type="button" class="btn-sm" data-heir="${n}">+ ${esc(c.name)}${c.rel ? ` (${esc(c.rel)})` : ''}</button>`).join('') : '';
+    box.style.display = C.length ? '' : 'none';
+}
+function renderNomAuto() {
+    const box = $('nomAuto');
+    if (!box) return;
+    const A = autoNoms(curStm());
+    box.innerHTML = A.map(r => `<div class="auto-row"><b>${esc(r._auto)}</b>: ${esc([r.acc, r.org].filter(Boolean).join(', '))}${amtOf(r.amt) != null ? ', ' + fmt(amtOf(r.amt)) : ''}</div>`).join('') +
+        '<div class="hint">Deposits, LIC policies and bonds ticked “Has a nominee” are listed here by themselves. Add any other nomination (for example terminal benefits) below.</div>';
 }
 /* ---------- the Application Form's net worth box, from the statements ---------- */
 function nwFigures() {
     const inc = gv('nwIncCo') !== false;
     const group = pick => {
-        const Ts = STM.map((s, i) => [s, i]).filter(([s]) => pick(s.role)).map(([, i]) => stmtTotals(stmFor(i)));
+        const idx = STM.map((s, i) => i).filter(i => pick(STM[i].role)), ids = idx.map(i => STM[i].id);
+        const Ts = idx.map(i => {
+            /* a loan shared within the group is counted once, for the person who entered it */
+            const s = stmFor(i);
+            s.lists = Object.assign({}, s.lists, {loans: s.lists.loans.filter(r => !(r._from && ids.includes(r._from)))});
+            return stmtTotals(s);
+        });
         return Ts.some(T => T.any) ? {mov: sum(Ts.map(T => T.mov)), imm: sum(Ts.map(T => T.imm)), liab: sum(Ts.map(T => T.liab))} : null;
     };
     return {app: group(r => r === 'APP' || (inc && r === 'CO')), gua: group(r => r === 'GUA')};
@@ -3582,26 +3874,6 @@ function syncWho() {
     sel.value = who135 === 'all' ? 'all' : String(STM.indexOf(who135));
     sel.style.display = STM.length > 1 && !gv('fBlank') ? '' : 'none';
 }
-/* a new statement, kept in the order applicant, co-applicants, guarantors; returns its place */
-function insertStmt(role) {
-    const g = STM.findIndex(s => s.role === 'GUA'), at = role === 'CO' && g >= 0 ? g : STM.length;
-    STM.splice(at, 0, newStmt(role));
-    return at;
-}
-function addPerson(role) {
-    stmCur = insertStmt(role);
-    renderStm();
-    const f = $('si_name');
-    if (f) f.focus();
-}
-function removePerson(i) {
-    if (!i || !STM[i]) return;
-    const has = stmTyped(STM[i]);
-    if (has && !confirm(`Remove ${roleTitle(i).toLowerCase()}${stmName(i) ? ' (' + stmName(i) + ')' : ''} and everything entered for them?`)) return;
-    STM.splice(i, 1);
-    stmCur = 0;
-    renderStm();
-}
 function stmInput(e) {
     const el = e.target, st = curStm(), k = el.dataset.k;
     if (!k) return;
@@ -3610,29 +3882,29 @@ function stmInput(e) {
         const r = st.lists[el.dataset.l][+el.dataset.i];
         r[k] = val;
         syncCard(el.closest('.ent'));
-    } else if (el.dataset.info) {
-        st.info[k] = val;
-        if (k === 'workType' || k === 'presSame') applyWhen();
     } else if (el.dataset.st) {
         st[k] = val;
         if (k === 'guarGiven' || k === 'director') applyWhen();
     }
     refreshTotals();
 }
+/* re-draw one list (after an entry is added or removed) */
+function redrawList(k) {
+    $('lst_' + k).outerHTML = listHtml(k);
+    $('lst_' + k).querySelectorAll('.ent:not(.linked)').forEach(syncCard);
+    applyWhen();
+}
 function stmClick(e) {
     const b = e.target.closest('button');
     if (!b) return;
     const st = curStm();
-    if (b.dataset.p != null) { stmCur = +b.dataset.p; renderStm(); return; }
-    if (b.dataset.addp) { addPerson(b.dataset.addp); return; }
-    if (b.dataset.delp) { removePerson(+b.dataset.delp); return; }
+    if (b.dataset.p != null) { selectPerson(+b.dataset.p); return; }
+    if (b.dataset.goppl != null) { openPeople(+b.dataset.goppl); return; }
     if (b.dataset.add) {
         const k = b.dataset.add, list = st.lists[k] || (st.lists[k] = []);
         list.push(Object.assign({}, ENTRY_DEFAULTS[k] || {}));
-        $('lst_' + k).outerHTML = listHtml(k);
-        const cards = $('lst_' + k).querySelectorAll('.ent'), last = cards[cards.length - 1];
-        cards.forEach(syncCard);
-        const first = last.querySelector('input, select, textarea');
+        redrawList(k);
+        const cards = $('lst_' + k).querySelectorAll('.ent:not(.linked)'), first = cards[cards.length - 1].querySelector('input, select, textarea');
         if (first) first.focus();
         refreshTotals();
         return;
@@ -3641,8 +3913,15 @@ function stmClick(e) {
         const k = b.dataset.del, i = +b.dataset.i, list = st.lists[k] || [];
         if (filledEntry(list[i], k) && !confirm(`Remove ${LISTS[k].item.toLowerCase()} ${i + 1}?`)) return;
         list.splice(i, 1);
-        $('lst_' + k).outerHTML = listHtml(k);
-        $('lst_' + k).querySelectorAll('.ent').forEach(syncCard);
+        redrawList(k);
+        refreshTotals();
+        return;
+    }
+    if (b.dataset.heir != null) {
+        const c = heirCandidates(stmCur)[+b.dataset.heir];
+        if (!c) return;
+        (st.lists.heirs || (st.lists.heirs = [])).push({name: c.name, rel: c.rel, age: c.age, addr: c.addr});
+        redrawList('heirs');
         refreshTotals();
     }
 }
@@ -3659,22 +3938,27 @@ function applicantInfo() {
         org: gv('org'), offAddr: gv('offAddr'), offPin: gv('offPin'), desig: gv('desig'), activity: gv('activity'), estSince: gv('estSince'),
         capacity: gv('capacity'), annualIncome: gn('annualIncome')};
 }
-/* one statement, ready for the PDF */
-function stmFor(i) {
+/* a person's details as the forms need them (addresses shared with the applicant filled in) */
+function personInfo(i) {
     const st = STM[i];
-    let p;
-    if (st.role === 'APP') p = applicantInfo();
-    else {
-        const f = st.info, same = f.presSame !== false, inc = amtOf(f.annualIncome);
-        p = Object.assign({}, f, {resAddr: same ? f.permAddr : f.resAddr, resPin: same ? f.permPin : f.resPin, annualIncome: inc == null ? tx(f.annualIncome) : inc});
-        delete p.presSame;
-    }
-    return Object.assign(p, {role: st.role, asAt: gv('asAt'), place: gv('place'), date: gv('date'), lists: st.lists, guarGiven: st.guarGiven,
+    if (st.role === 'APP') return applicantInfo();
+    const f = st.info, inc = amtOf(f.annualIncome), p = Object.assign({}, f, {annualIncome: inc == null ? tx(f.annualIncome) : inc});
+    if (f.sameAddr) { const app = applicantInfo(); ADDR_KEYS.forEach(k => { p[k] = app[k]; }); }
+    else if (f.presSame !== false) Object.assign(p, {resAddr: f.permAddr, resPin: f.permPin});
+    delete p.presSame; delete p.sameAddr;
+    return p;
+}
+/* one statement, ready for the PDF: the person's own entries, the ones held jointly with them, and the nominations ticked on their deposits and policies */
+function stmFor(i) {
+    const st = STM[i], lists = {};
+    Object.keys(LISTS).forEach(k => { lists[k] = (st.lists[k] || []).map(r => resolveOwn(k, r, i)).concat(linkedFor(k, i)); });
+    lists.noms = autoNoms(st).concat(lists.noms);
+    return Object.assign(personInfo(i), {role: st.role, asAt: gv('asAt'), place: gv('place'), date: gv('date'), lists, guarGiven: st.guarGiven,
         director: st.director, directorBank: st.director === 'AM' ? st.directorBank : '', encls: st.encls});
 }
 /* the applicant's loans for the Application Form: three rows, the third summing up any more */
 function appLoans() {
-    const L = entries(STM[0], 'loans');
+    const L = entries(stmFor(0), 'loans');
     const row = r => ({src: [tx(r.lender), tx(r.purpose)].filter(Boolean).join(' – '), amt: amtOf(r.amt) == null ? '' : amtOf(r.amt),
         out: amtOf(r.out) == null ? '' : amtOf(r.out), emi: amtOf(r.emi) == null ? '' : amtOf(r.emi), od: tx(r.od)});
     const t = (R, k) => R.some(r => amtOf(r[k]) != null) ? sumOf(R, r => amtOf(r[k])) : '';
@@ -3708,43 +3992,63 @@ function formData() {
         loans: appLoans(),
         banks: [0, 1, 2].map(i => ({name: gv(`bk${i}_name`), branch: gv(`bk${i}_branch`), type: gv(`bk${i}_type`), no: gv(`bk${i}_no`), yrs: gv(`bk${i}_yrs`)})),
         bobAcc: gv('bobAcc'), bobAccType: gv('bobAccType'), bobBranch: gv('bobBranch'), cardCount: gv('cardCount'), cardIssuer: gv('cardIssuer'), cardNo: gv('cardNo'),
-        spouse: {name: gv('spName'), addr: gv('spAddr'), occ: gv('spOcc'), phone: gv('spPhone'), email: gv('spEmail'), pan: gv('spPan'), inc: gn('spInc')},
         asAt: gv('asAt'), place: gv('place'), date: gv('date')
     };
+    /* the spouse: a co-applicant or guarantor chosen in the Spouse section, or the details typed there */
+    const sj = spouseIdx();
+    d.spouse = sj > 0 ? personBox(sj) : {name: gv('spName'), addr: gv('spAddr'), occ: gv('spOcc'), phone: gv('spPhone'), email: gv('spEmail'), pan: gv('spPan'), inc: gn('spInc')};
     /* other assets: the boxes ticked, and a car or two-wheeler among the applicant's vehicles */
     const kinds = entries(STM[0], 'veh').map(r => r.cls);
     d.oa = OA.map(([k]) => k).filter(k => gv('oa_' + k) || ((k === 'car' || k === 'two') && kinds.includes(k)));
     /* the first guarantor in the guarantor box */
-    const g = STM.find(s => s.role === 'GUA');
-    if (g) {
-        const f = g.info, inc = amtOf(f.annualIncome);
-        d.gua = {name: tx(f.name), addr: tx(f.presSame === false ? f.resAddr : f.permAddr), occ: tx(f.occupation), phone: uniq([f.mobile, f.tel]).join(', '),
-            email: tx(f.email), pan: tx(f.pan), inc: inc == null ? '' : inc};
-    } else d.gua = {};
+    const g = STM.findIndex(s => s.role === 'GUA');
+    d.gua = g > 0 ? personBox(g) : {};
     const {app, gua} = nwFigures(), nv = (grp, k) => grp ? grp[k] : '';
     d.nw = {appMov: nv(app, 'mov'), appImm: nv(app, 'imm'), appLiab: nv(app, 'liab'), coll: gn('nwColl'), guaMov: nv(gua, 'mov'), guaImm: nv(gua, 'imm'), guaLiab: nv(gua, 'liab')};
-    d.guaPresent = g ? 'Y' : (d.name ? 'N' : '');
+    d.guaPresent = g > 0 ? 'Y' : (d.name ? 'N' : '');
     d.statements = STM.map((s, i) => stmFor(i));
     return d;
 }
 /* Fields holding characters the PDF base fonts cannot print (for example Hindi or Kannada script, emoji). */
 const unprintable = v => [...String(v == null ? '' : v)].some(ch => ch !== '\n' && ch !== '\r' && ch !== '\t' && !printable(ch));
 function badFields() {
-    const bad = [];
+    const bad = [], spLinked = spouseIdx() > 0;
     document.querySelectorAll('#formWrap input[id^="f_"], #formWrap textarea[id^="f_"]').forEach(el => {
         if (el.type === 'checkbox' || el.type === 'date') return;
+        if (spLinked && /^f_sp/.test(el.id)) return;   /* not used: the spouse's details come from a co-applicant */
         if (unprintable(el.value)) bad.push(FLABEL[el.id.slice(2)] || el.id.slice(2));
     });
     STM.forEach((st, i) => {
         const who = roleTitle(i);
-        INFO_FIELDS.forEach(([k, label, type]) => { if (type !== 'c' && type !== 'd' && type !== 's' && unprintable(st.info[k])) bad.push(`${who}: ${label}`); });
+        INFO_FIELDS.forEach(([k, label, type]) => {
+            if (type === 'c' || type === 'd' || type === 's' || (st.info.sameAddr && ADDR_KEYS.includes(k))) return;
+            if (unprintable(st.info[k])) bad.push(`${who}: ${label}`);
+        });
         Object.keys(LISTS).forEach(k => (st.lists[k] || []).forEach((r, j) => LISTS[k].fields.forEach(([f, label, type]) => {
-            if (type !== 'd' && type !== 's' && unprintable(r[f])) bad.push(`${who}: ${LISTS[k].item} ${j + 1}, ${label.replace(/ \(₹\)$/, '')}`);
+            if (type !== 'd' && type !== 's' && type !== 'c' && unprintable(r[f])) bad.push(`${who}: ${LISTS[k].item} ${j + 1}, ${label.replace(/ \(₹\)$/, '')}`);
         })));
         if (unprintable(st.encls)) bad.push(`${who}: enclosures`);
         if (unprintable(st.directorBank)) bad.push(`${who}: bank (director)`);
     });
     return bad;
+}
+
+/* ---------- one figure filled in from another, until it is typed by hand ---------- */
+const FOLLOW = {
+    gmi: ['annualIncome', v => { const a = amtOf(v); return a == null ? '' : String(Math.round(a * 12)); }],
+    annualIncome: ['gmi', v => { const a = amtOf(v); return a == null ? '' : String(Math.round(a / 12)); }],
+    facility: ['pPurpose', v => v]
+};
+function follow(id) {
+    const rule = FOLLOW[id], put = (t, v) => { const el = $(fid(t)); if (el && !el.dataset.touched) { el.value = v; el.dataset.auto = '1'; } };
+    if (rule) put(rule[0], rule[1](gv(id)));
+    /* the main bank account at Bank of Baroda is also the "Bank of Baroda account" on the form */
+    if (/^bk0_/.test(id) && /baroda|\bbob\b/i.test(gv('bk0_name'))) {
+        const t = gv('bk0_type');
+        put('bobAcc', gv('bk0_no'));
+        put('bobBranch', gv('bk0_branch').split(/[,;]/)[0].trim());
+        put('bobAccType', /current|\bca\b/i.test(t) ? 'CA' : /sav|\bsb\b/i.test(t) ? 'SB' : '');
+    }
 }
 
 /* ---------- prefill from the calculator ---------- */
@@ -3781,8 +4085,8 @@ function calcPrefill() {
     }
     return out;
 }
-/* A co-applicant in the calculator gets a statement here, with what the calculator knows about them
-   (made once; if it is removed, only "Fill from calculator again" brings it back). */
+/* A co-applicant in the calculator is added here, with what the calculator knows about them
+   (once; if they are removed, only "Fill from calculator again" adds them back). */
 let coMade = false;
 function prefillCoApplicant(force) {
     const {inp} = collectInputs();
@@ -3810,7 +4114,7 @@ function formsPrefill(force) {
     }
     if (!gv('date')) $(fid('date')).value = ymdOf(today());
     if (!gv('asAt')) $(fid('asAt')).value = ymdOf(today());
-    if (prefillCoApplicant(force)) renderStm();
+    if (prefillCoApplicant(force)) { renderPeople(); renderStm(); }
     formsUpdate();
 }
 let formsReady = false;
@@ -3879,14 +4183,16 @@ function formsClear() {
         else el.value = '';
         delete el.dataset.touched; delete el.dataset.auto;
     });
-    STM = [newStmt('APP')]; stmCur = 0;
+    STM = [newStmt('APP')]; stmCur = 0; pplCur = -1;
+    renderPeople();
     renderStm();
     formsPrefill(true);
     toast('Cleared');
 }
 function initForms() {
     $('formWrap').innerHTML = formsHtml();
-    STM = [newStmt('APP')]; stmCur = 0;
+    STM = [newStmt('APP')]; stmCur = 0; pplCur = -1;
+    renderPeople();
     renderStm();
     const first = $('formWrap').querySelector('details');
     if (first) first.open = true;
@@ -3894,10 +4200,16 @@ function initForms() {
     wrap.addEventListener('input', e => {
         if (!e.target.id || !e.target.id.startsWith('f_')) return;
         e.target.dataset.touched = '1'; delete e.target.dataset.auto;
-        if (e.target.id === 'f_asAt') document.querySelectorAll('#stmWrap .ent').forEach(syncCard);
+        follow(e.target.id.slice(2));
+        if (e.target.id === 'f_asAt') document.querySelectorAll('#stmWrap .ent:not(.linked)').forEach(syncCard);
         refreshTotals();
     });
     wrap.addEventListener('change', e => { if (e.target.id && e.target.id.startsWith('f_')) { if (e.target.tagName === 'SELECT') { e.target.dataset.touched = '1'; delete e.target.dataset.auto; } formsUpdate(); } });
+    wrap.addEventListener('click', e => { const b = e.target.closest('#spLinked button[data-goppl]'); if (b) openPeople(+b.dataset.goppl); });
+    const pw = $('pplWrap');
+    pw.addEventListener('input', pplInput);
+    pw.addEventListener('change', e => { if (e.target.tagName === 'SELECT' || e.target.type === 'checkbox' || e.target.type === 'date') pplInput(e); });
+    pw.addEventListener('click', pplClick);
     const sw = $('stmWrap');
     sw.addEventListener('input', stmInput);
     sw.addEventListener('change', e => { if (e.target.tagName === 'SELECT' || e.target.type === 'checkbox' || e.target.type === 'date') stmInput(e); });
@@ -3913,9 +4225,9 @@ function initForms() {
     formsReady = true;
     formsPrefill(false);
 }
-/* whether anything has been typed for a person (details filled in from the calculator do not count) */
+/* whether anything has been typed for a person (details filled in from the calculator, and tick boxes left as they were, do not count) */
 function stmTyped(st) {
-    return Object.entries(st.info).some(([k, v]) => k !== 'presSame' && tx(v) !== '' && !(st.auto && st.auto[k] === v)) || st.info.presSame === false ||
+    return Object.entries(st.info).some(([k, v]) => typeof v !== 'boolean' && tx(v) !== '' && !(st.auto && st.auto[k] === v)) ||
         !!(st.guarGiven || st.director || tx(st.directorBank) || tx(st.encls)) || Object.entries(st.lists).some(([k, l]) => l.some(r => filledEntry(r, k)));
 }
 /* whether anything has been typed in the Forms tab (to warn before the page is closed) */
